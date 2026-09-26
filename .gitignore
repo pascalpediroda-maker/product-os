@@ -1,0 +1,5 @@
+# Eval runs are regenerated and can be large.
+**/evals/results/
+
+node_modules/
+.DS_Store

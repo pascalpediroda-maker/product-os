@@ -1,0 +1,50 @@
+# product-os-core — Foundation + Domain
+
+The core is always installed. Every product function (Discovery, Design, Delivery, Assurance, Support & Success, Release & Operations, Go-to-Market) is an optional plugin that depends on it.
+
+It guarantees three things:
+
+- **A session never works from memory.** Each piece of knowledge has one place, found from the zone being touched, and a gated skill cannot act before it has read what its zone requires.
+- **Every incident moves a rule one rung up**: a sentence, then a gate, then a hook or a test.
+- **The domain is captured once.** The knowledge of the user's trade (official definitions, method, the criteria real judges apply, the units to cover) is written once, then read by product decisions, by configuration and by the product's AI.
+
+## Fill these first
+
+Copy the templates into your product repository, then fill them before running any skill.
+
+| File | Where it goes | What it holds |
+|---|---|---|
+| `templates/product/product.config.json` | `.claude/product/product.config.json` | the product, the installed modules and libraries, the memory routing table, the reading gate, the database IDs |
+| `templates/product/product_domain_context.md` | `.claude/product/product_domain_context.md` | the domain in one page, the official glossary, the phases of the user's work, the judges' criteria, the units and their coverage |
+| `templates/CLAUDE.md` | repository root | rules that apply to all work |
+| `templates/memory/MEMORY.md` | `.claude/memory/MEMORY.md` | the index, one line per memory file |
+| `templates/memory/*.md` | `.claude/memory/` | the shapes of a subsystem architecture file and of a reference file |
+
+Every template carries a separation line. Above it: the generic skeleton, which an OS update may change. Below it: what belongs to your product, which an update never overwrites.
+
+## `product.config.json`
+
+One file, read by the hooks and by every skill. Strict JSON: no comments.
+
+| Key | Meaning |
+|---|---|
+| `schema_version` | version of this contract; hooks refuse a version they do not know |
+| `product.name`, `product.one_liner` | the product in a name and a sentence |
+| `product.ui_language` | language of every user-facing string |
+| `product.team_language` | language the team and the assistant talk in |
+| `modules.<function>` | `true` when that product-function plugin is installed. A skill that needs a missing module says so and continues; it never invents what the module would have brought |
+| `libraries.<id>` | `true` when that external skill library is installed. Native skills route to it when present, and do the work themselves or declare it uncovered when absent |
+| `memory.dir` | where memory files live, relative to the repository root |
+| `memory.index` | the index file inside `memory.dir` |
+| `memory.always` | files every gated skill must read, whatever the zone |
+| `routing.zones.<zone>` | the memory files a zone requires. This table is what lets a session load only what the request needs |
+| `reading_gate.skills.<skill>.require` | files that skill must read before it may run a shell or write a file, on top of `memory.always` |
+| `reading_gate.skills.<skill>.min_reads` | minimum number of distinct memory files read, the required ones included |
+| `reading_gate.stale_hours` | an armed gate older than this is ignored |
+| `pivots.dir` | where the per-function pivot files live |
+| `pivots.domain` | the domain pivot file name inside `pivots.dir` |
+| `databases.feedback` / `roadmap` / `fix_backlog` / `crm` | IDs of the shared bases (for Notion: the `collection://…` data source). Empty means not configured: the skill that needs it says so |
+| `analytics.provider`, `analytics.project_id` | where product analytics are read |
+| `git.main_branch`, `git.push_deploys` | when `push_deploys` is true, a push to `main_branch` ships to production, so it only happens on an explicit go |
+
+A skill that is not listed under `reading_gate.skills` is not gated.

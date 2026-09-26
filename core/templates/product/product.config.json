@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "product": {
+    "name": "",
+    "one_liner": "",
+    "ui_language": "en",
+    "team_language": "en"
+  },
+  "modules": {
+    "discovery": false,
+    "design": false,
+    "delivery": false,
+    "assurance": false,
+    "support": false,
+    "release_ops": false,
+    "gtm": false
+  },
+  "libraries": {
+    "coreyhaines31/marketingskills": false,
+    "amplitude/builder-skills": false,
+    "anthropics/knowledge-work-plugins/product-management": false
+  },
+  "memory": {
+    "dir": ".claude/memory",
+    "index": "MEMORY.md",
+    "always": ["architecture.md"]
+  },
+  "routing": {
+    "zones": {
+      "example-zone": ["archi-example.md"]
+    }
+  },
+  "reading_gate": {
+    "stale_hours": 6,
+    "skills": {
+      "example-skill": {
+        "require": [],
+        "min_reads": 2
+      }
+    }
+  },
+  "pivots": {
+    "dir": ".claude/product",
+    "domain": "product_domain_context.md"
+  },
+  "databases": {
+    "feedback": "",
+    "roadmap": "",
+    "fix_backlog": "",
+    "crm": ""
+  },
+  "analytics": {
+    "provider": "",
+    "project_id": ""
+  },
+  "git": {
+    "main_branch": "main",
+    "push_deploys": true
+  }
+}
