@@ -8,6 +8,20 @@ It guarantees three things:
 - **Every incident moves a rule one rung up**: a sentence, then a gate, then a hook or a test.
 - **The domain is captured once.** The knowledge of the user's trade (official definitions, method, the criteria real judges apply, the units to cover) is written once, then read by product decisions, by configuration and by the product's AI.
 
+## What it contains
+
+| Piece | Where | What it does |
+|---|---|---|
+| Product config | `templates/product/product.config.json` | the product, its modules and libraries, the memory routing table, the reading gate, the database IDs |
+| Domain pivot | `templates/product/product_domain_context.md` | the domain written once: glossary, phases, judges' criteria, how a unit lives in the product, coverage, ground truth |
+| Memory templates | `templates/CLAUDE.md`, `templates/memory/` | where knowledge lives, the index, the shape of an architecture file and a reference file |
+| Rules | `rules/collaboration.md`, `rules/principles.md` | how the owner and the assistant work together, and the rungs a broken rule climbs |
+| Reading gate | `hooks/reading-gate.mjs` | a gated skill cannot run a shell or write a file before it has read the files the config requires |
+| Guards | `hooks/guard-destructive-git.mjs`, `hooks/guard-destructive-delete.mjs` | ask before commands that destroy work: reset to the remote, force push, worktree or branch removal, recursive deletes, a push that deploys |
+| `orient` | `skills/orient/` | where things stand, re-read from what is written and from git, never recalled |
+| `handoff` | `skills/handoff/` | a handoff that starts with the reading order and carries state, not story |
+| `domain-onboarding` | `skills/domain-onboarding/`, `agents/unit-*.md` | a new unit of the trade enters as data: analyse, integrate, calibrate, activate |
+
 ## Fill these first
 
 Copy the templates into your product repository, then fill them before running any skill.
@@ -28,7 +42,7 @@ One file, read by the hooks and by every skill. Strict JSON: no comments.
 
 | Key | Meaning |
 |---|---|
-| `schema_version` | version of this contract; hooks refuse a version they do not know |
+| `schema_version` | version of this contract; the reading gate does nothing with a version it does not know |
 | `product.name`, `product.one_liner` | the product in a name and a sentence |
 | `product.ui_language` | language of every user-facing string |
 | `product.team_language` | language the team and the assistant talk in |
@@ -39,12 +53,22 @@ One file, read by the hooks and by every skill. Strict JSON: no comments.
 | `memory.always` | files every gated skill must read, whatever the zone. A bare name resolves under `memory.dir`; a name prefixed `pivot:` (for example `pivot:product_domain_context.md`) resolves under `pivots.dir`, and the same holds in `reading_gate.skills.<skill>.require` |
 | `routing.zones.<zone>` | the memory files a zone requires. This table is what lets a session load only what the request needs |
 | `reading_gate.skills.<skill>.require` | files that skill must read before it may run a shell or write a file, on top of `memory.always` |
-| `reading_gate.skills.<skill>.min_reads` | minimum number of distinct memory files read, the required ones included |
-| `reading_gate.stale_hours` | an armed gate older than this is ignored |
-| `pivots.dir` | where the per-function pivot files live |
+| `reading_gate.skills.<skill>.min_reads` | minimum number of distinct files read, memory and pivots together. Every named file is required whatever this number; it only raises the floor above them |
+| `reading_gate.stale_hours` | an armed gate older than this is ignored (default 6) |
+| `pivots.dir` | where the per-function pivot files and this config live |
 | `pivots.domain` | the domain pivot file name inside `pivots.dir` |
 | `databases.feedback` / `roadmap` / `fix_backlog` / `crm` | IDs of the shared bases (for Notion: the `collection://…` data source). Empty means not configured: the skill that needs it says so |
 | `analytics.provider`, `analytics.project_id` | where product analytics are read |
-| `git.main_branch`, `git.push_deploys` | when `push_deploys` is true, a push to `main_branch` ships to production, so it only happens on an explicit go |
+| `git.main_branch`, `git.push_deploys` | when `push_deploys` is true (the default when the key is missing), a push to `main_branch` ships to production: the git guard asks before it, and it only happens on an explicit go |
 
 A skill that is not listed under `reading_gate.skills` is not gated.
+
+## How the hooks behave
+
+- **The reading gate needs the config.** Without `.claude/product/product.config.json`, or with an unknown `schema_version`, it does nothing and logs why.
+- **The guards protect everywhere.** The destructive git rules and the delete guard apply with or without a config. The config only refines them: `git.main_branch` names the protected branch, and the confirmation before a push to it applies when `git.push_deploys` is true.
+- **A read counts wherever the work happens.** A file read in any worktree of the same repository counts, matched by its path relative to `memory.dir` or `pivots.dir`. A file read in another repository does not.
+- **A required file that does not exist is dropped and named**, rather than locking the session with no way out.
+- **A hook never blocks by crashing.** Every failure exits cleanly and is logged under the plugin's data directory, without command text.
+
+Tests: `node --test "core/hooks/test/*.test.mjs"` (Node 22 or later).
