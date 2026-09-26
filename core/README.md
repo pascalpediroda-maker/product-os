@@ -18,6 +18,8 @@ It guarantees three things:
 | Rules | `rules/collaboration.md`, `rules/principles.md` | how the owner and the assistant work together, and the rungs a broken rule climbs |
 | Reading gate | `hooks/reading-gate.mjs` | a gated skill cannot run a shell or write a file before it has read the files the config requires |
 | Guards | `hooks/guard-destructive-git.mjs`, `hooks/guard-destructive-delete.mjs` | ask before commands that destroy work: reset to the remote, force push, worktree or branch removal, recursive deletes, a push that deploys |
+| `setup` | `skills/setup/` | the first skill a new product runs: templates in place, the connectors it needs (Notion, Supabase, Amplitude, Gmail) created, signed in with least privilege and tested, credentials kept out of the repository, the config filled, the fix backlog base created |
+| `tool-conventions` | `skills/tool-conventions/` | how to use each connected tool without breaking anything, one reference per tool, every fact checked on the vendor's documentation |
 | `orient` | `skills/orient/` | where things stand, re-read from what is written and from git, never recalled |
 | `handoff` | `skills/handoff/` | a handoff that starts with the reading order and carries state, not story |
 | `domain-onboarding` | `skills/domain-onboarding/`, `agents/unit-*.md` | a new unit of the trade enters as data: analyse, integrate, calibrate, activate |
