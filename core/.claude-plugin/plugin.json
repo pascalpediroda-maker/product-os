@@ -1,6 +1,6 @@
 {
   "name": "product-os-core",
-  "displayName": "Product OS — Core (Foundation + Domain)",
+  "displayName": "Product OS: Core (Foundation + Domain)",
   "description": "The base every product function builds on: product config and routing table, memory templates, the reading gate that makes a skill read its memory before acting, guards on destructive commands, collaboration rules, and the protocol that captures the product's domain knowledge once.",
   "author": {
     "name": "Pascal Pediroda"

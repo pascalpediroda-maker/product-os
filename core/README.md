@@ -1,4 +1,4 @@
-# product-os-core — Foundation + Domain
+# product-os-core: Foundation + Domain
 
 The core is always installed. Every product function (Discovery, Design, Delivery, Assurance, Support & Success, Release & Operations, Go-to-Market) is an optional plugin that depends on it.
 
@@ -36,7 +36,7 @@ One file, read by the hooks and by every skill. Strict JSON: no comments.
 | `libraries.<id>` | `true` when that external skill library is installed. Native skills route to it when present, and do the work themselves or declare it uncovered when absent |
 | `memory.dir` | where memory files live, relative to the repository root |
 | `memory.index` | the index file inside `memory.dir` |
-| `memory.always` | files every gated skill must read, whatever the zone |
+| `memory.always` | files every gated skill must read, whatever the zone. A bare name resolves under `memory.dir`; a name prefixed `pivot:` (for example `pivot:product_domain_context.md`) resolves under `pivots.dir`, and the same holds in `reading_gate.skills.<skill>.require` |
 | `routing.zones.<zone>` | the memory files a zone requires. This table is what lets a session load only what the request needs |
 | `reading_gate.skills.<skill>.require` | files that skill must read before it may run a shell or write a file, on top of `memory.always` |
 | `reading_gate.skills.<skill>.min_reads` | minimum number of distinct memory files read, the required ones included |
