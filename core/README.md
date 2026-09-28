@@ -18,15 +18,23 @@ It guarantees three things:
 | Rules | `rules/collaboration.md`, `rules/principles.md` | how the owner and the assistant work together, and the rungs a broken rule climbs |
 | Reading gate | `hooks/reading-gate.mjs` | a gated skill cannot run a shell or write a file before it has read the files the config requires |
 | Guards | `hooks/guard-destructive-git.mjs`, `hooks/guard-destructive-delete.mjs` | ask before commands that destroy work: reset to the remote, force push, worktree or branch removal, recursive deletes, a push that deploys |
-| `setup` | `skills/setup/` | the first skill a new product runs: templates in place, the connectors it needs (Notion, Supabase, Amplitude, Gmail) created, signed in with least privilege and tested, credentials kept out of the repository, the config filled, the fix backlog base created |
+| `setup` | `skills/setup/` | the first skill a new product runs: templates in place, the connectors it needs (Notion, Supabase, Amplitude, Gmail) created, signed in with least privilege and tested, credentials kept out of the repository, the config filled |
 | `tool-conventions` | `skills/tool-conventions/` | how to use each connected tool without breaking anything, one reference per tool, every fact checked on the vendor's documentation |
 | `orient` | `skills/orient/` | where things stand, re-read from what is written and from git, never recalled |
 | `handoff` | `skills/handoff/` | a handoff that starts with the reading order and carries state, not story |
 | `domain-onboarding` | `skills/domain-onboarding/`, `agents/unit-*.md` | a new unit of the trade enters as data: analyse, integrate, calibrate, activate |
 
+## Function plugins
+
+Installed on top of the core, from the same marketplace, each switched on by its `modules.<function>` key.
+
+| Plugin | Function | What it carries |
+|---|---|---|
+| `product-os-support` | Customer Support & Success (`modules.support`) | the fix backlog base and its schema (`fix-backlog`), the bug kill session that empties it into a minor fix release (`bug-kill`), the Support pivot |
+
 ## Fill these first
 
-Copy the templates into your product repository, then fill them before running any skill.
+Copy the templates into your product repository, then fill them before running any skill. The `setup` skill does the copying for you.
 
 | File | Where it goes | What it holds |
 |---|---|---|
@@ -59,11 +67,13 @@ One file, read by the hooks and by every skill. Strict JSON: no comments.
 | `reading_gate.stale_hours` | an armed gate older than this is ignored (default 6) |
 | `pivots.dir` | where the per-function pivot files and this config live |
 | `pivots.domain` | the domain pivot file name inside `pivots.dir` |
-| `databases.feedback` / `roadmap` / `fix_backlog` / `crm` | IDs of the shared bases (for Notion: the `collection://…` data source). Empty means not configured: the skill that needs it says so |
+| `databases.feedback` / `roadmap` / `fix_backlog` / `crm` | the shared bases. For Notion, the full data source URL, `collection://<id>`, used as it is (it is also the table name in Notion's SQL mode). Empty means not configured: the skill that needs it says so |
 | `analytics.provider`, `analytics.project_id` | where product analytics are read |
 | `git.main_branch`, `git.push_deploys` | when `push_deploys` is true (the default when the key is missing), a push to `main_branch` ships to production: the git guard asks before it, and it only happens on an explicit go |
 
 A skill that is not listed under `reading_gate.skills` is not gated.
+
+**Function pivots.** Each function plugin has one pivot, named `<pivots.dir>/product_<module>_context.md`, where `<module>` is its key under `modules`: `product_support_context.md`, `product_release_ops_context.md`, `product_discovery_context.md`, and so on. The plugin ships it as a template with the same separation line.
 
 ## How the hooks behave
 

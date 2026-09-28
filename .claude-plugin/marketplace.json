@@ -8,6 +8,10 @@
     {
       "name": "product-os-core",
       "source": "./core"
+    },
+    {
+      "name": "product-os-support",
+      "source": "./support"
     }
   ]
 }

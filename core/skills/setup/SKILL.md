@@ -1,6 +1,6 @@
 ---
 name: setup
-description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, asks which of four connectors the installed modules need (Notion for the shared bases, Supabase for the product's database, Amplitude for analytics, Gmail for drafts), checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in, least privilege, where the credential lives), tests each with one harmless read, fills the product config after showing the diff, offers to create the fix backlog base, then hands over to `orient` and `domain-onboarding`. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/setup".
+description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, asks which of four connectors the installed modules need (Notion for the shared bases, Supabase for the product's database, Amplitude for analytics, Gmail for drafts), checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in, least privilege, where the credential lives), tests each with one harmless read, fills the product config after showing the diff, hands the fix backlog base to the Support plugin, then hands over to `orient` and `domain-onboarding`. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/setup".
 ---
 
 # Setup
@@ -44,7 +44,7 @@ What setup guarantees:
 | Supabase | [references/supabase.md](references/supabase.md) |
 | Amplitude | [references/amplitude.md](references/amplitude.md) |
 | Gmail | [references/gmail.md](references/gmail.md) |
-| The fix backlog base | [references/fix-backlog-schema.md](references/fix-backlog-schema.md) |
+| The fix backlog base | the `fix-backlog` skill of the `product-os-support` plugin, which owns its schema |
 
 Read a connector's reference file in full before its step. The tool names a connector exposes change
 with each install: this skill names capabilities ("list the tables"), and the session finds the tool
@@ -230,7 +230,7 @@ again. A read that fails is not "connected".
    | `product.name`, `product.one_liner` | the owner, when empty |
    | `product.ui_language`, `product.team_language` | confirm the template's value with the owner |
    | `modules.<function>` | Step 2 |
-   | `databases.feedback`, `databases.roadmap`, `databases.fix_backlog`, `databases.crm` | for each base that exists, its `collection://` data source ID, read as `references/notion.md` says. A base that does not exist stays empty |
+   | `databases.feedback`, `databases.roadmap`, `databases.fix_backlog`, `databases.crm` | for each base that exists, its full `collection://<id>` data source URL, read as `references/notion.md` says. A base that does not exist stays empty |
    | `analytics.provider` | `amplitude` when Amplitude is connected |
    | `analytics.project_id` | the project the owner picks from the Step 5 list |
    | `git.main_branch` | `git -C <root> symbolic-ref --short refs/remotes/origin/HEAD` without its `origin/` prefix, confirmed by the owner; if it is not set, ask |
@@ -255,16 +255,20 @@ again. A read that fails is not "connected".
 
 ## Step 7: the fix backlog base
 
-**When:** `databases.fix_backlog` is empty, `modules.support` is true, and Notion is usable. Offer it
-once: "The fix backlog is not configured. Shall I create it in Notion with the OS schema?"
+The Support module owns its base and its schema. Setup does not create it; it hands over.
 
-**On yes:** follow [references/fix-backlog-schema.md](references/fix-backlog-schema.md) in full: the
-parent page and the `Area` list from the owner, option names checked (no commas, final before any
-import), the schema shown and approved, the creation announced, the new base fetched and compared,
-then `databases.fix_backlog` written through Step 6's diff.
-
-**When `databases.fix_backlog` is already set:** create nothing. Fetch the base, compare it with the
-schema, report the differences, change nothing without the owner's go.
+- **`modules.support` is true and `databases.fix_backlog` is empty:** offer it once: "The fix backlog
+  is not configured. Shall I run `fix-backlog` to create it in Notion?" On yes, run the `fix-backlog`
+  skill of `product-os-support`. It creates the base with its schema and writes `databases.fix_backlog`
+  through a shown diff, the same way as Step 6.
+- **`databases.fix_backlog` is already set:** create nothing. `fix-backlog` compares the base with its
+  schema whenever it runs.
+- **The owner wants a fix backlog but `product-os-support` is not installed:** say that this plugin
+  carries it, give the install command
+  (`claude plugin install product-os-support@product-os --scope project`), and tell the owner to
+  restart the session, set `modules.support` to true, and run setup again.
+- **`modules.support` is false and nobody wants a backlog:** nothing. The key stays empty; say so in the
+  summary.
 
 ## Step 8: commit, then hand over
 
@@ -311,7 +315,7 @@ Each run checks, reports and fills only what is empty.
 - Steps 3 and 5 re-establish the table from scratch: nothing is assumed from an earlier run.
 - Step 4 runs only for connectors that are wanted and not usable.
 - Step 6 fills only empty keys and verifies the filled ones.
-- Step 7 never creates a second fix backlog.
+- Step 7 only hands over to `fix-backlog`, which never creates a second base.
 - A run with nothing to do ends on one line: "Set up, nothing missing." followed by the connector
   table.
 
