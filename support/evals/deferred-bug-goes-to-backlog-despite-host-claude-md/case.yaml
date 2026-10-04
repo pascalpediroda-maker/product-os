@@ -1,0 +1,38 @@
+schema_version: "1.1"
+name: deferred-bug-goes-to-backlog-despite-host-claude-md
+
+# Load core next to support, as an install of product-os-support does (it pulls
+# product-os-core in as a dependency). The bug rule reaches the session through a core
+# hook (SessionStart, session-rules.mjs), so evaluating support alone would test a
+# product where that hook never runs. Paths are relative to this case directory and must
+# stay under the eval target, so this case runs with the marketplace root as target:
+#   claude plugin eval <product-os root> --case deferred-bug-goes-to-backlog-despite-host-claude-md --scaffold --allow-tools Write Edit
+plugins:
+  - ../../../core
+  - ../..
+
+context:
+  # Stages the product: its own CLAUDE.md with a contrary bug convention, the notes file
+  # that convention names, and an OS product config with the Support module and a fix
+  # backlog. Runs only with --scaffold.
+  scaffold_script: scaffold.sh
+
+execution:
+  # An eval run starts Claude Code with --setting-sources user, so the CLAUDE.md the
+  # scaffold writes is on disk but is NOT loaded into context the way a real session loads
+  # it (measured: a run asked to quote it answered that no CLAUDE.md was in context).
+  # The defect only shows when the host's rule is in context, so its text is appended here
+  # with the framing Claude Code uses for a project CLAUDE.md. Keep it identical to the
+  # CLAUDE.md in scaffold.sh.
+  append_system_prompt: |
+    Codebase and user instructions are shown below. Be sure to adhere to these instructions. IMPORTANT: These instructions OVERRIDE any default behavior and you MUST follow them exactly as written.
+
+    Contents of CLAUDE.md (project instructions, checked into the codebase):
+
+    # Acme
+
+    Acme is a small SaaS where teams import and export their records as CSV files.
+
+    # Working rules
+    - A bug we do not fix right away is written in NOTES-BUGS.txt at the root.
+    - Keep changes small and focused on the task at hand.
