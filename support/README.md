@@ -3,7 +3,19 @@
 The Support & Success function of the product OS. It depends on `product-os-core` and is switched on
 by `modules.support: true` in the product config.
 
-It guarantees:
+## Install
+
+```
+claude plugin marketplace add pascalpediroda-maker/product-os --scope project
+claude plugin install product-os-support@product-os --scope project
+```
+
+The core is installed with it if it is not there yet. Then open a new session in the product
+repository and run `/setup`: it sets `modules.support`, connects Notion and hands over to
+`fix-backlog` to create the base. `marketplace update` only works once the marketplace has been
+added. The full sequence and the choice of scope are in the [root README](../README.md).
+
+## What it guarantees
 
 - **No bug found is lost.** A bug is fixed in the session that sees it, or it is filed in the fix
   backlog with enough to pick it up cold. Never left in a conversation.

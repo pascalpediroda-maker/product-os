@@ -1,5 +1,8 @@
 # product-os-core: Foundation + Domain
 
+To install it and get started, follow "Start here" in the [root README](../README.md): add the
+marketplace, install, open a new session, run `/setup`.
+
 The core is always installed. Every product function (Discovery, Design, Delivery, Assurance, Support & Success, Release & Operations, Go-to-Market) is an optional plugin that depends on it.
 
 It guarantees three things:
