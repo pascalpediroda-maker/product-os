@@ -1,13 +1,13 @@
 ---
 name: setup
-description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, asks which of four connectors the installed modules need (Notion for the shared bases, Supabase for the product's database, Amplitude for analytics, Gmail for drafts), checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in, least privilege, where the credential lives), tests each with one harmless read, fills the product config after showing the diff, hands the fix backlog base to the Support plugin, then hands over to `orient` and `domain-onboarding`. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/setup".
+description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, reconciles an existing CLAUDE.md with the OS rules (names each conflict, proposes a section by diff, never overwrites), asks which of four connectors the installed modules need (Notion for the shared bases, Supabase for the product's database, Amplitude for analytics, Gmail for drafts), checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in, least privilege, where the credential lives), tests each with one harmless read, fills the product config after showing the diff, hands the fix backlog base to the Support plugin, then hands over to `orient` and `domain-onboarding`. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/setup".
 ---
 
 # Setup
 
 A newcomer installs the core, then runs this. At the end the product repository holds its config,
-each connector the product needs answers a read in this session, and the owner knows exactly what is
-left to do.
+its CLAUDE.md agrees with the OS or records where it chose otherwise, each connector the product needs
+answers a read in this session, and the owner knows exactly what is left to do.
 
 What setup guarantees:
 
@@ -17,6 +17,7 @@ What setup guarantees:
 - **Every command comes from a reference file checked against the vendor's documentation,** with its
   source. Nothing from memory.
 - **Nothing that exists is overwritten:** no file, no filled config key, no connector.
+- **A product never leaves setup with two rules on the same subject,** one of them silent.
 
 ## What setup never does
 
@@ -27,6 +28,8 @@ What setup guarantees:
   callback URL in the chat.
 - **Install a connector the owner did not ask for,** or remove or replace one that exists without the
   owner's go for that entry: another product may use it.
+- **Rewrite the product's CLAUDE.md.** It proposes an added section and, for a conflicting line, an
+  edit the owner approves line by line.
 - **Drive a client's space.** Its reads are the harmless ones of Step 5: names, never content. No
   browser automation, no script, no write in a space that belongs to a client (`rules/collaboration.md`,
   rule 32).
@@ -40,6 +43,8 @@ What setup guarantees:
 |---|---|
 | The contract | `${CLAUDE_PLUGIN_ROOT}/README.md` |
 | The templates | `${CLAUDE_PLUGIN_ROOT}/templates/` |
+| The OS rules | `${CLAUDE_PLUGIN_ROOT}/rules/collaboration.md`, `${CLAUDE_PLUGIN_ROOT}/rules/principles.md` |
+| How the rules reach a session | `${CLAUDE_PLUGIN_ROOT}/hooks/session-rules.mjs` |
 | Notion: account, command, sign-in, config | [references/notion.md](references/notion.md) |
 | Supabase | [references/supabase.md](references/supabase.md) |
 | Amplitude | [references/amplitude.md](references/amplitude.md) |
@@ -65,7 +70,7 @@ language.
    (`rules/collaboration.md`, rule 3). Use `git -C <path>` and absolute paths for every command.
 3. **The config.** Read `.claude/product/product.config.json`.
    - **It exists:** read it in full. A `schema_version` this skill does not know (it knows `1`):
-     stop and say so. Otherwise go to Step 2; this is a re-run (see "Running it again").
+     stop and say so. Otherwise go on; this is a re-run (see "Running it again").
    - **It is missing:** list what the core README asks to fill first, with, for each, its target
      and whether that target already exists. Say it, then copy the missing ones byte for byte. Never
      overwrite.
@@ -74,13 +79,11 @@ language.
    |---|---|
    | `product/product.config.json` | `.claude/product/product.config.json` |
    | `product/product_domain_context.md` | `.claude/product/product_domain_context.md` |
-   | `CLAUDE.md` | `CLAUDE.md` at the root |
+   | `CLAUDE.md` | `CLAUDE.md` at the root, only when there is none |
    | `memory/MEMORY.md` | `.claude/memory/MEMORY.md` |
    | `memory/archi-subsystem.md`, `memory/reference.md` | `.claude/memory/` (the shapes of a memory file) |
 
-   A `CLAUDE.md` that already exists is left as it is. Say that the OS skeleton is in the template
-   above the separation line, and that bringing it into the existing file is a separate change the
-   owner decides.
+   A `CLAUDE.md` that already exists is never replaced by the template: it is reconciled in Step 1b.
 4. **Local env files.** Credentials often sit in env files next to the code.
    ```
    git -C <root> ls-files -- ".env" ".env.*" "*.env"
@@ -90,6 +93,52 @@ language.
      it holds, never print it. Removing it from the history is the owner's decision.
    - Env files not ignored: propose the `.gitignore` lines (for example `.env` and `.env.*`, with
      `!.env.example` if the product commits an example file). Show the diff, write on the OK.
+
+## Step 1b: reconcile an existing CLAUDE.md
+
+**Why.** The OS rules reach every session through the core's `session-rules` hook, which injects a
+digest built from the config at session start. A product CLAUDE.md that says otherwise on the same
+subject leaves the session two rules and a guess. Measured: on a product whose CLAUDE.md sent deferred
+bugs to a notes file, a session wrote the bug there and the fix backlog never saw it. The hook makes
+the OS rule win where the config settles the subject and names the conflict; this step removes the
+conflict at its source, with the owner.
+
+1. **Read the whole CLAUDE.md**, and the files it imports (`@path` lines), in full.
+2. **For each subject the OS settles, find what the product says.**
+
+   | Subject | The OS rule | Where the OS reads it |
+   |---|---|---|
+   | A bug not fixed in the session | filed in the fix backlog, never left in the conversation, a todo or a notes file (rule 20) | `modules.support`, `databases.fix_backlog` |
+   | Pushing | only on the owner's explicit go when a push deploys (rule 27) | `git.push_deploys`, `git.main_branch` |
+   | Where memory lives, and reading it first | `memory.dir`, `memory.index`, `routing.zones`; memory first, code confirms (rule 1) | `memory.*`, `routing.zones` |
+   | Committing | named files only, only your own hunks (rule 28) | none |
+   | A client's data | read only, with the exception of rule 32 | none |
+
+3. **Classify each subject:** agrees, silent, or conflicts. A conflict quotes the product's line, with
+   its line number. A product rule that is stricter than the OS rule (for example "never push without
+   two reviews") agrees: it adds, it does not contradict.
+4. **Present the table** (subject, what the product says, the OS rule, verdict), then, for each
+   conflict, one numbered question with your recommendation: **adopt the OS rule** (setup proposes an
+   edit of that line that points to the OS) or **keep the product's rule** (setup records it as a
+   standing choice, naming the OS rule it changes, so that the hook lets it win). The owner decides
+   each one.
+5. **Propose the section by diff.** Append to CLAUDE.md, or extend if it already exists, one section:
+
+   ```markdown
+   ## Product OS: standing choices of the owner
+
+   This product uses the product OS (`product-os-core`). Its rules reach every session through the
+   core's session-rules hook, built from `.claude/product/product.config.json`; they are not copied
+   here. Where this file chooses otherwise, the choice is recorded below and wins for this product.
+
+   - <one line per kept product rule: the subject, the product's choice, the OS rule it changes>
+   ```
+
+   With no conflict, the section has only its first paragraph. Show the diff (the added section, and
+   each approved line edit), then "OK, or adjust before I write it?". On the OK, write. Nothing else in
+   the file changes.
+6. **The template's own heading.** A CLAUDE.md copied from the template already has this section below
+   its separation line. Step 1b then only checks it against the table.
 
 ## Step 2: which connectors this product needs
 
@@ -272,8 +321,9 @@ The Support module owns its base and its schema. Setup does not create it; it ha
 
 ## Step 8: commit, then hand over
 
-1. **Commit what setup wrote, by name.** The templates it created, the config, the `.gitignore` lines,
-   and `.mcp.json` once you have read it and it holds no secret. Check the branch first.
+1. **Commit what setup wrote, by name.** The templates it created, the config, the CLAUDE.md section,
+   the `.gitignore` lines, and `.mcp.json` once you have read it and it holds no secret. Check the
+   branch first.
    ```
    git -C <root> rev-parse --abbrev-ref HEAD
    git -C <root> add <each path>
@@ -283,11 +333,14 @@ The Support module owns its base and its schema. Setup does not create it; it ha
 2. **The summary,** status first. The first line alone tells the owner whether setup is finished.
 
 ```
-<"Set up: Notion and Supabase connected and tested, Gmail not wanted, config filled."
+<"Set up: Notion and Supabase connected and tested, Gmail not wanted, config filled, CLAUDE.md reconciled."
  or "Not finished: Amplitude waits for your sign-in in /mcp; databases.crm is empty.">
 
 Connectors
 | Connector | Installed (scope) | Authenticated | Tools in this session | Harmless read |
+
+CLAUDE.md
+- <agrees with the OS | N conflicts: X adopted, Y kept as standing choices>.
 
 Config
 - Filled: <keys>.
@@ -299,8 +352,9 @@ Waiting on the owner
 1. <a sign-in, an account to create, a decision; each once>
 
 Next
-1. Run `orient`: it re-reads the config, the memory and git, and says where things stand.
-2. Run `domain-onboarding` to write the domain pivot (`<pivots.dir>/<pivots.domain>`), which is
+1. Open a new session: the OS rules are injected at session start, from the config just written.
+2. Run `orient`: it re-reads the config, the memory and git, and says where things stand.
+3. Run `domain-onboarding` to write the domain pivot (`<pivots.dir>/<pivots.domain>`), which is
    still the empty template.
 ```
 
@@ -312,6 +366,8 @@ Setup is meant to be re-run: after a sign-in expires, on a new machine, when a m
 Each run checks, reports and fills only what is empty.
 
 - Step 1 copies only the templates that are missing.
+- Step 1b re-reads CLAUDE.md and brings up only conflicts that are neither adopted nor recorded as a
+  standing choice.
 - Steps 3 and 5 re-establish the table from scratch: nothing is assumed from an earlier run.
 - Step 4 runs only for connectors that are wanted and not usable.
 - Step 6 fills only empty keys and verifies the filled ones.
@@ -338,6 +394,8 @@ reference file.
   `get`, `login`, `logout`, the status labels, OAuth tokens "stored securely and refreshed
   automatically", claude.ai connectors and the conditions under which they load,
   `disableClaudeAiConnectors`, `ENABLE_CLAUDEAI_MCP_SERVERS`, `${VAR}` expansion in `.mcp.json`).
+- Hooks: https://code.claude.com/docs/en/hooks, read on 2026-10-04 (`SessionStart` and its `source`
+  values, `additionalContext` added before the first prompt, the 10,000-character cap, plugin hooks).
 - Authentication: https://code.claude.com/docs/en/authentication (claude.ai login needed for
   connectors; `claude setup-token` cannot fetch them).
 - Permissions: https://code.claude.com/docs/en/permissions (`/permissions`, `mcp__<server>` rules,

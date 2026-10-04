@@ -18,8 +18,14 @@ because a rule lives in one place:
 - `rules/principles.md`: the working principles, and the rungs (a written rule that is broken again
   becomes a gate, then a hook or a test).
 
-The product's own rules are below the separation line. Where one of them explicitly lifts or changes
-an OS rule, the product rule wins for this product.
+They reach every session through the core's `session-rules` hook, which injects a digest at session
+start, built from the product config: where a deferred bug goes, who pushes, where memory is read,
+and the path of the two files.
+
+The product's own rules are below the separation line. Where one of them changes an OS rule, it is
+recorded under "Product OS: standing choices of the owner", naming the rule it changes, and it wins
+for this product. A product rule that contradicts the OS without being recorded there is a conflict:
+the session follows the OS rule and names it, and the `setup` skill helps resolve it.
 
 ## Where knowledge lives
 
@@ -146,11 +152,12 @@ to reuse, and the non-negotiables (for example: no dark mode, tokens only, sente
 subfolder per topic, for example `<evidence-folder>/<YYYY-MM-DD>-<topic>/`. Test code and generated
 test output live elsewhere. -->
 
-## Standing instructions from the owner
+## Product OS: standing choices of the owner
 
 <!-- The owner's standing choices that change a default of the OS rules for this product, each with
-the rule it changes. Example: "Delegation to agents needs no permission; ask only for an unusual cost
-or sensitive data (rule 36)." -->
+the rule it changes. The session-rules hook lets a choice recorded here win over the OS rule.
+Example: "Delegation to agents needs no permission; ask only for an unusual cost or sensitive data
+(rule 36)." -->
 
 ## Register of locks
 
