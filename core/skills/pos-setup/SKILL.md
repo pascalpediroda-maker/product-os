@@ -378,10 +378,9 @@ Read each schema file in full first, and the `pos-tool-conventions` Notion refer
    have: fetch it, compare, and point the key to it on the config diff. Only the rest is created.
 2. **Ask once, together, what only the owner knows:** the parent page that will hold the bases (one for
    all, where the team's shared pages live; without it the connector creates private pages nobody else
-   sees), and the option lists the schemas leave to the product: its personas (shared by the feedback
-   base and the CRM, name for name), its areas (shared by the roadmap and the fix backlog), the
-   roadmap's themes, the CRM's sales motions and target plans. A list that an existing base already
-   holds is read from it and reused, not asked again.
+   sees), and the option lists the schemas leave to the product: its personas, the roadmap's areas
+   and themes, the CRM's sales motions and target tiers. A list an existing base already holds is
+   read from it, not asked again.
 3. **Show every schema to create in one block,** with the owner's lists in place and the relations
    that apply, then "OK, or adjust before I create them?". The structure is final once entries exist:
    option names are checked now (no comma, unique regardless of case).
@@ -392,7 +391,7 @@ Read each schema file in full first, and the `pos-tool-conventions` Notion refer
 5. **The fix backlog,** last, so its relations find their targets: run the `pos-fix-backlog` skill
    ("Create or check the base"). It asks its ID prefix (unique in the Notion workspace) and creates
    the base, or checks the existing one. A fix backlog that existed before the feedback base or the
-   CRM gets its relations from them: the feedback base's `Fixes` adds `Source feedback` to it, and
+   CRM gets its relations from them: the feedback base's `Fix backlog` relation adds `Source feedback` to it, and
    `Customer to notify` is added on its side once the CRM exists (the CRM schema gives the statement).
    An added column renames nothing and erases nothing; it is part of the yes to question 1.
    - `pos-support` not installed: say that this plugin carries the fix backlog, give its install

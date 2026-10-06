@@ -91,9 +91,8 @@ If `modules.support` is false, say that the config does not declare the Support 
 1. **Ask the owner, once, for:**
    - the parent page, where the other shared bases live. Without a parent, the connector creates the
      base as a private page at the workspace level, which nobody else sees;
-   - the `Area` list. When the roadmap base exists (`databases.roadmap`), its `Area` options are the
-     list, name for name: one vocabulary for the parts of the product. Otherwise propose the one in
-     Support pivot section 3 when it is filled, or ask for it, and suggest keeping an `Other` area;
+   - the `Area` list. Propose the one in Support pivot section 3 when it is filled; otherwise ask for
+     it, and suggest keeping an `Other` area;
    - the `ID` prefix. Ask whether this Notion workspace already holds another product's fix backlog.
      When it does not, propose `FIX`, the default; when it does, or the owner does not know, propose a
      prefix that belongs to this product, such as its initials or `BUG`. Say that Notion keeps the
@@ -108,7 +107,7 @@ If `modules.support` is false, say that the config does not declare the Support 
    values and the relations that apply (`Source feedback` only when `databases.feedback` is set,
    `Customer to notify` only when `databases.crm` is set). Then: "OK, or adjust before I create it?"
 4. **On the OK, announce the call:** it creates one base under the named page and, when
-   `Source feedback` applies, adds one property (`Fixes`) to the feedback base. Read the create
+   `Source feedback` applies, adds one property (`Fix backlog`) to the feedback base. Read the create
    tool's own description in the session, then create the base with the statement in the schema
    reference and the approved prefix. Where the two differ, the tool's description wins.
    - **The prefix is taken** (the call answers 409, or says the prefix is already in use): another

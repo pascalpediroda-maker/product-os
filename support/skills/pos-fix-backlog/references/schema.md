@@ -122,7 +122,7 @@ CREATE TABLE (
   "Effort" SELECT('XS':green, 'S':blue, 'M':yellow, 'L':red),
   "Reproduction" RICH_TEXT,
   "Reported on" DATE,
-  "Source feedback" RELATION('<feedback data source id>', DUAL 'Fixes'),
+  "Source feedback" RELATION('<feedback data source id>', DUAL 'Fix backlog'),
   "Customer to notify" RELATION('<crm data source id>'),
   "Commit" RICH_TEXT,
   "Version" RICH_TEXT,
