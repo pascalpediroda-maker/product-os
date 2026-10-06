@@ -1,6 +1,6 @@
 # Support context
 
-Skeleton version 1, maintained by `product-os-support`.
+Skeleton version 2, maintained by `product-os-support`.
 
 Copy this file to `<pivots.dir>/product_support_context.md` (by default
 `.claude/product/product_support_context.md`) and fill it before running a skill of the Support
@@ -12,8 +12,8 @@ and where a bug may be reproduced. The `fix-backlog` and `bug-kill` skills read 
 
 | Reader | What it takes from here |
 |---|---|
-| `fix-backlog` | the channel a bug came through (1), the report marker (2), the Area list (3), who is in the team (4), how the customer to notify is found (5) |
-| `bug-kill` | all of it: the in-app reports it files (2), the memory each area loads (3), the customer bonus (4), the messages (5), the priority rule (6), the release path (7), where it reproduces (8) |
+| `fix-backlog` | the channel a bug came through (1), the report marker (2), the Area list and the ID prefix (3), who is in the team (4), how the customer to notify is found (5) |
+| `bug-kill` | all of it: the in-app reports it files (2), the memory each area loads and the ID prefix its commits cite (3), the customer bonus (4), the messages (5), the priority rule (6), the release path (7), where it reproduces (8) |
 | Any session that meets a bug it will not fix now | the Area list (3) and the team (4), to file the entry right |
 
 ## Rules for everything below the separation line
@@ -41,7 +41,7 @@ and where a bug may be reproduced. The `fix-backlog` and `bug-kill` skills read 
 |---|---|---|
 | 1 | Channels | where reports and bugs reach the team, who reads each channel, which `Source` of the fix backlog each one feeds |
 | 2 | In-app reports | where reports made inside the product live, who can see them, the read-only query that lists the new ones, whether anything may be written back, the marker a report carries in the fix backlog |
-| 3 | Areas | the product's `Area` list for the fix backlog, and for each area the `routing.zones` key whose memory a bug kill loads, plus any rule that area imposes |
+| 3 | Areas | the prefix of the fix backlog's `ID` (unique across the whole Notion workspace), the product's `Area` list for the fix backlog, and for each area the `routing.zones` key whose memory a bug kill loads, plus any rule that area imposes |
 | 4 | The team | who counts as the team, so their reports are not counted as customer reports, and how a test report is recognised |
 | 5 | Customers to notify | how the author of a report is matched to a record in `databases.crm`, how their language is found, how a direct link is built, who sends |
 | 6 | Priority rule | the default rule of the `bug-kill` skill, or this product's override with its reason, and the batch size |
@@ -118,8 +118,17 @@ order by r.<created_at>
 ## 3. Areas
 
 <!--
-Guidance: the product's own list of areas. Each is one option of the fix backlog's `Area` select, and
-the list here and the options in the base must match (the `fix-backlog` skill compares them).
+Guidance: the prefix of the fix backlog's IDs, and the product's own list of areas.
+- ID prefix: the prefix of the base's `ID` property. Every entry reads `<prefix>-n`, and commits,
+  handoffs and messages cite it that way. Notion keeps a unique ID prefix unique across the whole
+  workspace: when another product's fix backlog lives in the same Notion workspace, this product
+  cannot take its prefix. The OS default is `FIX`; a second product takes one of its own, for example
+  its initials or `BUG`. The `fix-backlog` skill proposes it when it creates the base, picks another
+  on a conflict with the owner's OK, and writes the one the base was created with here. On an
+  existing base it reads the prefix from an entry and reports a difference with this line, or a
+  missing line. The base is the reference: the prefix is final once entries exist.
+- Each area is one option of the fix backlog's `Area` select, and the list here and the options in
+  the base must match (the `fix-backlog` skill compares them).
 - Option names: no commas (Notion refuses them), unique regardless of case, and final before the base
   is created or any entry imported. Renaming an option through the connector erases its value on
   every entry that carries it.
@@ -132,6 +141,8 @@ the list here and the options in the base must match (the `fix-backlog` skill co
 - Keep an `Other` area for what fits nowhere; the bug kill moves its entries to the right area at
   triage.
 -->
+
+**ID prefix:** <!-- the prefix the base was created with, written by fix-backlog; FIX is the default -->
 
 | Area (option in the backlog) | Zone(s) in `routing.zones` | Area rule |
 |---|---|---|

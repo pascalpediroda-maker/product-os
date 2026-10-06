@@ -9,6 +9,12 @@ schema (its section "Create or check the base").
 The structure is in English whatever `product.team_language` is, so skills find its properties by
 name and another product can reuse it as it is. Entries are written in the team's language.
 
+**The ID prefix belongs to the product.** Notion keeps a unique ID prefix unique across the whole
+workspace, so a second product whose backlog lives in the same Notion workspace cannot take the
+first one's. The prefix is chosen with the owner when the base is created, recorded in the Support
+pivot, section 3 (`ID prefix`), and every entry reads `<prefix>-n`. `FIX` is only the default: with
+it, entries read `FIX-1`, `FIX-2`...; a product that took `BUG` reads `BUG-1`, `BUG-2`...
+
 A base created earlier by the core `setup` skill has this same schema: nothing to migrate.
 
 ## Properties
@@ -16,7 +22,7 @@ A base created earlier by the core `setup` skill has this same schema: nothing t
 | Property | Type | Values or rule |
 |---|---|---|
 | `Bug` | title | one line: what the user sees go wrong |
-| `ID` | unique ID, prefix `FIX` | numbered by Notion (FIX-1, FIX-2...); commits and messages cite it |
+| `ID` | unique ID, with the product's prefix | numbered by Notion (`<prefix>-1`, `<prefix>-2`...); the prefix is recorded in Support pivot section 3, `FIX` by default; commits and messages cite `<prefix>-n` |
 | `Status` | select | `To triage`, `To fix`, `In progress`, `Fixed (to release)`, `Released`, `Not reproduced`, `Dropped` |
 | `Severity` | select | `Blocker`, `Major`, `Minor`, `Cosmetic`; definitions in the `bug-kill` skill, Step 3 |
 | `Priority` | select | `P0`, `P1`, `P2`, `P3`; set only by a bug kill, when the owner validates the batch |
@@ -71,6 +77,9 @@ A base created earlier by the core `setup` skill has this same schema: nothing t
   later with the connector's update capability, once the base exists.
 - **Customers are carried by the relation, never written in `Bug` or `Reproduction`.** The base is
   read by every session; a name in free text travels with every copy of it.
+- **The prefix is the product's, not the OS's.** One prefix per Notion workspace means one OS-wide
+  prefix would fail for the second product that shares a workspace. Everything else in the schema is
+  the same for every product.
 
 ## Before creating: fix the names
 
@@ -81,6 +90,15 @@ A base created earlier by the core `setup` skill has this same schema: nothing t
   "New names add options", and "Omitted options are removed". A rename made through the connector is
   a removal plus an addition, and the entries that carried the old option lose their value. So the
   names are settled with the owner first, then the base is created, then entries are imported.
+- **The prefix is unique across the whole Notion workspace.** Propose `FIX` when the workspace holds
+  no other product's fix backlog; otherwise one that belongs to this product, such as its initials or
+  `BUG`. The connector offers no way to check it in advance: the create call is the check. When it
+  answers 409, or that the prefix is already in use, check under the parent page that no base was
+  created, then propose another prefix and create again on the owner's OK (observed 2026-10-06: a
+  second product's base was refused with a 409 because the first product's backlog already used
+  `FIX`).
+- **The prefix is final once entries exist.** Commits and messages already written cite
+  `<prefix>-n`; a later change leaves them pointing at IDs the base no longer shows.
 - **An `ID` number cannot be written.** Notion's reference: "You can configure the prefix, but you
   cannot write a page's number." An import numbers entries in the order it creates them; a legacy
   identifier, if one must be kept, goes in the entry's text.
@@ -94,7 +112,7 @@ session is the contract: read it first, and follow it where it differs.
 ```sql
 CREATE TABLE (
   "Bug" TITLE,
-  "ID" UNIQUE_ID PREFIX 'FIX',
+  "ID" UNIQUE_ID PREFIX '<prefix>',
   "Status" SELECT('To triage':gray, 'To fix':red, 'In progress':yellow, 'Fixed (to release)':blue, 'Released':green, 'Not reproduced':brown, 'Dropped':default),
   "Severity" SELECT('Blocker':red, 'Major':orange, 'Minor':yellow, 'Cosmetic':gray),
   "Priority" SELECT('P0':red, 'P1':orange, 'P2':yellow, 'P3':gray),
@@ -112,13 +130,24 @@ CREATE TABLE (
 )
 ```
 
-Drop the `Source feedback` line when `databases.feedback` is empty, and the `Customer to notify`
-line when `databases.crm` is empty.
+`<prefix>` is the one the owner approved (`FIX` by default, for example `PREFIX 'FIX'`). Drop the
+`Source feedback` line when `databases.feedback` is empty, and the `Customer to notify` line when
+`databases.crm` is empty.
 
 ## How the properties read back
 
 - In SQL, the unique ID column named `ID` reads as `"userDefined:ID"` (a property named `id` or `url`
   takes the `userDefined:` prefix), and the date reads as `"date:Reported on:start"`.
+- **The `ID` value depends on how it is read** (observed 2026-10-06):
+  - in SQL, `"userDefined:ID"` is an integer column and gives the bare number (`152`);
+  - a fetched entry page gives the full ID with its prefix (`"userDefined:ID": "FIX-152"` on a base
+    with the default prefix);
+  - a fetch of the base or of its data source shows the property as `auto_increment_id`, without
+    its prefix.
+
+  So the prefix of an existing base is read from a fetched entry. On a base with no entry yet, it
+  cannot be read through the connector: the owner reads it in Notion, in the `ID` property's
+  settings, or the first entry filed shows it.
 - A relation is written as a list of page URLs (page IDs are also accepted), never as titles.
 - `Reproduction` is rich text: SQL returns it lossy (mentions, links and formatting can be missing).
   Read it in rows mode, or fetch the page, before relying on it or rewriting it.
@@ -129,12 +158,14 @@ The rest of the connector's behaviour is in the `tool-conventions` skill, Notion
 
 When `databases.fix_backlog` is set, nothing is created. The base is fetched and compared with this
 schema and with the Support pivot's Area list, and the differences are reported (a missing property,
-an option spelled differently, an area in one list and not the other). Nothing changes without the
-owner's go, and an option that entries already carry is never renamed through the connector.
+an option spelled differently, an area in one list and not the other). Its prefix, read from a
+fetched entry, is compared with the pivot's `ID prefix`: a difference, or a pivot that does not hold
+one, is reported too. Nothing changes without the owner's go, and an option that entries already
+carry is never renamed through the connector.
 
 ## Sources
 
-Read on 2026-09-26.
+Read on 2026-09-26, unless marked otherwise.
 
 - Notion API, data source properties: https://developers.notion.com/reference/property-object
   ("Commas are not allowed.", option names unique regardless of case, the unique ID prefix, one-way
@@ -149,3 +180,7 @@ Read on 2026-09-26.
   connected session. It has no public URL; re-read it in the session before use.
 - Observed in use, September 2026: renaming select options erased the values of the renamed options;
   the unique ID column read as `"userDefined:ID"` in SQL.
+- Observed in use, 2026-10-06: creating a second product's backlog in the same Notion workspace with
+  the prefix the first product's backlog already used failed with a 409; SQL returned the `ID` as a
+  bare integer, a fetched entry page returned it with its prefix, and a fetch of the base or data
+  source showed the property as `auto_increment_id` without its prefix.

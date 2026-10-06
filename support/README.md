@@ -30,7 +30,7 @@ added. The full sequence and the choice of scope are in the [root README](../REA
 
 | Piece | Where | What it does |
 |---|---|---|
-| Support pivot | `templates/product_support_context.md` | the product's support facts: channels, in-app reports and the query that lists them, the `Area` list and the memory each area loads, who is the team, how a customer is told, the priority rule, how a fix release ships and is read once live, where bugs are reproduced |
+| Support pivot | `templates/product_support_context.md` | the product's support facts: channels, in-app reports and the query that lists them, the fix backlog's ID prefix, the `Area` list and the memory each area loads, who is the team, how a customer is told, the priority rule, how a fix release ships and is read once live, where bugs are reproduced |
 | `fix-backlog` | `skills/fix-backlog/` | creates the fix backlog base in Notion, or checks an existing one; files an entry after searching for a duplicate; moves and closes entries. The base every other support skill reads and writes |
 | The schema | `skills/fix-backlog/references/schema.md` | the backlog's properties, statuses, sources, the creation statement, and the Notion traps that bite on creation |
 | `bug-kill` | `skills/bug-kill/` | a session that verifies the backlog against the deployed reference, proposes a batch, fixes it area by area in RED -> GREEN -> REFACTOR, ships a minor fix release on a go, and closes the loop |
@@ -40,7 +40,7 @@ added. The full sequence and the choice of scope are in the [root README](../REA
 | What | Where | How |
 |---|---|---|
 | The Support pivot | `<pivots.dir>/product_support_context.md` (by default `.claude/product/`) | copy `templates/product_support_context.md` and fill it below the separation line. The pivot of a function is named `product_<function>_context.md` in `pivots.dir` |
-| The fix backlog base | `databases.fix_backlog` | run the `fix-backlog` skill: it creates the base with the owner's parent page and Area list, then writes the key through a shown diff. A base that already exists is checked, not recreated |
+| The fix backlog base | `databases.fix_backlog` | run the `fix-backlog` skill: it creates the base with the owner's parent page, Area list and ID prefix, then writes the key and the prefix through a shown diff. The prefix is unique across the Notion workspace: a second product whose backlog shares a workspace with another takes its own (`FIX` is only the default). A base that already exists is checked, not recreated |
 | The module switch | `modules.support: true` | in the product config |
 
 Worth filling too:

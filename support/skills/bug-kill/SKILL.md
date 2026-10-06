@@ -5,10 +5,11 @@ description: >
   release. Files the in-app bug reports that are not in the backlog yet, re-verifies every entry
   against the deployed reference (never the local copy) and gives it a verdict with its proof,
   prioritises (severity x users affected, customer reports first, then effort), has the owner
-  validate the batch, fixes area by area in RED -> GREEN -> REFACTOR (one commit per bug, citing
-  FIX-n), pushes on the owner's explicit go, checks what is live, then closes the entries and drafts
-  the messages to the customers who reported them. Use when someone says "bug kill", "empty the
-  backlog", "let's kill bugs", "fix session", "fix release", "/bug-kill".
+  validate the batch, fixes area by area in RED -> GREEN -> REFACTOR (one commit per bug, citing the
+  entry's ID with the product's own prefix, FIX-n by default), pushes on the owner's explicit go,
+  checks what is live, then closes the entries and drafts the messages to the customers who reported
+  them. Use when someone says "bug kill", "empty the backlog", "let's kill bugs", "fix session", "fix
+  release", "/bug-kill".
 ---
 
 # Bug kill
@@ -29,7 +30,10 @@ Delivery module does). A bug whose fix is a project of its own (effort L) leaves
 Rule numbers refer to the collaboration rules of `product-os-core`, principles to its working
 principles. They are not repeated here. Sections of the Support pivot are cited by number:
 1 Channels, 2 In-app reports, 3 Areas, 4 The team, 5 Customers to notify, 6 Priority rule, 7 Fix
-releases, 8 Test space. `<main>` below is `git.main_branch`.
+releases, 8 Test space. `<main>` below is `git.main_branch`. `<prefix>-n` is a backlog entry's ID:
+this product's prefix, recorded in section 3 (`ID prefix`) and set on the base's `ID` property, then
+the number Notion gave the entry. `FIX` is only the default prefix; a product whose backlog shares a
+Notion workspace with another product's has its own, since Notion keeps a prefix unique per workspace.
 
 What a bug kill guarantees:
 
@@ -102,7 +106,8 @@ this is read. Name the pivot and the config there (`pivot:product_support_contex
    shared reference, not proof of what runs: what runs is read where section 7 says.
 2. **Open entries** of the backlog, with the query of the `fix-backlog` skill ("Reading the backlog"),
    statuses `To triage`, `To fix`, `In progress`. An entry `In progress` with no commit is left over
-   from an interrupted session: it goes back to `To fix`.
+   from an interrupted session: it goes back to `To fix`. SQL gives each entry's number alone; it is
+   cited as `<prefix>-n` with the prefix of section 3.
 3. **In-app reports,** read only, with the query in section 2. Each report absent from the backlog
    (its marker `report:<id>` searched in `Reproduction`, every status included) becomes an entry
    through the `fix-backlog` skill ("File an entry"): `Source` = `In-app feedback`, `Reported on` =
@@ -124,6 +129,10 @@ A desk check: the code at `origin/<main>`, the git history since `Reported on`, 
 - **Read each entry in full:** fetch its page (body, captures, the owner's notes), not only its
   properties in SQL. An entry once carried in its body the fix the owner wanted; read through SQL
   alone, it was missed.
+- **The fetched page gives the entry's full ID,** `<prefix>-n`. When its prefix differs from the one
+  in section 3, cite the base's prefix (the one Notion shows and earlier commits carry) and report
+  the difference: the `fix-backlog` skill ("Create or check the base", "When
+  `databases.fix_backlog` is set") reconciles the pivot.
 - **A UI fix that changes the visible structure** (a top bar, shared headers, what hides, where a
   field lives) is not an ordinary fix: its scope is validated by the owner, then an analysis (every
   control and its real function, the hierarchy), mockups and a go, all BEFORE any agent or code.
@@ -210,9 +219,9 @@ batch.
 **Present it in text** (no choice pop-up), short:
 
 - the triage summary: closed, to fix, questions;
-- the batch table by area: the entry's title as the owner reads it in the base (`Bug`), then `FIX-n`,
-  then the priority. Wherever an entry is mentioned to the owner, its title names it: the number alone
-  tells the owner nothing, it serves the commits;
+- the batch table by area: the entry's title as the owner reads it in the base (`Bug`), then
+  `<prefix>-n`, then the priority. Wherever an entry is mentioned to the owner, its title names it:
+  the ID alone tells the owner nothing, it serves the commits;
 - what leaves the batch, and why;
 - the work plan: the base (a temporary worktree from `origin/<main>` when the local `<main>` is not
   level), its dependency install, the dev server (asked before it is started, rule 8), the services
@@ -243,8 +252,9 @@ its bugs in priority order. For each bug:
    tried, and on to the next bug.
 3. **GREEN:** fix the cause (below).
 4. **REFACTOR:** the regression test stays (below).
-5. **Commit:** named files only (rule 28), one commit per bug, `fix(<area>): <what is fixed> (FIX-n)`.
-   Two bugs with one cause: one fix, one commit citing both numbers.
+5. **Commit:** named files only (rule 28), one commit per bug,
+   `fix(<area>): <what is fixed> (<prefix>-n)`. Two bugs with one cause: one fix, one commit citing
+   both IDs.
 6. **Backlog:** `Fixed (to release)`, `Commit` = the short hash.
 
 **No owner checkpoint per bug:** the validation of the batch covers the session. **Stop and say so**
@@ -380,8 +390,8 @@ Over the whole batch, then one report:
 
 When a batch waits on the owner (Checkpoint 1 or 3), or the context runs short, write a handoff with
 the core `handoff` skill. Its line 1 names `bug-kill`. The state lives in the backlog: the handoff
-points to `databases.fix_backlog` and to the entries by `FIX-n`, names the worktree by path, and lists
-what waits on the owner, numbered. `orient` lists it as open.
+points to `databases.fix_backlog` and to the entries by `<prefix>-n`, names the worktree by path, and
+lists what waits on the owner, numbered. `orient` lists it as open.
 
 ## When something is missing
 
@@ -392,6 +402,7 @@ brought (principle 10).
 |---|---|
 | `databases.fix_backlog` empty | stops at Step 1: run the `fix-backlog` skill first ("Create or check the base") |
 | the Support pivot, or one of its sections | names the section, runs the steps that do not need it, and asks the owner only what a step cannot go without (the release path, the test space) |
+| no `ID prefix` in section 3 | takes the prefix from the first entry fetched at Step 2 (its `ID` reads `<prefix>-n`), cites entries with it, and proposes the line for section 3 through the `fix-backlog` skill ("Create or check the base") |
 | in-app reports (section 2 says none, or is empty) | skips Step 1.3 and says so |
 | `databases.crm` empty | `Customer to notify` stays empty; the customers to tell are listed in the final report by their account, for the owner |
 | `databases.feedback` empty | no `Source feedback`; open product decisions go to the owner in the report |
@@ -417,7 +428,7 @@ brought (principle 10).
 - Group by area, so an area's memory and code are loaded once.
 - Update the backlog at every transition, not at the end: an interrupted session leaves a backlog that
   is right.
-- Cite `FIX-n` in every commit.
+- Cite `<prefix>-n` in every commit, with this product's prefix.
 - Plan the services that ship separately with the batch.
 
 ## DON'T
@@ -459,8 +470,9 @@ brought (principle 10).
 
 ## Annex: brief for a verification agent (Step 2)
 
-Copy it, then complete it with the area, its memory files, and its entries (`FIX-n`, the date
-reported, the original note). Paste the Step 3 grid where it says so: the agent cannot read this skill.
+Copy it, then complete it with the area, its memory files, and its entries (`<prefix>-n` with this
+product's prefix, the date reported, the original note). Paste the Step 3 grid where it says so: the
+agent cannot read this skill.
 
 > Read-only verifier for a bug kill on `<product.name>`, repository `<absolute path of the primary
 > checkout>`. Edit nothing. No server, no package install, no test run, no browser. Git read only

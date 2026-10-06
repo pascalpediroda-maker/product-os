@@ -2,16 +2,18 @@
 name: fix-backlog
 description: >
   The product's fix backlog in Notion: the one place a bug goes when it is not fixed in the session
-  that sees it. Creates the base with the OS schema when `databases.fix_backlog` is empty (parent page
-  and Area list from the owner, option names checked, schema shown and approved, creation announced,
-  base fetched and compared, config key written through a shown diff), or checks an existing base and
-  reports the differences without changing anything. Files an entry (a bug the owner defers, a bug met
-  outside the current task, a customer report not handled now, an in-app report, an audit finding, a
-  red end-to-end test, what remains after a fix) after searching for a duplicate. Closes an entry at
-  fix time and at release. Every other Support skill reads and writes the backlog through this
-  contract. Use when someone says "note this bug", "put it in the backlog", "file it", "we'll fix it
-  later", "create the fix backlog", "check the fix backlog", "close FIX-12", or when a session meets a
-  bug it will not fix now. "/fix-backlog".
+  that sees it. Creates the base with the OS schema when `databases.fix_backlog` is empty (parent page,
+  Area list and ID prefix from the owner, the prefix unique in the Notion workspace and replaced on a
+  conflict, option names checked, schema shown and approved, creation announced, base fetched and
+  compared, config key and pivot written through a shown diff), or checks an existing base, its
+  prefix included, and reports the differences without changing anything. Files an entry (a bug the
+  owner defers, a bug met outside the current task, a customer report not handled now, an in-app
+  report, an audit finding, a red end-to-end test, what remains after a fix) after searching for a
+  duplicate. Closes an entry at fix time and at release. Every other Support skill reads and writes
+  the backlog through this contract. Use when someone says "note this bug", "put it in the backlog",
+  "file it", "we'll fix it later", "create the fix backlog", "check the fix backlog", "close FIX-12"
+  (FIX is the default prefix; a product may have its own, such as "close BUG-12"), or when a session
+  meets a bug it will not fix now. "/fix-backlog".
 ---
 
 # Fix backlog
@@ -33,6 +35,13 @@ What it guarantees:
 - **An entry is closed with proof:** the commit that cites it, the release that ships it, or the
   reason it was dropped.
 - **The base keeps one schema across products,** in English, so skills find its properties by name.
+  Only the `ID` prefix differs from one product to the next.
+
+**An entry's ID is `<prefix>-n`.** Notion gives each entry its number; the prefix is the product's,
+set on the base's `ID` property and recorded in Support pivot section 3 (`ID prefix`). Notion keeps
+a prefix unique across the whole workspace, so two products whose backlogs share a Notion workspace
+never share one. `FIX` is only the default: wherever this skill writes `<prefix>-n`, read this
+product's prefix (`FIX-12` with the default, `BUG-12` for a product that took `BUG`).
 
 ## What this skill never does
 
@@ -41,7 +50,8 @@ What it guarantees:
 - **Name a customer in `Bug` or `Reproduction`.** The `Customer to notify` relation carries who.
 - **Write to the product's in-app reports store.**
 - **Change the base's structure without the owner's go:** no option renamed, no column dropped, no
-  option list rewritten on a base that holds entries.
+  option list rewritten on a base that holds entries, no `ID` prefix changed.
+- **Create the base with a prefix the owner has not approved,** even after a conflict.
 - **Search for a likely base and write into it** when `databases.fix_backlog` is empty
   (`tool-conventions` rule 5).
 - **Push.** It commits what it wrote to the repository, by name.
@@ -50,10 +60,11 @@ What it guarantees:
 
 1. **The product config** (`.claude/product/product.config.json`): `databases.fix_backlog`,
    `databases.feedback`, `databases.crm`, `modules.support`, `pivots.dir`, `product.team_language`.
-2. **The Support pivot**, `<pivots.dir>/product_support_context.md`: section 1 (Channels), 3 (Areas),
-   4 (The team), 5 (Customers to notify), and section 2 (In-app reports) when filing one. Missing or
-   still empty: say so. Creating the base then takes the Area list from the owner; filing an entry
-   takes it from the base's own options.
+2. **The Support pivot**, `<pivots.dir>/product_support_context.md`: section 1 (Channels), 3 (Areas,
+   with the `ID prefix`), 4 (The team), 5 (Customers to notify), and section 2 (In-app reports) when
+   filing one. Missing or still empty: say so. Creating the base then takes the Area list and the
+   prefix from the owner; filing an entry takes the areas from the base's own options and the prefix
+   from the entry it reads back.
 3. **The `tool-conventions` skill**: its rules, then its Notion reference in full, before the first
    Notion call of the session.
 4. **The schema**: [references/schema.md](references/schema.md).
@@ -81,28 +92,42 @@ If `modules.support` is false, say that the config does not declare the Support 
    - the parent page, where the other shared bases live. Without a parent, the connector creates the
      base as a private page at the workspace level, which nobody else sees;
    - the `Area` list. Propose the one in Support pivot section 3 when it is filled; otherwise ask for
-     it, and suggest keeping an `Other` area.
+     it, and suggest keeping an `Other` area;
+   - the `ID` prefix. Ask whether this Notion workspace already holds another product's fix backlog.
+     When it does not, propose `FIX`, the default; when it does, or the owner does not know, propose a
+     prefix that belongs to this product, such as its initials or `BUG`. Say that Notion keeps the
+     prefix unique across the whole workspace, and that it is final once entries exist, since commits
+     and messages cite it. A prefix already in Support pivot section 3 is proposed first.
 2. **Check every option name** (`Status`, `Severity`, `Priority`, `Area`, `Source`, `Effort`) against
    the schema reference, "Before creating: fix the names": no comma, unique regardless of case, and
    final. Renaming an option through the connector later erases its value on every entry that
    carries it, so the names are settled now, before the base exists and before any entry is imported.
    A name that breaks a rule is reported with a proposed replacement.
-3. **Show the full schema:** the property table of the schema reference, with the `Area` values and
-   the relations that apply (`Source feedback` only when `databases.feedback` is set,
+3. **Show the full schema:** the property table of the schema reference, with the prefix, the `Area`
+   values and the relations that apply (`Source feedback` only when `databases.feedback` is set,
    `Customer to notify` only when `databases.crm` is set). Then: "OK, or adjust before I create it?"
 4. **On the OK, announce the call:** it creates one base under the named page and, when
    `Source feedback` applies, adds one property (`Fixes`) to the feedback base. Read the create
    tool's own description in the session, then create the base with the statement in the schema
-   reference. Where the two differ, the tool's description wins.
+   reference and the approved prefix. Where the two differ, the tool's description wins.
+   - **The prefix is taken** (the call answers 409, or says the prefix is already in use): another
+     base in the workspace has it. Do not stop there. Fetch the parent page and check that the
+     failed call created nothing: a base cannot be deleted through the connector, so a half-made one
+     must be known before trying again. Tell the owner the prefix is taken in this workspace, propose
+     another that belongs to this product, and on the OK create again with it.
 5. **Fetch the new base.** Compare every property, type and option with the schema, and read its data
    source URL (`collection://...`) from the response. A difference is fixed now, while the base is
-   still empty, then fetched again.
+   still empty, then fetched again. The fetch does not show the prefix (the `ID` property reads as
+   `auto_increment_id`; schema reference, "How the properties read back"): the creation that
+   succeeded with the approved prefix is the evidence, and the first entry filed confirms it when its
+   fetch-back reads `<prefix>-1`.
 6. **Write `databases.fix_backlog`** in the config: show the diff (key, now, proposed, from where),
    and on the OK write the whole file once, strict JSON, key order and two-space indentation kept,
    then check that it parses. The core `setup` skill writes the config the same way (its Step 6).
-7. **If Support pivot section 3 did not hold the Area list,** propose the table below the separation
-   line: each area with the `routing.zones` key it loads, left empty where the owner has not said.
-   Write it on the OK.
+7. **Write Support pivot section 3,** below the separation line: the `ID prefix` line with the prefix
+   the base was created with, and, if section 3 did not hold the Area list, the table: each area with
+   the `routing.zones` key it loads, left empty where the owner has not said. Show the diff, write it
+   on the OK.
 8. **Commit** the config and the pivot by name (rule 28). Never push.
 
 ### When `databases.fix_backlog` is set
@@ -112,10 +137,22 @@ Create nothing.
 1. Fetch the base. A base that does not resolve is reported as "configured, not reachable" (the
    signed-in account may lack access to it), never replaced.
 2. Compare it with the schema reference, and its `Area` options with Support pivot section 3.
-3. Report each difference in one line: a missing property, a type that differs, an option spelled
-   differently, an area in the base and not in the pivot, or the reverse.
-4. Change nothing without the owner's go. An option that entries carry is never renamed through the
+3. **Read its prefix and compare it with the pivot.** The base's schema does not show the prefix:
+   find the most recent entry in SQL (highest `"userDefined:ID"`), fetch its page, and read its `ID`,
+   `<prefix>-n`. Then:
+   - the prefix matches the `ID prefix` of section 3: nothing to report;
+   - it differs: report the mismatch. The base's prefix is the one Notion shows and the commits
+     already cite, so the proposal is to correct the pivot, written on the owner's go;
+   - section 3 holds no `ID prefix` (a pivot written before the line existed, or not filled):
+     propose the line with the base's prefix, written on the OK;
+   - the base has no entry yet: the prefix cannot be read through the connector. Say so, and when
+     section 3 holds none either, ask the owner to read it in Notion (the `ID` property's settings).
+4. Report each difference in one line: a missing property, a type that differs, an option spelled
+   differently, an area in the base and not in the pivot, or the reverse, a prefix that differs or
+   is missing from the pivot.
+5. Change nothing without the owner's go. An option that entries carry is never renamed through the
    connector: the `tool-conventions` Notion reference (section 4) says how a rename keeps its values.
+   The base's `ID` prefix is never changed to match the pivot.
 
 ---
 
@@ -147,7 +184,7 @@ Then:
 - A match on an open entry is updated instead of duplicated: the new report added to
   `Reproduction`, `Users affected` raised.
 - A match on a closed entry (`Released`, `Not reproduced`, `Dropped`) is not reopened, so it keeps
-  its commit and version. A new entry is filed, and its `Reproduction` cites the old `FIX-n`.
+  its commit and version. A new entry is filed, and its `Reproduction` cites the old `<prefix>-n`.
 
 ### What an entry carries
 
@@ -180,9 +217,12 @@ Then:
 
 1. Announce the write (`tool-conventions` rule 2), then create the page with the data source as its
    parent.
-2. Fetch it back (`tool-conventions` rule 7) and read the number Notion gave it. The number cannot be
-   written, only read; in SQL, the unique ID column `ID` reads as `"userDefined:ID"`.
-3. Give the owner the title, `FIX-n` and the link, in one line. Stop there for that bug.
+2. Fetch it back (`tool-conventions` rule 7) and read the ID Notion gave it. The fetched page gives
+   it whole, `<prefix>-n`; in SQL, the column `"userDefined:ID"` gives only the number. The number
+   cannot be written, only read. A prefix that differs from the `ID prefix` of Support pivot
+   section 3, or a section 3 that holds none, is said in the report ("Create or check the base",
+   "When `databases.fix_backlog` is set", step 3).
+3. Give the owner the title, `<prefix>-n` and the link, in one line. Stop there for that bug.
 
 ### When the base is not configured
 
@@ -200,14 +240,14 @@ leave a backlog that is right.
 | Moment | `Status` | Also write |
 |---|---|---|
 | a session starts fixing it | `In progress` | |
-| the fix is committed | `Fixed (to release)` | `Commit`: the short hash. The commit message cites `FIX-n` |
+| the fix is committed | `Fixed (to release)` | `Commit`: the short hash. The commit message cites `<prefix>-n` |
 | the fix is live | `Released` | `Version`: the version read on the deployed product, never assumed (the `bug-kill` skill, Step 6) |
 | the deployed code already fixes it | `Released` | `Commit`: the commit on `origin/<git.main_branch>`; `Version`: "live since <date of that commit>"; in `Reproduction`, "Closed at the bug kill of <date>: fixed by <commit>." |
 | a real attempt did not reproduce it | `Not reproduced` | in `Reproduction`, what was tried. Never from reading code alone |
 | not a bug, a test report from the team, or nobody remembers what it was | `Dropped` | the reason, in `Reproduction` |
 
-- **Commit message:** `fix(<area>): <what is fixed> (FIX-n)`. Two entries with one cause: one fix, one
-  commit citing both numbers.
+- **Commit message:** `fix(<area>): <what is fixed> (<prefix>-n)`, for example `(FIX-12)` with the
+  default prefix. Two entries with one cause: one fix, one commit citing both IDs.
 - **An entry left `In progress` with no commit** is left over from an interrupted session: it goes
   back to `To fix`.
 - **Adding a line to `Reproduction`:** SQL returns rich text lossy. Read the current value in rows
@@ -234,6 +274,8 @@ WHERE "Status" IN (?, ?, ?)
 
 with `params` such as `["To triage", "To fix", "In progress"]`.
 
+- `n` is the bare number: the entry is cited as `<prefix>-n`, with the `ID prefix` of Support pivot
+  section 3.
 - Option values match exactly, case included. Filters saved on a view are not applied: every filter
   goes in `WHERE`.
 - An empty result is not "no entries" until the data source URL and the option names in the filter
