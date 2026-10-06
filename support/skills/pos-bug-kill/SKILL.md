@@ -1,5 +1,5 @@
 ---
-name: bug-kill
+name: pos-bug-kill
 description: >
   A bug kill session: empty the fix backlog in small batches and ship each batch as a minor fix
   release. Files the in-app bug reports that are not in the backlog yet, re-verifies every entry
@@ -9,14 +9,14 @@ description: >
   entry's ID with the product's own prefix, FIX-n by default), pushes on the owner's explicit go,
   checks what is live, then closes the entries and drafts the messages to the customers who reported
   them. Use when someone says "bug kill", "empty the backlog", "let's kill bugs", "fix session", "fix
-  release", "/bug-kill".
+  release", "/pos-bug-kill".
 ---
 
 # Bug kill
 
 ## Role
 
-The `fix-backlog` skill files one bug at a time. **A bug kill empties the backlog in batches:** one
+The `pos-fix-backlog` skill files one bug at a time. **A bug kill empties the backlog in batches:** one
 session, a batch the owner validates, a minor fix release, and every customer who reported a bug gets
 the message meant for them.
 
@@ -27,7 +27,7 @@ is deployed, the priority, the grouping by area, the release, and the closing of
 A bug kill does not frame an evolution (the Discovery module does) and does not ship a feature (the
 Delivery module does). A bug whose fix is a project of its own (effort L) leaves the bug kill.
 
-Rule numbers refer to the collaboration rules of `product-os-core`, principles to its working
+Rule numbers refer to the collaboration rules of `pos-core`, principles to its working
 principles. They are not repeated here. Sections of the Support pivot are cited by number:
 1 Channels, 2 In-app reports, 3 Areas, 4 The team, 5 Customers to notify, 6 Priority rule, 7 Fix
 releases, 8 Test space. `<main>` below is `git.main_branch`. `<prefix>-n` is a backlog entry's ID:
@@ -71,11 +71,11 @@ In this order, each in full. Nothing else happens before, not even a search in t
 3. **The memory index** and every file in `memory.always`.
 4. **The release path:** when `modules.release_ops` is true, the Release & Operations pivot that
    section 7 points to; otherwise section 7 itself.
-5. **The backlog contract:** the `fix-backlog` skill (its sections "File an entry", "Move and close an
+5. **The backlog contract:** the `pos-fix-backlog` skill (its sections "File an entry", "Move and close an
    entry" and "Reading the backlog") and its schema,
-   `${CLAUDE_PLUGIN_ROOT}/skills/fix-backlog/SKILL.md` and
-   `${CLAUDE_PLUGIN_ROOT}/skills/fix-backlog/references/schema.md`.
-6. **The `tool-conventions` skill:** its rules, the Notion reference, the reference of the tool that
+   `${CLAUDE_PLUGIN_ROOT}/skills/pos-fix-backlog/SKILL.md` and
+   `${CLAUDE_PLUGIN_ROOT}/skills/pos-fix-backlog/references/schema.md`.
+6. **The `pos-tool-conventions` skill:** its rules, the Notion reference, the reference of the tool that
    holds the in-app reports (Supabase when they live there) and, when drafts go to the mailbox, the
    Gmail reference.
 7. **The product's `CLAUDE.md`:** its test space, its evidence folder, its branch policy.
@@ -85,7 +85,7 @@ zone or zones section 3 gives that area, and the area rule in section 3. Plus, w
 them, the files the memory index names for the design system (before any UI change, rule 4), for
 end-to-end tests, and for migrations.
 
-If `reading_gate.skills` lists `bug-kill`, the reading gate holds shell commands and writes until
+If `reading_gate.skills` lists `pos-bug-kill`, the reading gate holds shell commands and writes until
 this is read. Name the pivot and the config there (`pivot:product_support_context.md`,
 `pivot:product.config.json`) so the gate enforces the reading instead of trusting it.
 
@@ -104,13 +104,13 @@ this is read. Name the pivot and the config there (`pivot:product_support_contex
    (Step 2), every fix is made in a temporary worktree based on `origin/<main>` (Step 4), and the
    release ships from that worktree (Step 6). With `git.push_deploys` false, `origin/<main>` is the
    shared reference, not proof of what runs: what runs is read where section 7 says.
-2. **Open entries** of the backlog, with the query of the `fix-backlog` skill ("Reading the backlog"),
+2. **Open entries** of the backlog, with the query of the `pos-fix-backlog` skill ("Reading the backlog"),
    statuses `To triage`, `To fix`, `In progress`. An entry `In progress` with no commit is left over
    from an interrupted session: it goes back to `To fix`. SQL gives each entry's number alone; it is
    cited as `<prefix>-n` with the prefix of section 3.
 3. **In-app reports,** read only, with the query in section 2. Each report absent from the backlog
    (its marker `report:<id>` searched in `Reproduction`, every status included) becomes an entry
-   through the `fix-backlog` skill ("File an entry"): `Source` = `In-app feedback`, `Reported on` =
+   through the `pos-fix-backlog` skill ("File an entry"): `Source` = `In-app feedback`, `Reported on` =
    the report's date, `Reproduction` = the symptom summarised, the page path and the marker,
    `Customer to notify` = the author's CRM record when the author is a customer (sections 4 and 5).
    - **A test report from the team** (section 4 says how to recognise one) becomes a `Dropped`
@@ -131,7 +131,7 @@ A desk check: the code at `origin/<main>`, the git history since `Reported on`, 
   alone, it was missed.
 - **The fetched page gives the entry's full ID,** `<prefix>-n`. When its prefix differs from the one
   in section 3, cite the base's prefix (the one Notion shows and earlier commits carry) and report
-  the difference: the `fix-backlog` skill ("Create or check the base", "When
+  the difference: the `pos-fix-backlog` skill ("Create or check the base", "When
   `databases.fix_backlog` is set") reconciles the pivot.
 - **A UI fix that changes the visible structure** (a top bar, shared headers, what hides, where a
   field lives) is not an ordinary fix: its scope is validated by the owner, then an analysis (every
@@ -150,7 +150,7 @@ Each entry gets one verdict:
 | **Security, cross-tenant leak, data loss** | the risk is plausible | **Stop.** Check yourself, at once, who can really get through (does the row-level policy block it? which role does the path run as?), and tell the owner. Out of the batch, handled on its own with a targeted security audit when the risk is real. A missing application check behind a policy that blocks is a defect, not a leak: say which |
 
 - **A residual found while verifying** (a neighbouring defect, a side effect) becomes **its own
-  entry** (`fix-backlog`, "File an entry", `Source` = `Dev session`), never a line lost inside
+  entry** (`pos-fix-backlog`, "File an entry", `Source` = `Dev session`), never a line lost inside
   another entry.
 - **Every claim about data checks the soft-delete flags** (a deleted flag, a deletion date, an
   archived status): a counted row is not an active row. A bug that "left data behind" may have left
@@ -165,7 +165,7 @@ Each entry gets one verdict:
 - **Questions on vague entries go in one list.** When the owner no longer knows what an entry meant:
   `Dropped`.
 - **Adding evidence to `Reproduction`:** read its current value in rows mode or by fetching the page,
-  then write the full new value (`fix-backlog`, "Move and close an entry").
+  then write the full new value (`pos-fix-backlog`, "Move and close an entry").
 
 ## Step 3: prioritise and propose the batch (Checkpoint 1)
 
@@ -266,7 +266,7 @@ only when:
   (rule 11);
 - the fix needs a product decision.
 
-**A bug met on the way, outside the batch:** an entry (`fix-backlog`, "File an entry", `Source` =
+**A bug met on the way, outside the batch:** an entry (`pos-fix-backlog`, "File an entry", `Source` =
 `Dev session`), never an opportunistic fix.
 
 **Parallel work:** two areas with no file in common may advance in parallel, one agent per area.
@@ -377,7 +377,7 @@ Over the whole batch, then one report:
 - **Customer messages:** one draft per person in `Customer to notify`, and per customer who authored a
   fixed in-app report, following rule 40 and section 5: their language, the direct link to the place
   that was fixed, three factual lines, no apology that nothing establishes. Drafts go to the mailbox
-  when a Gmail tool is callable (`tool-conventions`, Gmail reference), otherwise into the report as
+  when a Gmail tool is callable (`pos-tool-conventions`, Gmail reference), otherwise into the report as
   text. **The owner sends them;** this skill sends nothing.
 - **In-app reports:** list the ones fixed, so the owner can mark them as section 2 says, or note that
   nothing is written back. This skill writes nothing to the store.
@@ -389,9 +389,9 @@ Over the whole batch, then one report:
 ## Stopping before the end
 
 When a batch waits on the owner (Checkpoint 1 or 3), or the context runs short, write a handoff with
-the core `handoff` skill. Its line 1 names `bug-kill`. The state lives in the backlog: the handoff
+the core `pos-handoff` skill. Its line 1 names `pos-bug-kill`. The state lives in the backlog: the handoff
 points to `databases.fix_backlog` and to the entries by `<prefix>-n`, names the worktree by path, and
-lists what waits on the owner, numbered. `orient` lists it as open.
+lists what waits on the owner, numbered. `pos-orient` lists it as open.
 
 ## When something is missing
 
@@ -400,9 +400,9 @@ brought (principle 10).
 
 | Missing | What the bug kill does |
 |---|---|
-| `databases.fix_backlog` empty | stops at Step 1: run the `fix-backlog` skill first ("Create or check the base") |
+| `databases.fix_backlog` empty | stops at Step 1: run the `pos-fix-backlog` skill first ("Create or check the base") |
 | the Support pivot, or one of its sections | names the section, runs the steps that do not need it, and asks the owner only what a step cannot go without (the release path, the test space) |
-| no `ID prefix` in section 3 | takes the prefix from the first entry fetched at Step 2 (its `ID` reads `<prefix>-n`), cites entries with it, and proposes the line for section 3 through the `fix-backlog` skill ("Create or check the base") |
+| no `ID prefix` in section 3 | takes the prefix from the first entry fetched at Step 2 (its `ID` reads `<prefix>-n`), cites entries with it, and proposes the line for section 3 through the `pos-fix-backlog` skill ("Create or check the base") |
 | in-app reports (section 2 says none, or is empty) | skips Step 1.3 and says so |
 | `databases.crm` empty | `Customer to notify` stays empty; the customers to tell are listed in the final report by their account, for the owner |
 | `databases.feedback` empty | no `Source feedback`; open product decisions go to the owner in the report |
@@ -449,13 +449,13 @@ brought (principle 10).
 
 | Skill or module | When | Relation |
 |---|---|---|
-| `fix-backlog` | one bug at a time | fills the backlog; its sections "File an entry" and "Move and close an entry" are the contract every backlog write here follows |
-| `bug-kill` | empty the backlog in batches | this skill |
+| `pos-fix-backlog` | one bug at a time | fills the backlog; its sections "File an entry" and "Move and close an entry" are the contract every backlog write here follows |
+| `pos-bug-kill` | empty the backlog in batches | this skill |
 | Delivery module | an L fix, an evolution | receives what leaves the bug kill; provides the specialist agents |
 | Discovery module | a "bug" that is a product decision | receives, through the owner, the `Dropped` entries worth keeping (`databases.feedback`) |
 | Assurance module | regression suite, audits | owns the tests the fixes leave; its full audit is not run here, and its unhandled findings arrive through the backlog (`Source` = `Audit`) |
 | Release & Operations module | release path, version, release notes | Step 6 follows its pivot when it is installed |
-| `handoff`, `orient` (core) | stopping mid-way, resuming | the handoff's line 1 names `bug-kill`; `orient` lists it while it is open |
+| `pos-handoff`, `pos-orient` (core) | stopping mid-way, resuming | the handoff's line 1 names `pos-bug-kill`; `pos-orient` lists it while it is open |
 
 ## Conventions
 

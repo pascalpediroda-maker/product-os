@@ -1,19 +1,19 @@
 # Support context
 
-Skeleton version 2, maintained by `product-os-support`.
+Skeleton version 2, maintained by `pos-support`.
 
 Copy this file to `<pivots.dir>/product_support_context.md` (by default
 `.claude/product/product_support_context.md`) and fill it before running a skill of the Support
 module. It is the Support pivot: how bugs and reports reach the team, how the fix backlog is
 organised for this product, who counts as a customer and how they are told, how a fix reaches them,
-and where a bug may be reproduced. The `fix-backlog` and `bug-kill` skills read it first.
+and where a bug may be reproduced. The `pos-fix-backlog` and `pos-bug-kill` skills read it first.
 
 ## Who reads it
 
 | Reader | What it takes from here |
 |---|---|
-| `fix-backlog` | the channel a bug came through (1), the report marker (2), the Area list and the ID prefix (3), who is in the team (4), how the customer to notify is found (5) |
-| `bug-kill` | all of it: the in-app reports it files (2), the memory each area loads and the ID prefix its commits cite (3), the customer bonus (4), the messages (5), the priority rule (6), the release path (7), where it reproduces (8) |
+| `pos-fix-backlog` | the channel a bug came through (1), the report marker (2), the Area list and the ID prefix (3), who is in the team (4), how the customer to notify is found (5) |
+| `pos-bug-kill` | all of it: the in-app reports it files (2), the memory each area loads and the ID prefix its commits cite (3), the customer bonus (4), the messages (5), the priority rule (6), the release path (7), where it reproduces (8) |
 | Any session that meets a bug it will not fix now | the Area list (3) and the team (4), to file the entry right |
 
 ## Rules for everything below the separation line
@@ -44,7 +44,7 @@ and where a bug may be reproduced. The `fix-backlog` and `bug-kill` skills read 
 | 3 | Areas | the prefix of the fix backlog's `ID` (unique across the whole Notion workspace), the product's `Area` list for the fix backlog, and for each area the `routing.zones` key whose memory a bug kill loads, plus any rule that area imposes |
 | 4 | The team | who counts as the team, so their reports are not counted as customer reports, and how a test report is recognised |
 | 5 | Customers to notify | how the author of a report is matched to a record in `databases.crm`, how their language is found, how a direct link is built, who sends |
-| 6 | Priority rule | the default rule of the `bug-kill` skill, or this product's override with its reason, and the batch size |
+| 6 | Priority rule | the default rule of the `pos-bug-kill` skill, or this product's override with its reason, and the batch size |
 | 7 | Fix releases | how a minor fix release ships, service by service, how its version is set and read once live; or the pointer to the Release & Operations pivot |
 | 8 | Test space | where a bug may be reproduced and a fix tested, what must never be used, the test accounts |
 
@@ -63,7 +63,7 @@ demo). One row each.
   customer's champion"), never an address that would expose a person.
 - Who reads it: a role.
 - Source in the fix backlog: one of the base's `Source` options (User feedback, Support,
-  Interview / demo, In-app feedback, Audit, E2E, Dev session, Legacy notes). The `fix-backlog` skill
+  Interview / demo, In-app feedback, Audit, E2E, Dev session, Legacy notes). The `pos-fix-backlog` skill
   uses this column to set `Source` on an entry.
 - A channel nobody reads is a finding: say so here.
 -->
@@ -123,12 +123,12 @@ Guidance: the prefix of the fix backlog's IDs, and the product's own list of are
   handoffs and messages cite it that way. Notion keeps a unique ID prefix unique across the whole
   workspace: when another product's fix backlog lives in the same Notion workspace, this product
   cannot take its prefix. The OS default is `FIX`; a second product takes one of its own, for example
-  its initials or `BUG`. The `fix-backlog` skill proposes it when it creates the base, picks another
+  its initials or `BUG`. The `pos-fix-backlog` skill proposes it when it creates the base, picks another
   on a conflict with the owner's OK, and writes the one the base was created with here. On an
   existing base it reads the prefix from an entry and reports a difference with this line, or a
   missing line. The base is the reference: the prefix is final once entries exist.
 - Each area is one option of the fix backlog's `Area` select, and the list here and the options in
-  the base must match (the `fix-backlog` skill compares them).
+  the base must match (the `pos-fix-backlog` skill compares them).
 - Option names: no commas (Notion refuses them), unique regardless of case, and final before the base
   is created or any entry imported. Renaming an option through the connector erases its value on
   every entry that carries it.
@@ -142,7 +142,7 @@ Guidance: the prefix of the fix backlog's IDs, and the product's own list of are
   triage.
 -->
 
-**ID prefix:** <!-- the prefix the base was created with, written by fix-backlog; FIX is the default -->
+**ID prefix:** <!-- the prefix the base was created with, written by pos-fix-backlog; FIX is the default -->
 
 | Area (option in the backlog) | Zone(s) in `routing.zones` | Area rule |
 |---|---|---|
@@ -199,7 +199,7 @@ the core is the rule for a support message; write here only what is specific to 
 ## 6. Priority rule
 
 <!--
-Guidance: the `bug-kill` skill carries the default grid (severity, effort, priority, and the bonus
+Guidance: the `pos-bug-kill` skill carries the default grid (severity, effort, priority, and the bonus
 for a bug a customer reported). Write "Default." unless this product has a reason to differ; then
 write the rule in full and its reason in one sentence.
 - Batch size: the default is small batches (one or two areas, about five bugs), each shipped and

@@ -1,5 +1,5 @@
 {
-  "name": "product-os-support",
+  "name": "pos-support",
   "displayName": "Product OS: Support & Success",
   "description": "Customer Support & Success for the product OS: the fix backlog where every bug not fixed at once is filed, and the bug kill session that empties it into a minor fix release and closes the loop with the customers who reported it.",
   "author": {
@@ -7,7 +7,7 @@
   },
   "license": "MIT",
   "dependencies": [
-    "product-os-core"
+    "pos-core"
   ],
   "keywords": [
     "claude-code",

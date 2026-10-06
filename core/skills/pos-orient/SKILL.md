@@ -1,5 +1,5 @@
 ---
-name: orient
+name: pos-orient
 description: Run at the start of a session, after a compaction, or whenever you cannot say for sure which checkout, branch or task you are on. Reads the product config, the memory index and the routing table, fetches the remote and states where the local work stands against the deployed reference, lists worktrees and open handoffs, and ends with a status-first summary. It reports; it never acts.
 ---
 
@@ -16,7 +16,7 @@ stand now, and reports. It changes nothing.
 
 - No stage, commit, checkout, merge, rebase, reset, stash, pull or push.
 - No removal of a worktree or a branch, not even one this session created. Cleaning is done by the
-  session at the end of its own task (skill `handoff`).
+  session at the end of its own task (skill `pos-handoff`).
 - No fix to memory, config or handoffs. It reports inconsistencies; the work that follows fixes them.
 - No reading of a handoff's body (step 5).
 

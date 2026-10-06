@@ -1,6 +1,6 @@
 # Template: subsystem architecture file
 
-Skeleton version 1, maintained by `product-os-core`.
+Skeleton version 1, maintained by `pos-core`.
 
 **Use.** Copy everything below the separation line into `<memory.dir>/archi-<subsystem>.md`, fill
 it, add its line to `<memory.index>`, and list it under its zone in `routing.zones`. The new file

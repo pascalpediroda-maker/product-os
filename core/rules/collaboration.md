@@ -297,6 +297,14 @@ turned into alternatives to choose from.
   unauthorised edits at once.
 - The owner pointing at a problem to fix is the go: act. A decision already taken is not
   re-confirmed, and a binary choice stays binary (no third option).
+- **What the owner proposes to do, or has already asked for, is the go.** "I propose X", or "you can
+  create everything here", covers its whole natural scope: do it, never ask the owner to confirm it
+  again or turn it back into a decision. A defect you see in it is said while doing the corrected
+  version. Where a skill cannot cover part of the request (no schema, no module), say so and propose
+  the way, without asking the owner to repeat the request. Observed: the owner proposed a naming
+  convention, and the session answered with a numbered decision asking him to confirm his own
+  proposal; asked to "create everything here" in Notion, a session created one base, then asked
+  whether the owner wanted the others.
 - Successive inputs enrich; they do not replace. Place each one at its level (category, ambition,
   value) and don't manufacture an opposition.
 

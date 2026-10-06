@@ -1,6 +1,6 @@
 # Template: reference file
 
-Skeleton version 1, maintained by `product-os-core`.
+Skeleton version 1, maintained by `pos-core`.
 
 **Use.** Copy everything below the separation line into `<memory.dir>/reference_<topic>.md`, fill
 it, add its line to `<memory.index>`, and list it under every zone of `routing.zones` that needs it.

@@ -2,7 +2,7 @@
 
 The fix backlog is the shared base where a bug that is not fixed in the session that sees it is
 written down, so a bug kill session can empty it in batches (core principle 8, collaboration
-rule 20). The Support module owns it: the `fix-backlog` skill creates it in Notion when
+rule 20). The Support module owns it: the `pos-fix-backlog` skill creates it in Notion when
 `databases.fix_backlog` is empty and the owner says yes, and checks an existing base against this
 schema (its section "Create or check the base").
 
@@ -15,7 +15,7 @@ first one's. The prefix is chosen with the owner when the base is created, recor
 pivot, section 3 (`ID prefix`), and every entry reads `<prefix>-n`. `FIX` is only the default: with
 it, entries read `FIX-1`, `FIX-2`...; a product that took `BUG` reads `BUG-1`, `BUG-2`...
 
-A base created earlier by the core `setup` skill has this same schema: nothing to migrate.
+A base created earlier by the core `pos-setup` skill has this same schema: nothing to migrate.
 
 ## Properties
 
@@ -24,12 +24,12 @@ A base created earlier by the core `setup` skill has this same schema: nothing t
 | `Bug` | title | one line: what the user sees go wrong |
 | `ID` | unique ID, with the product's prefix | numbered by Notion (`<prefix>-1`, `<prefix>-2`...); the prefix is recorded in Support pivot section 3, `FIX` by default; commits and messages cite `<prefix>-n` |
 | `Status` | select | `To triage`, `To fix`, `In progress`, `Fixed (to release)`, `Released`, `Not reproduced`, `Dropped` |
-| `Severity` | select | `Blocker`, `Major`, `Minor`, `Cosmetic`; definitions in the `bug-kill` skill, Step 3 |
+| `Severity` | select | `Blocker`, `Major`, `Minor`, `Cosmetic`; definitions in the `pos-bug-kill` skill, Step 3 |
 | `Priority` | select | `P0`, `P1`, `P2`, `P3`; set only by a bug kill, when the owner validates the batch |
 | `Area` | select | the product's own list of areas: the Support pivot, section 3 |
 | `Source` | select | `User feedback`, `Support`, `Interview / demo`, `In-app feedback`, `Audit`, `E2E`, `Dev session`, `Legacy notes` |
 | `Users affected` | number | how many users are known to hit it |
-| `Effort` | select | `XS`, `S`, `M`, `L`; definitions in the `bug-kill` skill, Step 3 |
+| `Effort` | select | `XS`, `S`, `M`, `L`; definitions in the `pos-bug-kill` skill, Step 3 |
 | `Reproduction` | text | the steps, the account or space used (the team's test space, never a customer's), what is expected, what happens; for an in-app report, its marker `report:<id>` |
 | `Reported on` | date | when it was first reported |
 | `Source feedback` | relation to the base in `databases.feedback`, two-way | only when that base is configured |
@@ -42,7 +42,7 @@ A base created earlier by the core `setup` skill has this same schema: nothing t
 
 | Status | Means | Set by |
 |---|---|---|
-| `To triage` | filed, not verified yet | whoever files it (`fix-backlog`, "File an entry") |
+| `To triage` | filed, not verified yet | whoever files it (`pos-fix-backlog`, "File an entry") |
 | `To fix` | verified against the deployed reference: still present, to reproduce, or taken over by ongoing work (then out of the batch) | a bug kill, Step 2 |
 | `In progress` | a session is fixing it now | the session that starts the fix |
 | `Fixed (to release)` | fixed and committed, not live yet | the session that commits the fix |
@@ -152,7 +152,7 @@ CREATE TABLE (
 - `Reproduction` is rich text: SQL returns it lossy (mentions, links and formatting can be missing).
   Read it in rows mode, or fetch the page, before relying on it or rewriting it.
 
-The rest of the connector's behaviour is in the `tool-conventions` skill, Notion reference.
+The rest of the connector's behaviour is in the `pos-tool-conventions` skill, Notion reference.
 
 ## When the base already exists
 

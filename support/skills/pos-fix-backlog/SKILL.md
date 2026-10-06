@@ -1,5 +1,5 @@
 ---
-name: fix-backlog
+name: pos-fix-backlog
 description: >
   The product's fix backlog in Notion: the one place a bug goes when it is not fixed in the session
   that sees it. Creates the base with the OS schema when `databases.fix_backlog` is empty (parent page,
@@ -13,16 +13,16 @@ description: >
   the backlog through this contract. Use when someone says "note this bug", "put it in the backlog",
   "file it", "we'll fix it later", "create the fix backlog", "check the fix backlog", "close FIX-12"
   (FIX is the default prefix; a product may have its own, such as "close BUG-12"), or when a session
-  meets a bug it will not fix now. "/fix-backlog".
+  meets a bug it will not fix now. "/pos-fix-backlog".
 ---
 
 # Fix backlog
 
 A bug noted in a conversation is a bug lost. The fix backlog is where it goes instead, with enough to
-pick it up later without rediscovering it, and a bug kill session (the `bug-kill` skill) empties it
+pick it up later without rediscovering it, and a bug kill session (the `pos-bug-kill` skill) empties it
 in batches.
 
-Rule numbers refer to the collaboration rules of `product-os-core`, principles to its working
+Rule numbers refer to the collaboration rules of `pos-core`, principles to its working
 principles. They are not repeated here. Collaboration rule 20 and principle 8 are the reason this
 skill exists.
 
@@ -53,7 +53,7 @@ product's prefix (`FIX-12` with the default, `BUG-12` for a product that took `B
   option list rewritten on a base that holds entries, no `ID` prefix changed.
 - **Create the base with a prefix the owner has not approved,** even after a conflict.
 - **Search for a likely base and write into it** when `databases.fix_backlog` is empty
-  (`tool-conventions` rule 5).
+  (`pos-tool-conventions` rule 5).
 - **Push.** It commits what it wrote to the repository, by name.
 
 ## Read first
@@ -65,7 +65,7 @@ product's prefix (`FIX-12` with the default, `BUG-12` for a product that took `B
    filing one. Missing or still empty: say so. Creating the base then takes the Area list and the
    prefix from the owner; filing an entry takes the areas from the base's own options and the prefix
    from the entry it reads back.
-3. **The `tool-conventions` skill**: its rules, then its Notion reference in full, before the first
+3. **The `pos-tool-conventions` skill**: its rules, then its Notion reference in full, before the first
    Notion call of the session.
 4. **The schema**: [references/schema.md](references/schema.md).
 
@@ -81,8 +81,8 @@ product's prefix (`FIX-12` with the default, `BUG-12` for a product that took `B
 
 ### When `databases.fix_backlog` is empty
 
-**Before anything:** a Notion tool must be callable in this session (`tool-conventions` rule 4). If
-none is, say so and hand over to the core `setup` skill, which connects Notion. Until the base exists,
+**Before anything:** a Notion tool must be callable in this session (`pos-tool-conventions` rule 4). If
+none is, say so and hand over to the core `pos-setup` skill, which connects Notion. Until the base exists,
 a bug goes into a handoff ("File an entry", last part).
 
 If `modules.support` is false, say that the config does not declare the Support module, and propose
@@ -123,7 +123,7 @@ If `modules.support` is false, say that the config does not declare the Support 
    fetch-back reads `<prefix>-1`.
 6. **Write `databases.fix_backlog`** in the config: show the diff (key, now, proposed, from where),
    and on the OK write the whole file once, strict JSON, key order and two-space indentation kept,
-   then check that it parses. The core `setup` skill writes the config the same way (its Step 6).
+   then check that it parses. The core `pos-setup` skill writes the config the same way (its Step 6).
 7. **Write Support pivot section 3,** below the separation line: the `ID prefix` line with the prefix
    the base was created with, and, if section 3 did not hold the Area list, the table: each area with
    the `routing.zones` key it loads, left empty where the owner has not said. Show the diff, write it
@@ -151,7 +151,7 @@ Create nothing.
    differently, an area in the base and not in the pivot, or the reverse, a prefix that differs or
    is missing from the pivot.
 5. Change nothing without the owner's go. An option that entries carry is never renamed through the
-   connector: the `tool-conventions` Notion reference (section 4) says how a rename keeps its values.
+   connector: the `pos-tool-conventions` Notion reference (section 4) says how a rename keeps its values.
    The base's `ID` prefix is never changed to match the pivot.
 
 ---
@@ -167,7 +167,7 @@ Create nothing.
 - Something remains after a fix: another occurrence, a neighbouring defect, a missing test. One entry
   each (rule 20).
 - An audit finding or a red end-to-end test is not fixed at once.
-- A bug kill files the in-app reports that are not in the backlog yet (the `bug-kill` skill, Step 1).
+- A bug kill files the in-app reports that are not in the backlog yet (the `pos-bug-kill` skill, Step 1).
 
 ### First, search
 
@@ -194,7 +194,7 @@ Then:
 | `Status` | `To triage` |
 | `Area` | one of the base's options (the list of Support pivot section 3). When no area fits, `Other`: the bug kill corrects it |
 | `Source` | where it came from: the option Support pivot section 1 gives that channel, or the schema reference's table "Where an entry comes from" |
-| `Severity` | only if known, by the grid of the `bug-kill` skill (Step 3); otherwise empty, the bug kill sets it |
+| `Severity` | only if known, by the grid of the `pos-bug-kill` skill (Step 3); otherwise empty, the bug kill sets it |
 | `Priority` | empty: only a bug kill sets it, once the owner validates the batch |
 | `Effort` | only if known, by the same grid |
 | `Users affected` | a number, only if known |
@@ -215,9 +215,9 @@ Then:
 
 ### Create, read back, report
 
-1. Announce the write (`tool-conventions` rule 2), then create the page with the data source as its
+1. Announce the write (`pos-tool-conventions` rule 2), then create the page with the data source as its
    parent.
-2. Fetch it back (`tool-conventions` rule 7) and read the ID Notion gave it. The fetched page gives
+2. Fetch it back (`pos-tool-conventions` rule 7) and read the ID Notion gave it. The fetched page gives
    it whole, `<prefix>-n`; in SQL, the column `"userDefined:ID"` gives only the number. The number
    cannot be written, only read. A prefix that differs from the `ID prefix` of Support pivot
    section 3, or a section 3 that holds none, is said in the report ("Create or check the base",
@@ -227,7 +227,7 @@ Then:
 ### When the base is not configured
 
 Say "`databases.fix_backlog` is not configured." Write the entry, with the same fields, into a
-handoff (the core `handoff` skill) so another session picks it up, and offer to create the base
+handoff (the core `pos-handoff` skill) so another session picks it up, and offer to create the base
 ("Create or check the base"). Never leave it only in the conversation.
 
 ---
@@ -241,7 +241,7 @@ leave a backlog that is right.
 |---|---|---|
 | a session starts fixing it | `In progress` | |
 | the fix is committed | `Fixed (to release)` | `Commit`: the short hash. The commit message cites `<prefix>-n` |
-| the fix is live | `Released` | `Version`: the version read on the deployed product, never assumed (the `bug-kill` skill, Step 6) |
+| the fix is live | `Released` | `Version`: the version read on the deployed product, never assumed (the `pos-bug-kill` skill, Step 6) |
 | the deployed code already fixes it | `Released` | `Commit`: the commit on `origin/<git.main_branch>`; `Version`: "live since <date of that commit>"; in `Reproduction`, "Closed at the bug kill of <date>: fixed by <commit>." |
 | a real attempt did not reproduce it | `Not reproduced` | in `Reproduction`, what was tried. Never from reading code alone |
 | not a bug, a test report from the team, or nobody remembers what it was | `Dropped` | the reason, in `Reproduction` |
@@ -254,7 +254,7 @@ leave a backlog that is right.
   mode, or fetch the page, then write the full new value built from that read. Never rebuild it from
   a SQL result.
 - **At release, the customer:** each person in `Customer to notify` gets a draft message, and the
-  owner sends it (collaboration rule 40, Support pivot section 5, the `tool-conventions` Gmail
+  owner sends it (collaboration rule 40, Support pivot section 5, the `pos-tool-conventions` Gmail
   reference when a Gmail tool is callable). A bug kill drafts them in batch (its Step 7); an entry
   closed outside a bug kill is drafted the same way.
 
@@ -283,4 +283,4 @@ with `params` such as `["To triage", "To fix", "In progress"]`.
 - `Reproduction` and an entry's body (captures, the owner's notes) are read by fetching the page. SQL
   is enough to list and filter, not to read an entry in full.
 
-Everything else about the connector is in the `tool-conventions` skill, Notion reference.
+Everything else about the connector is in the `pos-tool-conventions` skill, Notion reference.

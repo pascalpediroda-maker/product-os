@@ -1,6 +1,6 @@
 # <product.name>
 
-Skeleton version 1, maintained by `product-os-core`.
+Skeleton version 1, maintained by `pos-core`.
 
 Copy this file to the root of the product repository. It holds the rules that apply to all work on
 the product and must always be in context. The product itself (name, installed modules, memory
@@ -25,7 +25,7 @@ and the path of the two files.
 The product's own rules are below the separation line. Where one of them changes an OS rule, it is
 recorded under "Product OS: standing choices of the owner", naming the rule it changes, and it wins
 for this product. A product rule that contradicts the OS without being recorded there is a conflict:
-the session follows the OS rule and names it, and the `setup` skill helps resolve it.
+the session follows the OS rule and names it, and the `pos-setup` skill helps resolve it.
 
 ## Where knowledge lives
 

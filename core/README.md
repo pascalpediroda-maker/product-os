@@ -1,7 +1,7 @@
-# product-os-core: Foundation + Domain
+# pos-core: Foundation + Domain
 
 To install it and get started, follow "Start here" in the [root README](../README.md): add the
-marketplace, install, open a new session, run `/setup`.
+marketplace, install, open a new session, run `/pos-setup`.
 
 The core is always installed. Every product function (Discovery, Design, Delivery, Assurance, Support & Success, Release & Operations, Go-to-Market) is an optional plugin that depends on it.
 
@@ -22,12 +22,12 @@ It guarantees three things:
 | Session rules | `hooks/session-rules.mjs` | at session start, injects a digest of the rules built from the config (where a deferred bug goes, who pushes, where memory is read), whatever the product's own CLAUDE.md says |
 | Reading gate | `hooks/reading-gate.mjs` | a gated skill cannot run a shell or write a file before it has read the files the config requires |
 | Guards | `hooks/guard-destructive-git.mjs`, `hooks/guard-destructive-delete.mjs` | ask before commands that destroy work: reset to the remote, force push, worktree or branch removal, recursive deletes, a push that deploys |
-| `setup` | `skills/setup/` | the first skill a new product runs: templates in place, an existing CLAUDE.md reconciled with the OS rules, the connectors it needs (Notion, Supabase, Amplitude, Gmail) created, signed in with least privilege and tested, credentials kept out of the repository, the config filled |
-| `guide` | `skills/guide/` | the tour for this product: which skill to start a session with, what each calls, the agents by trade, where to begin, with one recommendation. Its catalog (`references/catalog.md`) maps every skill and agent of the OS, installed or planned; a plugin that ships updates it in the same commit |
-| `tool-conventions` | `skills/tool-conventions/` | how to use each connected tool without breaking anything, one reference per tool, every fact checked on the vendor's documentation |
-| `orient` | `skills/orient/` | where things stand, re-read from what is written and from git, never recalled |
-| `handoff` | `skills/handoff/` | a handoff that starts with the reading order and carries state, not story |
-| `domain-onboarding` | `skills/domain-onboarding/`, `agents/unit-*.md` | a new unit of the trade enters as data: analyse, integrate, calibrate, activate |
+| `pos-setup` | `skills/pos-setup/` | the first skill a new product runs: templates in place, an existing CLAUDE.md reconciled with the OS rules, the connectors it needs (Notion, Supabase, Amplitude, Gmail) created, signed in with least privilege and tested, credentials kept out of the repository, the config filled |
+| `pos-guide` | `skills/pos-guide/` | the tour for this product: which skill to start a session with, what each calls, the agents by trade, where to begin, with one recommendation. Its catalog (`references/catalog.md`) maps every skill and agent of the OS, installed or planned; a plugin that ships updates it in the same commit |
+| `pos-tool-conventions` | `skills/pos-tool-conventions/` | how to use each connected tool without breaking anything, one reference per tool, every fact checked on the vendor's documentation |
+| `pos-orient` | `skills/pos-orient/` | where things stand, re-read from what is written and from git, never recalled |
+| `pos-handoff` | `skills/pos-handoff/` | a handoff that starts with the reading order and carries state, not story |
+| `pos-domain` | `skills/pos-domain/`, `agents/unit-*.md` | a new unit of the trade enters as data: analyse, integrate, calibrate, activate |
 
 ## Function plugins
 
@@ -35,17 +35,17 @@ Installed on top of the core, from the same marketplace, each switched on by its
 
 | Plugin | Function | What it carries |
 |---|---|---|
-| `product-os-support` | Customer Support & Success (`modules.support`) | the fix backlog base and its schema (`fix-backlog`), the bug kill session that empties it into a minor fix release (`bug-kill`), the Support pivot |
+| `pos-support` | Customer Support & Success (`modules.support`) | the fix backlog base and its schema (`pos-fix-backlog`), the bug kill session that empties it into a minor fix release (`pos-bug-kill`), the Support pivot |
 
 ## Fill these first
 
-Copy the templates into your product repository, then fill them before running any skill. The `setup` skill does the copying for you.
+Copy the templates into your product repository, then fill them before running any skill. The `pos-setup` skill does the copying for you.
 
 | File | Where it goes | What it holds |
 |---|---|---|
 | `templates/product/product.config.json` | `.claude/product/product.config.json` | the product, the installed modules and libraries, the memory routing table, the reading gate, the database IDs |
 | `templates/product/product_domain_context.md` | `.claude/product/product_domain_context.md` | the domain in one page, the official glossary, the phases of the user's work, the judges' criteria, the units and their coverage |
-| `templates/CLAUDE.md` | repository root, only when the product has none | rules that apply to all work. An existing CLAUDE.md is kept and reconciled by `setup` |
+| `templates/CLAUDE.md` | repository root, only when the product has none | rules that apply to all work. An existing CLAUDE.md is kept and reconciled by `pos-setup` |
 | `templates/memory/MEMORY.md` | `.claude/memory/MEMORY.md` | the index, one line per memory file |
 | `templates/memory/*.md` | `.claude/memory/` | the shapes of a subsystem architecture file and of a reference file |
 
@@ -82,7 +82,7 @@ A skill that is not listed under `reading_gate.skills` is not gated.
 
 ## How the hooks behave
 
-- **The OS rules reach every session.** At the start of a new, cleared or compacted session, the session-rules hook injects a digest built from the config. Where the product's CLAUDE.md says otherwise on a subject the config settles (a deferred bug, a push, memory), the OS rule applies and the session names the conflict once; a choice the owner recorded in CLAUDE.md under "Product OS: standing choices of the owner" wins, and the owner's word in the conversation wins over everything. Without a config, the hook says only, and only if the repository enabled the core in its own settings, that the OS is not set up and that `setup` is next.
+- **The OS rules reach every session.** At the start of a new, cleared or compacted session, the session-rules hook injects a digest built from the config. Where the product's CLAUDE.md says otherwise on a subject the config settles (a deferred bug, a push, memory), the OS rule applies and the session names the conflict once; a choice the owner recorded in CLAUDE.md under "Product OS: standing choices of the owner" wins, and the owner's word in the conversation wins over everything. Without a config, the hook says only, and only if the repository enabled the core in its own settings, that the OS is not set up and that `pos-setup` is next.
 - **The reading gate needs the config.** Without `.claude/product/product.config.json`, or with an unknown `schema_version`, it does nothing and logs why.
 - **The guards protect everywhere.** The destructive git rules and the delete guard apply with or without a config. The config only refines them: `git.main_branch` names the protected branch, and the confirmation before a push to it applies when `git.push_deploys` is true.
 - **A read counts wherever the work happens.** A file read in any worktree of the same repository counts, matched by its path relative to `memory.dir` or `pivots.dir`. A file read in another repository does not.

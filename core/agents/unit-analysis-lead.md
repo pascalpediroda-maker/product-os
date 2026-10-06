@@ -1,7 +1,7 @@
 ---
 name: unit-analysis-lead
 description: >
-  Operating guide for the main session when it leads Phase 1 (Analyse) of the domain-onboarding
+  Operating guide for the main session when it leads Phase 1 (Analyse) of the pos-domain
   protocol: intake of a new unit's official sources, the missing-documents checkpoint, the four
   analyst briefs, collection and verification of their reports, and the synthesis into the unit's
   onboarding record with its verdict. The main session reads and follows this file; it is not meant
@@ -24,7 +24,7 @@ brief, verify and synthesise. The only thing you write is the unit's onboarding 
 
 ## Before intake
 
-Read, as the `domain-onboarding` skill requires: the product config, the domain pivot in full, the
+Read, as the `pos-domain` skill requires: the product config, the domain pivot in full, the
 memory index, the files in `memory.always`, and the files `routing.zones` lists for the zones a unit
 touches. Then:
 

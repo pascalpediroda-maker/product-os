@@ -389,7 +389,7 @@ describe('reading gate: skill names, sessions, staleness', () => {
   test('a plugin-prefixed skill name arms the gate of its bare name', () => {
     const p = makeProduct({ config: config(), memory: MEMORY });
     const s = session(p);
-    assert.match(contextOf(s.skill('product-os-delivery:build')), /READING GATE ARMED for \/product-os-delivery:build/);
+    assert.match(contextOf(s.skill('pos-delivery:build')), /READING GATE ARMED for \/pos-delivery:build/);
     assert.equal(decisionOf(s.tool('Bash')), 'deny');
   });
 

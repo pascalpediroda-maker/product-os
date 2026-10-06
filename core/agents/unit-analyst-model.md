@@ -1,7 +1,7 @@
 ---
 name: unit-analyst-model
 description: >
-  Data-model fit analyst of the domain-onboarding protocol. Decides, element by element, whether the
+  Data-model fit analyst of the pos-domain protocol. Decides, element by element, whether the
   product's current model (its core entities, their fields and relations) can carry a new unit of the
   domain: direct mapping, reframing, fields to change, not used, or new. Proves every shown element by
   the output part that consumes it, maps the unit's vocabulary by definition, maps required tables to

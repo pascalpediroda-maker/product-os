@@ -1,5 +1,5 @@
 ---
-name: tool-conventions
+name: pos-tool-conventions
 description: >
   How to use the connected tools (Notion, Supabase, Amplitude, Gmail) without breaking anything. Read
   the tool's reference before the first call to that tool in a session: Notion before any search,

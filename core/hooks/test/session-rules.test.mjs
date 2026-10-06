@@ -23,18 +23,18 @@ const baseConfig = (over = {}) => ({
 const start = (p, source = 'startup') => runHook(SCRIPT, { session_id: 's1', cwd: p.root, source, hook_event_name: 'SessionStart' }, p.env);
 
 describe('session rules: with a product config', () => {
-  test('injects the digest with the fix-backlog rule when the backlog is configured', () => {
+  test('injects the digest with the pos-fix-backlog rule when the backlog is configured', () => {
     const p = makeProduct({ config: baseConfig() });
     const r = start(p);
     assert.equal(r.status, 0);
     assert.equal(r.json.hookSpecificOutput.hookEventName, 'SessionStart');
     const ctx = contextOf(r);
     assert.match(ctx, /PRODUCT OS RULES for Acme/);
-    assert.match(ctx, /`fix-backlog` skill/);
+    assert.match(ctx, /`pos-fix-backlog` skill/);
     assert.match(ctx, /notes file/);
     assert.match(ctx, /push to `main` ships to production/);
     assert.match(ctx, /\.claude\/memory\/MEMORY\.md/);
-    assert.match(ctx, /`orient`/);
+    assert.match(ctx, /`pos-orient`/);
   });
 
   test('names the conflict rule and the recorded owner exception', () => {
@@ -49,13 +49,13 @@ describe('session rules: with a product config', () => {
     const p = makeProduct({ config: baseConfig({ databases: { fix_backlog: '' } }) });
     const ctx = contextOf(start(p));
     assert.match(ctx, /not configured yet/);
-    assert.match(ctx, /offer the `fix-backlog` skill/);
+    assert.match(ctx, /offer the `pos-fix-backlog` skill/);
   });
 
-  test('support off: no fix-backlog skill named, bug still kept out of the conversation', () => {
+  test('support off: no pos-fix-backlog skill named, bug still kept out of the conversation', () => {
     const p = makeProduct({ config: baseConfig({ modules: { support: false } }) });
     const ctx = contextOf(start(p));
-    assert.doesNotMatch(ctx, /`fix-backlog` skill/);
+    assert.doesNotMatch(ctx, /`pos-fix-backlog` skill/);
     assert.match(ctx, /never left only in the\s+conversation/);
   });
 
@@ -110,17 +110,17 @@ describe('session rules: without a usable config', () => {
   test('no config, core enabled in the repository: one line naming setup', () => {
     const p = makeProduct({
       config: null,
-      files: { '.claude/settings.json': JSON.stringify({ enabledPlugins: { 'product-os-core@product-os': true } }) },
+      files: { '.claude/settings.json': JSON.stringify({ enabledPlugins: { 'pos-core@product-os': true } }) },
     });
     const ctx = contextOf(start(p));
     assert.match(ctx, /not set up yet/);
-    assert.match(ctx, /`setup` skill/);
+    assert.match(ctx, /`pos-setup` skill/);
   });
 
   test('no config, core enabled in settings.local.json: same nudge', () => {
     const p = makeProduct({
       config: null,
-      files: { '.claude/settings.local.json': JSON.stringify({ enabledPlugins: { 'product-os-core@product-os': true } }) },
+      files: { '.claude/settings.local.json': JSON.stringify({ enabledPlugins: { 'pos-core@product-os': true } }) },
     });
     assert.match(contextOf(start(p)), /not set up yet/);
   });
@@ -133,7 +133,7 @@ describe('session rules: without a usable config', () => {
   test('no config, core disabled in the repository: silent', () => {
     const p = makeProduct({
       config: null,
-      files: { '.claude/settings.json': JSON.stringify({ enabledPlugins: { 'product-os-core@product-os': false } }) },
+      files: { '.claude/settings.json': JSON.stringify({ enabledPlugins: { 'pos-core@product-os': false } }) },
     });
     assert.equal(start(p).stdout, '');
   });
@@ -170,6 +170,6 @@ describe('session rules: the product root', () => {
   test('a host CLAUDE.md does not change what is injected', () => {
     const p = makeProduct({ config: baseConfig() });
     writeFiles(p.root, { 'CLAUDE.md': '# Rules\nA bug not fixed is written in NOTES-BUGS.txt.\n' });
-    assert.match(contextOf(start(p)), /`fix-backlog` skill/);
+    assert.match(contextOf(start(p)), /`pos-fix-backlog` skill/);
   });
 });

@@ -6,11 +6,11 @@
   },
   "plugins": [
     {
-      "name": "product-os-core",
+      "name": "pos-core",
       "source": "./core"
     },
     {
-      "name": "product-os-support",
+      "name": "pos-support",
       "source": "./support"
     }
   ]

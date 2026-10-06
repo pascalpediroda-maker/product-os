@@ -1,18 +1,18 @@
-# product-os-support: Customer Support & Success
+# pos-support: Customer Support & Success
 
-The Support & Success function of the product OS. It depends on `product-os-core` and is switched on
+The Support & Success function of the product OS. It depends on `pos-core` and is switched on
 by `modules.support: true` in the product config.
 
 ## Install
 
 ```
 claude plugin marketplace add pascalpediroda-maker/product-os --scope project
-claude plugin install product-os-support@product-os --scope project
+claude plugin install pos-support@product-os --scope project
 ```
 
 The core is installed with it if it is not there yet. Then open a new session in the product
-repository and run `/setup`: it sets `modules.support`, connects Notion and hands over to
-`fix-backlog` to create the base. `marketplace update` only works once the marketplace has been
+repository and run `/pos-setup`: it sets `modules.support`, connects Notion and hands over to
+`pos-fix-backlog` to create the base. `marketplace update` only works once the marketplace has been
 added. The full sequence and the choice of scope are in the [root README](../README.md).
 
 ## What it guarantees
@@ -31,16 +31,16 @@ added. The full sequence and the choice of scope are in the [root README](../REA
 | Piece | Where | What it does |
 |---|---|---|
 | Support pivot | `templates/product_support_context.md` | the product's support facts: channels, in-app reports and the query that lists them, the fix backlog's ID prefix, the `Area` list and the memory each area loads, who is the team, how a customer is told, the priority rule, how a fix release ships and is read once live, where bugs are reproduced |
-| `fix-backlog` | `skills/fix-backlog/` | creates the fix backlog base in Notion, or checks an existing one; files an entry after searching for a duplicate; moves and closes entries. The base every other support skill reads and writes |
-| The schema | `skills/fix-backlog/references/schema.md` | the backlog's properties, statuses, sources, the creation statement, and the Notion traps that bite on creation |
-| `bug-kill` | `skills/bug-kill/` | a session that verifies the backlog against the deployed reference, proposes a batch, fixes it area by area in RED -> GREEN -> REFACTOR, ships a minor fix release on a go, and closes the loop |
+| `pos-fix-backlog` | `skills/pos-fix-backlog/` | creates the fix backlog base in Notion, or checks an existing one; files an entry after searching for a duplicate; moves and closes entries. The base every other support skill reads and writes |
+| The schema | `skills/pos-fix-backlog/references/schema.md` | the backlog's properties, statuses, sources, the creation statement, and the Notion traps that bite on creation |
+| `pos-bug-kill` | `skills/pos-bug-kill/` | a session that verifies the backlog against the deployed reference, proposes a batch, fixes it area by area in RED -> GREEN -> REFACTOR, ships a minor fix release on a go, and closes the loop |
 
 ## Fill these first
 
 | What | Where | How |
 |---|---|---|
 | The Support pivot | `<pivots.dir>/product_support_context.md` (by default `.claude/product/`) | copy `templates/product_support_context.md` and fill it below the separation line. The pivot of a function is named `product_<function>_context.md` in `pivots.dir` |
-| The fix backlog base | `databases.fix_backlog` | run the `fix-backlog` skill: it creates the base with the owner's parent page, Area list and ID prefix, then writes the key and the prefix through a shown diff. The prefix is unique across the Notion workspace: a second product whose backlog shares a workspace with another takes its own (`FIX` is only the default). A base that already exists is checked, not recreated |
+| The fix backlog base | `databases.fix_backlog` | run the `pos-fix-backlog` skill: it creates the base with the owner's parent page, Area list and ID prefix, then writes the key and the prefix through a shown diff. The prefix is unique across the Notion workspace: a second product whose backlog shares a workspace with another takes its own (`FIX` is only the default). A base that already exists is checked, not recreated |
 | The module switch | `modules.support: true` | in the product config |
 
 Worth filling too:
@@ -53,7 +53,7 @@ Worth filling too:
   ```json
   "reading_gate": {
     "skills": {
-      "bug-kill": {
+      "pos-bug-kill": {
         "require": ["pivot:product_support_context.md", "pivot:product.config.json"],
         "min_reads": 4
       }
@@ -73,16 +73,16 @@ may change. Below it: the product's content, which an update never overwrites.
 | Gmail, optional | customer drafts in the owner's mailbox; without it, drafts come as text |
 | Analytics, optional | a customer's language and a user's real journey |
 
-The core `setup` skill connects them; the core `tool-conventions` skill says how each is used.
+The core `pos-setup` skill connects them; the core `pos-tool-conventions` skill says how each is used.
 
 ## How it fits with the core
 
-- **`setup` hands over to `fix-backlog`.** Setup connects Notion and fills the config; the Support
+- **`pos-setup` hands over to `pos-fix-backlog`.** Setup connects Notion and fills the config; the Support
   module owns its base, so the creation of the fix backlog and its schema live here.
-- **`orient` lists open handoffs.** A bug kill that stops at a checkpoint writes a handoff through the
-  core `handoff` skill, whose line 1 names `bug-kill`; `orient` shows it until it is closed.
+- **`pos-orient` lists open handoffs.** A bug kill that stops at a checkpoint writes a handoff through the
+  core `pos-handoff` skill, whose line 1 names `pos-bug-kill`; `pos-orient` shows it until it is closed.
 - **Collaboration rule 20** ("what is not done now goes to the backlog") is carried out by
-  `fix-backlog`: any session, in any module, that meets a bug it will not fix now files it there.
+  `pos-fix-backlog`: any session, in any module, that meets a bug it will not fix now files it there.
 - **The collaboration rules and principles of the core apply everywhere here.** The skills cite them
   by number and do not repeat them.
 

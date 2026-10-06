@@ -1,18 +1,18 @@
 # Domain context
 
-Skeleton version 1, maintained by `product-os-core`.
+Skeleton version 1, maintained by `pos-core`.
 
 Copy this file to `<pivots.dir>/<pivots.domain>` (by default `.claude/product/product_domain_context.md`)
 and fill it before running any skill. It is the domain pivot: the knowledge of the users' trade,
 written once, then read by product decisions, by the configuration of each unit and by the product's
-AI. The skill `domain-onboarding` reads it first and updates it at the end of every unit it integrates.
+AI. The skill `pos-domain` reads it first and updates it at the end of every unit it integrates.
 
 ## Who reads it
 
 | Reader | What it takes from here |
 |---|---|
 | Every session, before domain work | the domain in one page, the glossary, the phases of the user's work |
-| `domain-onboarding` and its analysts | how a unit lives in the product, the units and their coverage, the references, the ground truth |
+| `pos-domain` and its analysts | how a unit lives in the product, the units and their coverage, the references, the ground truth |
 | Product decisions (Discovery, Design) | the phases of the user's work, the judges' criteria, the coverage map |
 | Configuration work (Delivery) | the glossary, how a unit lives in the product |
 | The product's AI (prompts, knowledge base) | the glossary, the judges' criteria, the knowledge base document types |

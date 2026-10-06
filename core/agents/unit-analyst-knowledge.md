@@ -1,7 +1,7 @@
 ---
 name: unit-analyst-knowledge
 description: >
-  Knowledge-base analyst of the domain-onboarding protocol. Plans what the product's AI must know about
+  Knowledge-base analyst of the pos-domain protocol. Plans what the product's AI must know about
   a new unit: which official documents go into the domain knowledge base, under which document type,
   what is already there, with exact ingestion commands (not run); writes the unit's sheet for the
   product's assistant; and drafts the updates of the domain pivot (verbatim glossary entries, criteria,

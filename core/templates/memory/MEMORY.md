@@ -1,6 +1,6 @@
 # Memory index
 
-Skeleton version 1, maintained by `product-os-core`.
+Skeleton version 1, maintained by `pos-core`.
 
 Copy this file to `<memory.dir>/<memory.index>` (by default `.claude/memory/MEMORY.md`). It is the
 index of the repo memory: a session reads it to decide which files to open. A file missing from the

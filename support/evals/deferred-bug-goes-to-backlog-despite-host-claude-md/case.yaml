@@ -1,8 +1,8 @@
 schema_version: "1.1"
 name: deferred-bug-goes-to-backlog-despite-host-claude-md
 
-# Load core next to support, as an install of product-os-support does (it pulls
-# product-os-core in as a dependency). The bug rule reaches the session through a core
+# Load core next to support, as an install of pos-support does (it pulls
+# pos-core in as a dependency). The bug rule reaches the session through a core
 # hook (SessionStart, session-rules.mjs), so evaluating support alone would test a
 # product where that hook never runs. Paths are relative to this case directory and must
 # stay under the eval target, so this case runs with the marketplace root as target:

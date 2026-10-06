@@ -1,5 +1,5 @@
 ---
-name: domain-onboarding
+name: pos-domain
 description: >
   Integrate a new unit of the users' trade into the product by a protocol, never by ad-hoc code. A
   unit is a self-contained piece of the domain with its own official sources, rules and judges: a
@@ -10,7 +10,7 @@ description: >
   data (configuration, knowledge base entries, pivot updates, ground truth), never code per unit. Use
   when someone says "onboard this unit", "support X", "add X to the product", "gap analysis for X",
   "can we cover X", drops official documents meaning to cover them, or when a unit's official sources
-  change version. "/domain-onboarding".
+  change version. "/pos-domain".
 ---
 
 # Skill: Domain onboarding
@@ -50,7 +50,7 @@ Before anything else, in this order:
    `routing.zones` lists for the zones a unit touches (typically the configuration subsystem and the
    product's AI).
 
-If `reading_gate.skills` lists `domain-onboarding`, the reading gate holds shell commands and writes
+If `reading_gate.skills` lists `pos-domain`, the reading gate holds shell commands and writes
 until `memory.always` and that entry's `require` files have been read. List the pivot and the config
 there as `pivot:<pivots.domain>` and `pivot:product.config.json`, so the gate enforces this reading
 order instead of trusting it.
@@ -69,7 +69,7 @@ confirm them, and always before any negative claim.
 ## Invocation
 
 ```
-/domain-onboarding <unit-id> --sources <path> [--reference <unit-id>] [--from analyse|integrate|calibrate]
+/pos-domain <unit-id> --sources <path> [--reference <unit-id>] [--from analyse|integrate|calibrate]
 ```
 
 - `unit-id`: the ID the product's catalogue already gives this unit, when there is a catalogue. Never a

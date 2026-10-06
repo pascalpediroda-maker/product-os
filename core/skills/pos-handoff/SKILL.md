@@ -1,5 +1,5 @@
 ---
-name: handoff
+name: pos-handoff
 description: Write a handoff that another session, or this one after a compaction, can pick up without redoing anything and without skipping the method. Use when stopping before the work is finished, when splitting work across parallel sessions, or when the human asks for one. Covers the cleanup that comes first, the reading-order line, the status-first structure, where the file goes, how it is committed, and how a handoff is closed or superseded.
 ---
 
@@ -57,7 +57,7 @@ Every handoff starts with this line, before the title:
 
 `<name>` is the skill that governs the remaining work. Its Step 0 is everything it requires before
 acting: the files in `memory.always`, those in `reading_gate.skills.<name>.require`, and those
-`routing.zones` lists for the zone. If no skill fits, name `orient`.
+`routing.zones` lists for the zone. If no skill fits, name `pos-orient`.
 
 A session told "read the handoff" opens it first, goes straight to the subject and skips the
 method, with its memories and its gates. The handoff is an input to the method, never a shortcut
@@ -65,7 +65,7 @@ past it. Line 1 is the only place sure to be read before that happens.
 
 ## What goes in it, in this order
 
-1. **`Status: open`**, on its own line under the title. `orient` reads it to list open handoffs.
+1. **`Status: open`**, on its own line under the title. `pos-orient` reads it to list open handoffs.
 2. **Where it stands.** Its first line is "Finished." or "Not finished: X and Y remain." Then:
    - the working base: repository, worktree path, branch, and the `origin/<main>` commit it
      started from;

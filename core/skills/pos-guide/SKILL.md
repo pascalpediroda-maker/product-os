@@ -1,13 +1,13 @@
 ---
-name: guide
+name: pos-guide
 description: >
   The tour of the product OS for the product in front of it: which skill to start a session with
   depending on the situation, what each of those skills calls (skills and agents), the agents grouped
   by trade, and where to begin (the domain first, start small and see, or foundations first), with one
   recommendation drawn from the product's state. Shows what is installed and usable now, and what is
   planned and not built, never the second as the first. Reads and recommends; changes nothing. Use
-  after `setup`, when someone asks "what can the OS do", "which skills are there", "where are the
-  agents", "I don't see any skills or agents", "where do I start", "what next", "/guide". An argument
+  after `pos-setup`, when someone asks "what can the OS do", "which skills are there", "where are the
+  agents", "I don't see any skills or agents", "where do I start", "what next", "/pos-guide". An argument
   narrows it to one part: `start`, `skills`, `agents` or `begin`.
 ---
 
@@ -40,10 +40,10 @@ What the guide guarantees:
 1. **The catalog,** [references/catalog.md](references/catalog.md), in full.
 2. **The product config,** `.claude/product/product.config.json`, if it exists: `product.name`,
    `product.team_language`, `modules.*`, `pivots.*`, `memory.*`, `databases.*`.
-   - **No config:** the OS is installed but not set up. Say so in one line, recommend `setup`, and show
+   - **No config:** the OS is installed but not set up. Say so in one line, recommend `pos-setup`, and show
      only part 1 of Step 3 (the entry points), marked "after setup".
 3. **What this session can use,** from the session itself, not from files:
-   - the skills it lists, matched to the catalog by name (`setup` and `product-os-core:setup` are the
+   - the skills it lists, matched to the catalog by name (`pos-setup` and `pos-core:pos-setup` are the
      same skill);
    - the agent types the Agent tool offers.
 
@@ -66,11 +66,11 @@ Take the first line that applies.
 
 | The product's state | Recommend | Why, in one sentence |
 |---|---|---|
-| no config | `setup` | nothing else works before the config exists |
-| the domain pivot is still the template | **the domain first**: `domain-onboarding` on the unit the product already serves | every later skill reads the domain; written once, it stops sessions guessing the trade |
-| Discovery, Design and Delivery installed | **start small and see**: two or three real signals, then `opportunity` | the owner learns the OS on a real result |
+| no config | `pos-setup` | nothing else works before the config exists |
+| the domain pivot is still the template | **the domain first**: `pos-domain` on the unit the product already serves | every later skill reads the domain; written once, it stops sessions guessing the trade |
+| Discovery, Design and Delivery installed | **start small and see**: two or three real signals, then `pos-opportunity` | the owner learns the OS on a real result |
 | Delivery or Design installed, code started without architecture memory or without a design system | **foundations first**: the data model (Delivery) or the design system (Design), whichever is missing | building on an unwritten model or interface multiplies rework |
-| none of the above | what is usable now (the domain for another unit, `fix-backlog`, `bug-kill`), and which module would open each way in that is not available | say what is missing, do not fill it |
+| none of the above | what is usable now (the domain for another unit, `pos-fix-backlog`, `pos-bug-kill`), and which module would open each way in that is not available | say what is missing, do not fill it |
 
 When a way in needs a module that is not installed, say which one. When that module is planned and not
 built, say so: there is nothing to install yet.
@@ -83,8 +83,8 @@ only its part: `start` part 1, `skills` part 2, `agents` part 3, `begin` part 4.
 the session lists it (with its plugin prefix when the session shows one).
 
 1. **Starting a session.** The catalog's section 1, the installed entries only, as a table: situation,
-   skill. Then one line: "Planned: `opportunity` and `meeting-notes` (Discovery), `prd` (Design),
-   `dev` (Delivery), ..." from the planned rows.
+   skill. Then one line: "Planned: `pos-opportunity` and `pos-meeting-notes` (Discovery), `pos-prd` (Design),
+   `pos-dev` (Delivery), ..." from the planned rows.
 2. **What each skill calls.** For each installed entry skill: the skills it calls and the agents it
    spawns, one line each, from the catalog's section 2. Then one sentence: agents are never typed; the
    skill that needs one spawns it, and `/agents` lists them.

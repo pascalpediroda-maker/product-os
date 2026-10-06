@@ -1,7 +1,7 @@
 ---
 name: unit-analyst-configuration
 description: >
-  Configuration fit analyst of the domain-onboarding protocol. Compares what a new unit needs with the
+  Configuration fit analyst of the pos-domain protocol. Compares what a new unit needs with the
   live configuration of the closest existing unit, dimension by dimension, maps the unit's official
   structure to configuration elements, and returns the complete configuration draft for the new unit
   (not a list of deltas), with how its instances get attached to it. Writes nothing. Read-only.

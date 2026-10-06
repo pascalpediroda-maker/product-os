@@ -3,10 +3,10 @@
 //
 // WHY THIS EXISTS. The OS's rules live in this plugin's `rules/` folder, and nothing
 // loads a folder: Claude Code loads CLAUDE.md, skill descriptions, agents and hooks.
-// The only bridge was the CLAUDE.md template, and `setup` never overwrites an existing
+// The only bridge was the CLAUDE.md template, and `pos-setup` never overwrites an existing
 // CLAUDE.md. Every real product has one. Measured on a product with its own CLAUDE.md:
 // a session told "a user reports a bug, I can't fix it now" wrote the bug into the
-// notes file the product's CLAUDE.md prescribed. The fix-backlog skill was listed and
+// notes file the product's CLAUDE.md prescribed. The pos-fix-backlog skill was listed and
 // never fired, and the rule that should have fired it was not in context at all. A
 // skill description alone did not carry it: that is what failed.
 //
@@ -20,11 +20,11 @@
 // otherwise on one of those subjects, the config wins, because it is the more specific
 // and more recent declaration of the same owner, and the session names the conflict
 // once. An exception the owner chose is recorded in CLAUDE.md under a "Product OS"
-// heading (the `setup` skill writes it), and that record wins. The owner's word in the
+// heading (the `pos-setup` skill writes it), and that record wins. The owner's word in the
 // conversation wins over everything.
 //
 // Without a product config: if this repository enabled the core plugin in its own
-// settings, one line says the OS is installed but not set up and names `setup`.
+// settings, one line says the OS is installed but not set up and names `pos-setup`.
 // Otherwise nothing: a plugin installed for the user reaches every repository, and a
 // repository that did not adopt the OS gets no text from it.
 
@@ -39,7 +39,7 @@ const WIN = process.platform === 'win32';
 const DEFAULT_MEMORY_DIR = '.claude/memory';
 const DEFAULT_MEMORY_INDEX = 'MEMORY.md';
 const DEFAULT_PIVOTS_DIR = '.claude/product';
-const CORE_PLUGIN = 'product-os-core';
+const CORE_PLUGIN = 'pos-core';
 
 // ---------------------------------------------------------------------------
 // Shared prelude. Every core hook carries its own copy on purpose: the hooks are
@@ -129,12 +129,12 @@ function digest(config) {
 
   let bug;
   if (support && backlog) {
-    bug = 'A bug you will not fix in this session is filed in the fix backlog with the `fix-backlog` skill '
+    bug = 'A bug you will not fix in this session is filed in the fix backlog with the `pos-fix-backlog` skill '
       + '(`databases.fix_backlog`), now, with what is needed to pick it up cold. Never left in the '
       + 'conversation, a todo or a notes file.';
   } else if (support) {
     bug = 'A bug you will not fix in this session goes to the fix backlog. Its base is not configured yet '
-      + '(`databases.fix_backlog` is empty): say so and offer the `fix-backlog` skill to create it. Never '
+      + '(`databases.fix_backlog` is empty): say so and offer the `pos-fix-backlog` skill to create it. Never '
       + 'leave the bug only in the conversation.';
   } else {
     bug = 'A bug you will not fix in this session is written down where the next session will find it '
@@ -154,23 +154,23 @@ function digest(config) {
     `3. Memory first. Before proposing or asserting how something works, read \`${memoryDir}/${memoryIndex}\` and the files `
       + '`routing.zones` lists for the zone you touch (product config, `' + `${pivotsDir}/product.config.json` + '`). '
       + 'The code confirms what memory says.',
-    '4. Where things stand. Run the `orient` skill at the start of the work, never recall it. To see which '
-      + 'skill fits a situation, what it calls and where to begin, the `guide` skill.',
+    '4. Where things stand. Run the `pos-orient` skill at the start of the work, never recall it. To see which '
+      + 'skill fits a situation, what it calls and where to begin, the `pos-guide` skill.',
     rules
       ? `5. The full rules, cited by number in the OS skills: \`${join(rules, 'collaboration.md')}\` and \`${join(rules, 'principles.md')}\`.`
-      : '5. The full rules are in the `rules/` folder of the product-os-core plugin.',
+      : '5. The full rules are in the `rules/` folder of the pos-core plugin.',
     '',
     'If this repository\'s CLAUDE.md says otherwise on bugs, pushes or memory, follow the rule above for that '
-      + 'subject and tell the owner the conflict once, in one sentence, suggesting the `setup` skill to reconcile '
+      + 'subject and tell the owner the conflict once, in one sentence, suggesting the `pos-setup` skill to reconcile '
       + 'it. Two exceptions: a choice the owner recorded under a "Product OS" heading in CLAUDE.md wins, and '
       + 'the owner\'s word in this conversation wins over everything.',
   ];
   return lines.join('\n');
 }
 
-const SETUP_NUDGE = 'PRODUCT OS: product-os-core is enabled in this repository but it is not set up yet '
+const SETUP_NUDGE = 'PRODUCT OS: pos-core is enabled in this repository but it is not set up yet '
   + '(no `.claude/product/product.config.json`). Before work the OS covers (bugs, pushes, memory, '
-  + 'connectors), run the `setup` skill, or tell the owner it has not been run.';
+  + 'connectors), run the `pos-setup` skill, or tell the owner it has not been run.';
 
 async function main() {
   let input = {};

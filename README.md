@@ -3,20 +3,20 @@
 A product operating system for Claude Code: the method a Head of Product or a solo product builder
 uses to run a SaaS from opportunity to shipment and support, organised by product function.
 
-It is a marketplace of plugins. `product-os-core` (Foundation + Domain) is always installed; each
+It is a marketplace of plugins. `pos-core` (Foundation + Domain) is always installed; each
 product function is a plugin on top of it, switched on in the product's config.
 
 ## Start here
 
 Four steps: the first in a terminal at the root of your product repository, the others in Claude
-Code. Nothing else is needed before them: `/setup` copies the templates and fills the config for you.
+Code. Nothing else is needed before them: `/pos-setup` copies the templates and fills the config for you.
 
 **1. Declare the marketplace and install the plugins.**
 
 ```
 claude plugin marketplace add pascalpediroda-maker/product-os --scope project
-claude plugin install product-os-core@product-os --scope project
-claude plugin install product-os-support@product-os --scope project
+claude plugin install pos-core@product-os --scope project
+claude plugin install pos-support@product-os --scope project
 ```
 
 - `marketplace add` comes first, once. `marketplace update` only refreshes a marketplace that was
@@ -29,22 +29,27 @@ claude plugin install product-os-support@product-os --scope project
 **2. Open a new Claude Code session in the product repository.** Plugins load when a session
 starts, not in a session already open.
 
-**3. Run `/setup`.** It may be listed as `/product-os-core:setup`. It finds the repository, copies the
+**3. Run `/pos-setup`.** It may be listed as `/pos-core:pos-setup`. It finds the repository, copies the
 templates it lacks without overwriting anything, connects the tools the product needs (Notion,
 Supabase, Amplitude, Gmail) with least privilege and no credential in the repository, fills
 `.claude/product/product.config.json` after showing you the diff, offers to create the fix backlog
 when Support is installed, and says what is left.
 
-**4. Run `/guide`** in a new session. It shows which skill to start a session with depending on the
+**4. Run `/pos-guide`** in a new session. It shows which skill to start a session with depending on the
 situation, what each skill calls, the agents grouped by trade, and where to begin for your product,
 with one recommendation.
 
 The skills and agents live in the plugins: your repository's `.claude/skills` and `.claude/agents`
-stay empty, and that is expected. Type `/` to see the skills (they may show with their plugin name in
-front, `/product-os-core:orient`), and `/agents` to see the agents. The full map, installed and
-planned, is the [catalog](core/skills/guide/references/catalog.md).
+stay empty, and that is expected. Every OS skill starts with `pos-`: type `/pos-guide`, `/pos-orient`,
+and so on. The menu may show them with their plugin name in front (`/pos-core:pos-orient`); the short
+form works as long as no other command has the same name, which is what the prefix ensures. `/agents`
+lists the agents. The full map, installed and planned, is the
+[catalog](core/skills/pos-guide/references/catalog.md).
 
-Every session then starts with `/orient`: it re-reads the config, the memory and git, and says where
+**Naming rule for every plugin of this marketplace:** the plugin is `pos-<function>`, each skill it
+ships is `pos-<name>`.
+
+Every session then starts with `/pos-orient`: it re-reads the config, the memory and git, and says where
 things stand.
 
 ## Which scope
@@ -59,8 +64,8 @@ things stand.
 
 ```
 claude plugin marketplace update product-os
-claude plugin update product-os-core@product-os --scope project
-claude plugin update product-os-support@product-os --scope project
+claude plugin update pos-core@product-os --scope project
+claude plugin update pos-support@product-os --scope project
 ```
 
 Then start a new session: an update applies at the next start. Use the scope you installed with.
@@ -69,8 +74,8 @@ Then start a new session: an update applies at the next start. Use the scope you
 
 | Plugin | Function | What it carries |
 |---|---|---|
-| `product-os-core` | Foundation + Domain, always installed | product config and routing table, memory templates, the reading gate, guards on destructive commands, collaboration rules and principles, `setup`, `guide`, `tool-conventions`, `orient`, `handoff`, `domain-onboarding` and its four analysts |
-| `product-os-support` | Customer Support & Success (`modules.support`) | `fix-backlog` (the base where every bug not fixed at once is filed), `bug-kill` (empties it into a minor fix release and closes the loop with customers), the Support pivot |
+| `pos-core` | Foundation + Domain, always installed | product config and routing table, memory templates, the reading gate, guards on destructive commands, collaboration rules and principles, `pos-setup`, `pos-guide`, `pos-tool-conventions`, `pos-orient`, `pos-handoff`, `pos-domain` and its four analysts |
+| `pos-support` | Customer Support & Success (`modules.support`) | `pos-fix-backlog` (the base where every bug not fixed at once is filed), `pos-bug-kill` (empties it into a minor fix release and closes the loop with customers), the Support pivot |
 
 Planned, each built the day a product needs it: Discovery, Design, Delivery, Assurance, Release &
 Operations, Go-to-Market. A skill that needs a module that is not installed says so and continues; it
