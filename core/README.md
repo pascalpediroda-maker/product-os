@@ -23,6 +23,7 @@ It guarantees three things:
 | Reading gate | `hooks/reading-gate.mjs` | a gated skill cannot run a shell or write a file before it has read the files the config requires |
 | Guards | `hooks/guard-destructive-git.mjs`, `hooks/guard-destructive-delete.mjs` | ask before commands that destroy work: reset to the remote, force push, worktree or branch removal, recursive deletes, a push that deploys |
 | `setup` | `skills/setup/` | the first skill a new product runs: templates in place, an existing CLAUDE.md reconciled with the OS rules, the connectors it needs (Notion, Supabase, Amplitude, Gmail) created, signed in with least privilege and tested, credentials kept out of the repository, the config filled |
+| `guide` | `skills/guide/` | the tour for this product: which skill to start a session with, what each calls, the agents by trade, where to begin, with one recommendation. Its catalog (`references/catalog.md`) maps every skill and agent of the OS, installed or planned; a plugin that ships updates it in the same commit |
 | `tool-conventions` | `skills/tool-conventions/` | how to use each connected tool without breaking anything, one reference per tool, every fact checked on the vendor's documentation |
 | `orient` | `skills/orient/` | where things stand, re-read from what is written and from git, never recalled |
 | `handoff` | `skills/handoff/` | a handoff that starts with the reading order and carries state, not story |

@@ -154,7 +154,8 @@ function digest(config) {
     `3. Memory first. Before proposing or asserting how something works, read \`${memoryDir}/${memoryIndex}\` and the files `
       + '`routing.zones` lists for the zone you touch (product config, `' + `${pivotsDir}/product.config.json` + '`). '
       + 'The code confirms what memory says.',
-    '4. Where things stand. Run the `orient` skill at the start of the work, never recall it.',
+    '4. Where things stand. Run the `orient` skill at the start of the work, never recall it. To see which '
+      + 'skill fits a situation, what it calls and where to begin, the `guide` skill.',
     rules
       ? `5. The full rules, cited by number in the OS skills: \`${join(rules, 'collaboration.md')}\` and \`${join(rules, 'principles.md')}\`.`
       : '5. The full rules are in the `rules/` folder of the product-os-core plugin.',

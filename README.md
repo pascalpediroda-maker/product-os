@@ -8,8 +8,8 @@ product function is a plugin on top of it, switched on in the product's config.
 
 ## Start here
 
-Three steps, in a terminal at the root of your product repository. Nothing else is needed before
-them: `/setup` copies the templates and fills the config for you.
+Four steps: the first in a terminal at the root of your product repository, the others in Claude
+Code. Nothing else is needed before them: `/setup` copies the templates and fills the config for you.
 
 **1. Declare the marketplace and install the plugins.**
 
@@ -35,11 +35,17 @@ Supabase, Amplitude, Gmail) with least privilege and no credential in the reposi
 `.claude/product/product.config.json` after showing you the diff, offers to create the fix backlog
 when Support is installed, and says what is left.
 
-Then:
+**4. Run `/guide`** in a new session. It shows which skill to start a session with depending on the
+situation, what each skill calls, the agents grouped by trade, and where to begin for your product,
+with one recommendation.
 
-- `/orient` re-reads the config, the memory and git, and says where things stand. Run it at the start
-  of every session.
-- `/domain-onboarding` writes the domain pivot: the knowledge of your users' trade, written once.
+The skills and agents live in the plugins: your repository's `.claude/skills` and `.claude/agents`
+stay empty, and that is expected. Type `/` to see the skills (they may show with their plugin name in
+front, `/product-os-core:orient`), and `/agents` to see the agents. The full map, installed and
+planned, is the [catalog](core/skills/guide/references/catalog.md).
+
+Every session then starts with `/orient`: it re-reads the config, the memory and git, and says where
+things stand.
 
 ## Which scope
 
@@ -63,7 +69,7 @@ Then start a new session: an update applies at the next start. Use the scope you
 
 | Plugin | Function | What it carries |
 |---|---|---|
-| `product-os-core` | Foundation + Domain, always installed | product config and routing table, memory templates, the reading gate, guards on destructive commands, collaboration rules and principles, `setup`, `tool-conventions`, `orient`, `handoff`, `domain-onboarding` |
+| `product-os-core` | Foundation + Domain, always installed | product config and routing table, memory templates, the reading gate, guards on destructive commands, collaboration rules and principles, `setup`, `guide`, `tool-conventions`, `orient`, `handoff`, `domain-onboarding` and its four analysts |
 | `product-os-support` | Customer Support & Success (`modules.support`) | `fix-backlog` (the base where every bug not fixed at once is filed), `bug-kill` (empties it into a minor fix release and closes the loop with customers), the Support pivot |
 
 Planned, each built the day a product needs it: Discovery, Design, Delivery, Assurance, Release &

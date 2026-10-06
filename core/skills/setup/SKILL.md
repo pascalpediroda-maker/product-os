@@ -1,6 +1,6 @@
 ---
 name: setup
-description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, reconciles an existing CLAUDE.md with the OS rules (names each conflict, proposes a section by diff, never overwrites), asks which of four connectors the installed modules need (Notion for the shared bases, Supabase for the product's database, Amplitude for analytics, Gmail for drafts), checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in or token, least privilege, where the credential lives, the restart a new server needs), tests each with one harmless read, fills the product config after showing the diff, hands the fix backlog base to the Support plugin, lists what is still template, then hands over to `orient` and `domain-onboarding`. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/setup".
+description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, reconciles an existing CLAUDE.md with the OS rules (names each conflict, proposes a section by diff, never overwrites), asks which of four connectors the installed modules need (Notion for the shared bases, Supabase for the product's database, Amplitude for analytics, Gmail for drafts), checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in or token, least privilege, where the credential lives, the restart a new server needs), tests each with one harmless read, fills the product config after showing the diff, hands the fix backlog base to the Support plugin, lists what is still template, then hands over to `guide`, which shows what the OS offers and where to begin. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/setup".
 ---
 
 # Setup
@@ -401,8 +401,10 @@ Waiting on the owner
 
 Next
 1. Open a new session: the OS rules are injected at session start, from the config just written.
-2. Run `orient`: it re-reads the config, the memory and git, and says where things stand.
-3. Run `domain-onboarding` to write the domain pivot.
+2. Run `guide`: which skill to start a session with, what each one calls, the agents by trade, and
+   where to begin for this product. The skills and agents come from the plugins: the product's
+   `.claude/skills` and `.claude/agents` stay empty, and that is expected.
+3. Then the way in it recommends (for a product whose domain pivot is empty, `domain-onboarding`).
 ```
 
 ---
