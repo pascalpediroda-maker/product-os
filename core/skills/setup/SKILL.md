@@ -1,6 +1,6 @@
 ---
 name: setup
-description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, reconciles an existing CLAUDE.md with the OS rules (names each conflict, proposes a section by diff, never overwrites), asks which of four connectors the installed modules need (Notion for the shared bases, Supabase for the product's database, Amplitude for analytics, Gmail for drafts), checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in, least privilege, where the credential lives), tests each with one harmless read, fills the product config after showing the diff, hands the fix backlog base to the Support plugin, then hands over to `orient` and `domain-onboarding`. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/setup".
+description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, reconciles an existing CLAUDE.md with the OS rules (names each conflict, proposes a section by diff, never overwrites), asks which of four connectors the installed modules need (Notion for the shared bases, Supabase for the product's database, Amplitude for analytics, Gmail for drafts), checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in or token, least privilege, where the credential lives, the restart a new server needs), tests each with one harmless read, fills the product config after showing the diff, hands the fix backlog base to the Support plugin, lists what is still template, then hands over to `orient` and `domain-onboarding`. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/setup".
 ---
 
 # Setup
@@ -18,14 +18,15 @@ What setup guarantees:
   source. Nothing from memory.
 - **Nothing that exists is overwritten:** no file, no filled config key, no connector.
 - **A product never leaves setup with two rules on the same subject,** one of them silent.
+- **Nothing still template is presented as done:** placeholders are listed as remaining work.
 
 ## What setup never does
 
 - **Store a secret in a file of the repository** (config, `.mcp.json`, memory, a handoff, an env file
   it creates), print it, log it, commit it, or pass it as a command-line argument.
-- **Run a sign-in on the owner's behalf.** The OAuth in the browser and any command that carries a
-  secret are the owner's. Setup gives the step and waits. It never asks for a code, a token or a
-  callback URL in the chat.
+- **Run a sign-in on the owner's behalf, or handle a token.** The OAuth in the browser, setting an
+  environment variable that holds a token, and any command that carries a secret are the owner's.
+  Setup gives the step and waits. It never asks for a code, a token or a callback URL in the chat.
 - **Install a connector the owner did not ask for,** or remove or replace one that exists without the
   owner's go for that entry: another product may use it.
 - **Rewrite the product's CLAUDE.md.** It proposes an added section and, for a conflicting line, an
@@ -180,12 +181,17 @@ conflict at its source, with the owner.
    Statuses: `✔ Connected`, `! Needs authentication`, `✘ Failed to connect`, and `⏸ Pending approval`
    for a `.mcp.json` server not yet approved. `get` also gives the entry's scope.
 
-   **Never quote this output.** `list` prints a local server's full command line, and a credential
-   passed as an argument shows there in clear. Build the table below from it. If a credential shows,
-   say once that this connector's credential sits on its command line where `claude mcp list` prints
-   it, without repeating the value, and offer the OAuth route from its reference file.
+   **Never quote this output.** `list` and `get` print a local server's full command line and a remote
+   server's headers, and a credential passed there shows in clear. Build the table below from it. If a
+   credential shows, say once that this connector's credential sits where `claude mcp list` prints it,
+   without repeating the value, and offer the route from its reference file that keeps it out.
    If the `claude` command is not on this shell's path, ask the owner to open `/mcp` and say which of
    the four connectors it lists, and with which status.
+
+   **Copying another product's working setup** (the owner says "it works in my other project"): read
+   that project's `.mcp.json` or `claude mcp get <name>` with the values masked: keys, URLs and
+   variable names only, never a header value or an argument after `--access-token`. A token that
+   reaches the transcript is a token to rotate: say so once.
 
 2. **Connected in the CLI is not callable here.** A connector counts as usable only when this session
    has its tools: look in the tool list, including tools loaded on demand through tool search. Reasons
@@ -197,9 +203,8 @@ conflict at its source, with the owner.
      `ENABLE_CLAUDEAI_MCP_SERVERS=false`, one of them can be turned off for this project in `/mcp`, and
      an organization can block one;
    - a `.mcp.json` server waits for approval;
-   - the server was added after this session started: reconnect it in `/mcp`; if it is not listed
-     there, restart Claude Code and continue the conversation with `claude --continue`. Setup resumes
-     at this step.
+   - the server was added, or signed in, after this session started: it appears only after a restart
+     (Step 4, "Plan one restart").
 3. **Duplicates.** Two entries for the same service under different names both load, with two sets of
    tools. Keep one; turn the other off for this project in `/mcp`. The same name in several scopes
    loads once, from the first of: local, project, user, plugin, claude.ai.
@@ -214,46 +219,66 @@ conflict at its source, with the owner.
 
 ## Step 4: connect each missing one
 
+**Plan one restart, and say so before the first step.** A server added or signed in during this
+session does not become callable in it: observed, a server added mid-session stayed absent until
+Claude Code restarted, and a project-scoped server also waits for the owner's approval. So:
+
+1. do every add (and every environment variable the owner sets) first, for all missing connectors;
+2. then one restart of Claude Code: in an IDE, the whole IDE window, so the extension reads the new
+   environment;
+3. approve the project-scoped servers when asked (or in `/mcp`), sign in where a connector uses OAuth;
+4. continue the conversation (`claude --continue`, or the IDE's session history). Setup resumes at
+   Step 3 and re-checks everything.
+
 For each wanted connector that is not usable, follow its reference file, in this order.
 
 1. **Account.** If the owner has none: where to create it, the plan that is enough to start, and
    what it costs as the vendor's pricing page states it, with the date it was read. Prices change: if
    the owner is about to pay, send them to the pricing page.
-2. **Add it.** The command from the reference file, with its scope and the reason for that scope:
-   - **project** only when the address is a fact of this repository and carries no secret (the
-     Supabase project), because `.mcp.json` is committed;
+2. **Add it.** The route and command from the reference file, with its scope and the reason for that
+   scope:
+   - **project** when the entry is a fact of this repository and holds no secret: the Supabase project,
+     whose `.mcp.json` entry holds the URL and, on the token route, only a variable name. `.mcp.json` is
+     committed;
    - **user** for a personal account used across products (Notion, Amplitude);
-   - **local** for a personal account used for this product only, and for anything that carries a
+   - **local** for a personal account used for this product only, and for an entry that would hold a
      credential.
 
    Who runs it:
-   - **No secret in the command** (the OAuth route of Notion, Supabase and Amplitude): show it, get
-     the owner's OK, run it, and say what it wrote where (`~/.claude.json` for user and local scope,
-     `.mcp.json` for project). Gmail's default route has no command: it is connected on claude.ai.
-   - **A secret in the command:** the owner runs it in their own terminal. Not with `!` in this
-     session: shell mode adds the command and its output to the conversation.
-3. **Sign in.** The owner does it: `/mcp`, select the server, authenticate in the browser. From a
-   terminal, `claude mcp login <name>` does the same, and `--no-browser` prints the address to open
-   when the machine has no browser (an SSH session). A claude.ai connector signs in on claude.ai. Give
-   the step, then wait for the owner to say it is done.
+   - **No secret in the command or the file** (the OAuth routes of Notion and Amplitude, the Supabase
+     entry with its variable name): show it, get the owner's OK, run it or write it, and say what it
+     wrote where (`~/.claude.json` for user and local scope, `.mcp.json` for project). Then read the
+     entry back: it must hold no credential. Gmail's default route has no command: it is connected on
+     claude.ai.
+   - **A token to put in the environment** (the Supabase default route): the owner creates it and sets
+     the variable in their own terminal or system settings, as the reference file says. Not with `!` in
+     this session: shell mode adds the command and its output to the conversation.
+3. **Sign in, where the route uses OAuth.** The owner does it, after the restart: `/mcp`, select the
+   server, authenticate in the browser. From a **regular terminal**, `claude mcp login <name>` does the
+   same, and `--no-browser` prints the address to open when the machine has no browser (an SSH
+   session). Prefer the terminal to an IDE extension for a sign-in: Supabase's documentation says to
+   authenticate "In a regular terminal (not the IDE extension)", and a sign-in started from an IDE
+   extension was observed failing. A claude.ai connector signs in on claude.ai. Give the step, then wait
+   for the owner to say it is done.
 4. **Least privilege.** Apply what the reference file names: Supabase scoped to one project and
    read-only; Gmail with sending denied; Notion and Amplitude through the account and its role. In
    Claude Code's permissions (`/permissions`), never allow a whole server (`mcp__<server>` or
    `mcp__<server>__*`): tools that change data stay on ask, tools that send are denied. Deny rules win
    over allow rules.
 5. **Where the credential lives.** Always outside the repository:
-   - a server added in Claude Code: its OAuth token is held by Claude Code ("stored securely and
-     refreshed automatically"); `claude mcp logout <name>` clears it;
+   - a server signed in through Claude Code: its OAuth token is held by Claude Code ("stored securely
+     and refreshed automatically"); `claude mcp logout <name>` clears it;
    - a claude.ai connector: held by claude.ai;
-   - a token, only where no browser sign-in is possible (a CI job): kept in that environment's
-     variables and referenced as `${VAR}` in `.mcp.json`, which Claude Code expands. Never literal in
+   - a token: in the owner's user environment (or a CI job's variables), referenced as `${VAR}` in
+     `.mcp.json`, which Claude Code expands in a remote server's `url` and `headers`. Never literal in
      `.mcp.json`, never in the chat, never given to a server as a program argument (`claude mcp list`
-     prints those).
+     prints those). The variable must exist before Claude Code starts; an unset one is sent as the text
+     `${VAR}` and the server answers 401.
 
    **If the owner pastes a secret in the chat,** say once that it is now in this conversation's
    transcript and that rotating it is advised. Never repeat it, never write it anywhere, never use it.
-6. **Check.** `claude mcp get <name>` shows `✔ Connected`, and the connector's tools are in this
-   session (Step 3, point 2). Then Step 5 for it.
+6. **Check, after the restart.** `claude mcp get <name>` shows `✔ Connected`, and the connector's tools
+   are in this session (Step 3, point 2). Then Step 5 for it.
 
 ## Step 5: one harmless read each
 
@@ -291,8 +316,7 @@ again. A read that fails is not "connected".
    - the Amplitude data region: in the connector's address;
    - Gmail: nothing to record.
 3. **What setup leaves alone:** `libraries.*`, `memory.*`, `routing.*`, `reading_gate.*`, `pivots.*`.
-   They keep their values. If `routing.zones.example-zone` or `reading_gate.skills.example-skill` are
-   still there, say they are template placeholders to replace as memory gets written.
+   They keep their values; Step 6b says which of them are still template.
 4. **Only empty keys are filled.** A filled key that differs from what setup found is reported, and
    changed only if the owner says so for that key. A filled database ID is checked by fetching it; one
    that does not resolve is reported as "configured, not reachable" (the signed-in account may lack
@@ -302,14 +326,33 @@ again. A read that fails is not "connected".
    comments, key order and two-space indentation kept. Then check it parses:
    `node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" <path>`.
 
+## Step 6b: what is still template
+
+The templates ship with examples. Left in place, they look like a working setup and are not. List each
+one as remaining work, with what to do; setup does not write memory itself.
+
+- **`memory.always`** names files (the template names `architecture.md`). For each name, check the file
+  exists in `memory.dir`. A missing one is listed: "write `<file>` (shape: the core template
+  `memory/archi-subsystem.md`), or remove it from `memory.always`". The reading gate drops a missing
+  required file and says so, but the session then reads nothing for it.
+- **`MEMORY.md`** copied from the template holds example lines. Every line whose link points to a file
+  that does not exist is listed, to replace or delete.
+- **`routing.zones.example-zone`** and **`reading_gate.skills.example-skill`**: template placeholders,
+  to replace by the product's zones and gated skills as memory gets written.
+- **The domain pivot** (`<pivots.dir>/<pivots.domain>`) is still the empty template until
+  `domain-onboarding` runs.
+- **A copied `CLAUDE.md`** has its product sections still in guidance comments below the separation
+  line.
+
 ## Step 7: the fix backlog base
 
 The Support module owns its base and its schema. Setup does not create it; it hands over.
 
 - **`modules.support` is true and `databases.fix_backlog` is empty:** offer it once: "The fix backlog
   is not configured. Shall I run `fix-backlog` to create it in Notion?" On yes, run the `fix-backlog`
-  skill of `product-os-support`. It creates the base with its schema and writes `databases.fix_backlog`
-  through a shown diff, the same way as Step 6.
+  skill of `product-os-support`. It creates the base with its schema (and its ID prefix, which must be
+  unique in the Notion workspace) and writes `databases.fix_backlog` through a shown diff, the same way
+  as Step 6.
 - **`databases.fix_backlog` is already set:** create nothing. `fix-backlog` compares the base with its
   schema whenever it runs.
 - **The owner wants a fix backlog but `product-os-support` is not installed:** say that this plugin
@@ -334,7 +377,7 @@ The Support module owns its base and its schema. Setup does not create it; it ha
 
 ```
 <"Set up: Notion and Supabase connected and tested, Gmail not wanted, config filled, CLAUDE.md reconciled."
- or "Not finished: Amplitude waits for your sign-in in /mcp; databases.crm is empty.">
+ or "Not finished: restart Claude Code, approve supabase, then continue; databases.crm is empty.">
 
 Connectors
 | Connector | Installed (scope) | Authenticated | Tools in this session | Harmless read |
@@ -348,29 +391,33 @@ Config
 - No contract key: <the Supabase project reference is in .mcp.json; the Amplitude region is in its address>.
 - Committed: <hash>, not pushed.
 
+Still template (Step 6b)
+- <memory.always names architecture.md, which does not exist: write it or remove it>
+- <MEMORY.md: N example lines pointing to files that do not exist>
+- <routing and reading gate placeholders; the domain pivot>
+
 Waiting on the owner
-1. <a sign-in, an account to create, a decision; each once>
+1. <a restart, an approval, a sign-in, an environment variable, an account to create, a decision; each once>
 
 Next
 1. Open a new session: the OS rules are injected at session start, from the config just written.
 2. Run `orient`: it re-reads the config, the memory and git, and says where things stand.
-3. Run `domain-onboarding` to write the domain pivot (`<pivots.dir>/<pivots.domain>`), which is
-   still the empty template.
+3. Run `domain-onboarding` to write the domain pivot.
 ```
 
 ---
 
 ## Running it again
 
-Setup is meant to be re-run: after a sign-in expires, on a new machine, when a module is installed.
-Each run checks, reports and fills only what is empty.
+Setup is meant to be re-run: after a sign-in expires, on a new machine, after the restart it asked for,
+when a module is installed. Each run checks, reports and fills only what is empty.
 
 - Step 1 copies only the templates that are missing.
 - Step 1b re-reads CLAUDE.md and brings up only conflicts that are neither adopted nor recorded as a
   standing choice.
 - Steps 3 and 5 re-establish the table from scratch: nothing is assumed from an earlier run.
 - Step 4 runs only for connectors that are wanted and not usable.
-- Step 6 fills only empty keys and verifies the filled ones.
+- Step 6 fills only empty keys and verifies the filled ones; Step 6b lists only what is still template.
 - Step 7 only hands over to `fix-backlog`, which never creates a second base.
 - A run with nothing to do ends on one line: "Set up, nothing missing." followed by the connector
   table.
@@ -386,14 +433,15 @@ Each run checks, reports and fills only what is empty.
 
 ## Sources
 
-Claude Code documentation, read on 2026-09-26. Each connector's own sources are at the end of its
-reference file.
+Claude Code documentation. Each connector's own sources are at the end of its reference file.
 
-- MCP: https://code.claude.com/docs/en/mcp (`claude mcp add` syntax and `--transport`, the three
-  scopes and where each is stored, `.mcp.json` approval, scope precedence, `/mcp`, `claude mcp list`,
-  `get`, `login`, `logout`, the status labels, OAuth tokens "stored securely and refreshed
-  automatically", claude.ai connectors and the conditions under which they load,
-  `disableClaudeAiConnectors`, `ENABLE_CLAUDEAI_MCP_SERVERS`, `${VAR}` expansion in `.mcp.json`).
+- MCP: https://code.claude.com/docs/en/mcp, read on 2026-09-26 and 2026-10-06 (`claude mcp add` syntax,
+  `--transport` and `--header`, the three scopes and where each is stored, `.mcp.json` approval, scope
+  precedence, `/mcp`, `claude mcp list`, `get`, `login`, `logout`, the status labels, OAuth tokens
+  "stored securely and refreshed automatically", claude.ai connectors and the conditions under which
+  they load, `disableClaudeAiConnectors`, `ENABLE_CLAUDEAI_MCP_SERVERS`, `${VAR}` expansion in
+  `command`, `args`, `env`, `url` and `headers`, unset variables left unexpanded, the credential
+  variables read as empty).
 - Hooks: https://code.claude.com/docs/en/hooks, read on 2026-10-04 (`SessionStart` and its `source`
   values, `additionalContext` added before the first prompt, the 10,000-character cap, plugin hooks).
 - Authentication: https://code.claude.com/docs/en/authentication (claude.ai login needed for
@@ -406,5 +454,8 @@ reference file.
 - Plugins: https://code.claude.com/docs/en/discover-plugins (`claude plugin list` with version, scope
   and status).
 - Skills: https://code.claude.com/docs/en/skills (`${CLAUDE_PLUGIN_ROOT}` in a plugin skill).
-- The installed CLI, `claude mcp --help` and `claude mcp login --help` on version 2.1.282: the
-  `⏸ Pending approval` status, `login` accepting a claude.ai connector, `--no-browser`.
+- The installed CLI, `claude mcp --help`, `claude mcp add --help` and `claude mcp login --help`: the
+  `⏸ Pending approval` status, `--header`, `login` accepting a claude.ai connector, `--no-browser`.
+- Observed while setting up a product on 2026-10-06: a server added mid-session absent until restart,
+  a sign-in from an IDE extension failing, a token reaching the transcript through `claude mcp get` on
+  another project.

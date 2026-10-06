@@ -177,7 +177,13 @@ the names, types and options it returns. `DROP COLUMN` erases the column's value
 
 - A `UNIQUE_ID` column is numbered by Notion: you cannot write a page's number. Only the prefix is
   configurable (`UNIQUE_ID PREFIX 'X'`).
-- Named "ID", it reads as `"userDefined:ID"` in SQL (section 2).
+- **A prefix is unique across the workspace** (observed): a second base asking for a prefix that
+  another base already uses is refused with a 409. Two products of the same owner in one workspace
+  take two prefixes. Propose one per product before creating the column.
+- Named "ID", it reads as `"userDefined:ID"` in SQL (section 2), **and SQL returns only the number**,
+  without the prefix (observed). A fetch of the database or data source does not show the prefix
+  either; a fetch of one entry shows it (`<prefix>-<n>`). To learn an existing base's prefix, fetch its
+  latest entry.
 
 ### Relations
 
@@ -252,3 +258,6 @@ Before each write:
 - Observed in use, September 2026: renaming select options erased the values of the renamed options;
   status options could not be changed; the unique ID column read as `"userDefined:ID"` in SQL; a moved
   database kept its URL.
+- Observed in use, October 2026: SQL on a unique ID column returned the number without its prefix, an
+  entry fetch showed `<prefix>-<n>`, and a prefix already used by another base of the same workspace
+  was refused with a 409.
