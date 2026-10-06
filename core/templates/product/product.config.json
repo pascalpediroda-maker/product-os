@@ -4,7 +4,8 @@
     "name": "",
     "one_liner": "",
     "ui_language": "en",
-    "team_language": "en"
+    "team_language": "en",
+    "ai_agents": false
   },
   "modules": {
     "discovery": false,

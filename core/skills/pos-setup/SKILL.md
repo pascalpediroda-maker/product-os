@@ -1,6 +1,6 @@
 ---
 name: pos-setup
-description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, reconciles an existing CLAUDE.md with the OS rules (names each conflict, proposes a section by diff, never overwrites), asks which of four connectors the installed modules need (Notion for the shared bases, Supabase for the product's database, Amplitude for analytics, Gmail for drafts), checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in or token, least privilege, where the credential lives, the restart a new server needs), tests each with one harmless read, fills the product config after showing the diff, hands the fix backlog base to the Support plugin, lists what is still template, then hands over to `pos-guide`, which shows what the OS offers and where to begin. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/pos-setup".
+description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, reconciles an existing CLAUDE.md with the OS rules (names each conflict, proposes a section by diff, never overwrites), asks four questions about the product (its feedback, roadmap, fix backlog and CRM in Notion; fine tracking of users in Amplitude; a Supabase database; AI agents in production) and derives the connectors from the answers, checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in or token, least privilege, where the credential lives, the restart a new server needs), tests each with one harmless read, fills the product config after showing the diff, creates the Notion bases the owner wanted (CRM, feedback and insights, roadmap) from the OS schemas and hands the fix backlog to the Support plugin, lists what is still template, then hands over to `pos-guide`, which shows what the OS offers and where to begin. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/pos-setup".
 ---
 
 # Setup
@@ -50,6 +50,7 @@ What setup guarantees:
 | Supabase | [references/supabase.md](references/supabase.md) |
 | Amplitude | [references/amplitude.md](references/amplitude.md) |
 | Gmail | [references/gmail.md](references/gmail.md) |
+| The CRM, feedback and roadmap bases | [references/bases/](references/bases/): one schema each |
 | The fix backlog base | the `pos-fix-backlog` skill of the `pos-support` plugin, which owns its schema |
 
 Read a connector's reference file in full before its step. The tool names a connector exposes change
@@ -141,24 +142,37 @@ conflict at its source, with the owner.
 6. **The template's own heading.** A CLAUDE.md copied from the template already has this section below
    its separation line. Step 1b then only checks it against the table.
 
-## Step 2: which connectors this product needs
+## Step 2: four questions about the product
+
+The owner thinks in product terms, not in connectors. Ask about the product; the connectors, the
+bases and the config follow from the answers.
 
 1. **Modules.** Read `modules.*`. On a fresh config they are all `false`: run `claude plugin list`,
-   which prints the installed plugins with their version, scope and status, match each product-OS
-   plugin to its `modules.<function>` key, and confirm with the owner. A plugin you cannot match is
-   asked about, never guessed. The values are written in Step 6.
-2. **Propose the connectors** from the modules, then ask the owner which to set up. The owner decides.
+   which prints the installed plugins with their version, scope and status, and match each `pos-*`
+   plugin to its `modules.<function>` key (`pos-support` to `support`, and so on). A plugin you cannot
+   match is asked about, never guessed. A key set to `true` for a module whose plugin is not
+   installed is reported: a skill would expect what nothing brings. The values are written in Step 6.
+2. **Ask the four questions, in one message, numbered, each answered yes or no.** Each says what a yes
+   brings. On a re-run, ask only those the config does not answer yet.
 
-   | Connector | What it serves | Suggested when |
+   | # | Question | A yes brings |
    |---|---|---|
-   | Notion | the shared bases: `databases.feedback`, `databases.roadmap`, `databases.fix_backlog`, `databases.crm` | always useful to the core: `pos-domain` files product limits in `roadmap` and `fix_backlog`. `support` needs the fix backlog, `discovery` the feedback and the roadmap, `gtm` the CRM |
-   | Supabase | the product's database, read-only by default | the product runs on Supabase and a module works on its data (`delivery`, `support`, `assurance`) |
-   | Amplitude | product analytics: `analytics.provider`, `analytics.project_id` | the product tracks usage in Amplitude and a module reads it (`discovery`, `gtm`) |
-   | Gmail (optional) | drafts for support and go-to-market; never sending | `support` or `gtm` is installed and the owner wants drafts |
+   | 1 | The OS keeps the product's feedback and insights (interview notes included), its opportunities and their PRDs (the roadmap), its fix backlog and its contacts (the CRM) in Notion. Do you want these bases? | the Notion connector, then the four bases created in Step 7 with the OS schemas. The owner may leave one out in the same answer ("not the CRM"); otherwise all four |
+   | 2 | Do you want to follow what users do in the product, finely: funnels, cohorts, one user's real journey? | the Amplitude connector, `analytics.provider` and `analytics.project_id` |
+   | 3 | Does the product have, or will it have, a Supabase database? | the Supabase connector, read-only |
+   | 4 | Will the product run AI agents for its users: an assistant, a chatbot, generated content? | `product.ai_agents: true`. The skills, agents and memory for building and tuning production AI agents come with the Delivery module (AI engineering): planned, not built. Say so |
 
-3. **A connector nobody needs is not installed.** A tool outside these four (another database,
-   another analytics provider) is not covered by this skill: say so, point to that vendor's own MCP
-   documentation, and never improvise its command.
+   Gmail is not one of the four: when Support or Go-to-Market is installed, add one line, "Gmail,
+   optional: customer messages drafted in your mailbox, never sent. Want it?"
+3. **The answers are the go.** A yes to question 1 covers creating every base it names: do not ask
+   again base by base (`rules/collaboration.md`, rule 16). What remains to approve is what the owner
+   has not seen yet: each base's schema (Step 7) and the config diff (Step 6).
+4. **What a yes needs that is not installed.** Question 1 includes the fix backlog, which the
+   `pos-support` plugin carries: when it is not installed, give its install command
+   (`claude plugin install pos-support@product-os --scope project`) with the restart of Step 4, and
+   create the three other bases meanwhile.
+5. **A tool outside these** (another database, another analytics provider) is not covered by this
+   skill: say so, point to that vendor's own MCP documentation, and never improvise its command.
 
 ## Step 3: what is already connected
 
@@ -210,12 +224,12 @@ conflict at its source, with the owner.
    loads once, from the first of: local, project, user, plugin, claude.ai.
 4. **Report.**
 
-   | Connector | Wanted by | Installed (scope) | Authenticated | Tools in this session |
+   | Connector | Wanted (Step 2) | Installed (scope) | Authenticated | Tools in this session |
    |---|---|---|---|---|
-   | Notion | `support`, core | yes (user) | yes | yes |
-   | Supabase | `delivery` | no | | |
-   | Amplitude | nobody | not wanted | | |
-   | Gmail | `gtm` | claude.ai | yes | no: session signed in with an API key |
+   | Notion | question 1: yes | yes (user) | yes | yes |
+   | Supabase | question 3: yes | no | | |
+   | Amplitude | question 2: no | not wanted | | |
+   | Gmail | yes, optional line | claude.ai | yes | no: session signed in with an API key |
 
 ## Step 4: connect each missing one
 
@@ -304,6 +318,7 @@ again. A read that fails is not "connected".
    | `product.name`, `product.one_liner` | the owner, when empty |
    | `product.ui_language`, `product.team_language` | confirm the template's value with the owner |
    | `modules.<function>` | Step 2 |
+   | `product.ai_agents` | the answer to question 4 of Step 2 |
    | `databases.feedback`, `databases.roadmap`, `databases.fix_backlog`, `databases.crm` | for each base that exists, its full `collection://<id>` data source URL, read as `references/notion.md` says. A base that does not exist stays empty |
    | `analytics.provider` | `amplitude` when Amplitude is connected |
    | `analytics.project_id` | the project the owner picks from the Step 5 list |
@@ -344,23 +359,51 @@ one as remaining work, with what to do; setup does not write memory itself.
 - **A copied `CLAUDE.md`** has its product sections still in guidance comments below the separation
   line.
 
-## Step 7: the fix backlog base
+## Step 7: the Notion bases
 
-The Support module owns its base and its schema. Setup does not create it; it hands over.
+Runs when the owner answered yes to question 1 of Step 2 and Notion answered its harmless read. That
+yes is the go to create every base it named: never ask again base by base (rule 16).
 
-- **`modules.support` is true and `databases.fix_backlog` is empty:** offer it once: "The fix backlog
-  is not configured. Shall I run `pos-fix-backlog` to create it in Notion?" On yes, run the `pos-fix-backlog`
-  skill of `pos-support`. It creates the base with its schema (and its ID prefix, which must be
-  unique in the Notion workspace) and writes `databases.fix_backlog` through a shown diff, the same way
-  as Step 6.
-- **`databases.fix_backlog` is already set:** create nothing. `pos-fix-backlog` compares the base with its
-  schema whenever it runs.
-- **The owner wants a fix backlog but `pos-support` is not installed:** say that this plugin
-  carries it, give the install command
-  (`claude plugin install pos-support@product-os --scope project`), and tell the owner to
-  restart the session, set `modules.support` to true, and run setup again.
-- **`modules.support` is false and nobody wants a backlog:** nothing. The key stays empty; say so in the
-  summary.
+| Base | Config key | Schema | Created by |
+|---|---|---|---|
+| CRM: the contacts and their organisations | `databases.crm` | [references/bases/crm.md](references/bases/crm.md) | this step |
+| Feedback & Insights: what users and prospects say, interview notes included | `databases.feedback` | [references/bases/feedback.md](references/bases/feedback.md) | this step |
+| Roadmap: one page per opportunity, from the problem to the specs (FO(E)CUSED), the PRD inside | `databases.roadmap` | [references/bases/roadmap.md](references/bases/roadmap.md) | this step |
+| Fix backlog | `databases.fix_backlog` | the `pos-fix-backlog` skill of `pos-support` | that skill, which owns its schema and its ID prefix |
+
+Read each schema file in full first, and the `pos-tool-conventions` Notion reference.
+
+1. **What already exists.** For each base the owner wanted: a filled key is fetched and compared with
+   its schema, never recreated; differences are reported. The owner may also name a base they already
+   have: fetch it, compare, and point the key to it on the config diff. Only the rest is created.
+2. **Ask once, together, what only the owner knows:** the parent page that will hold the bases (one for
+   all, where the team's shared pages live; without it the connector creates private pages nobody else
+   sees), and the option lists the schemas leave to the product: its personas (shared by the feedback
+   base and the CRM, name for name), its areas (shared by the roadmap and the fix backlog), the
+   roadmap's themes, the CRM's sales motions and target plans. A list that an existing base already
+   holds is read from it and reused, not asked again.
+3. **Show every schema to create in one block,** with the owner's lists in place and the relations
+   that apply, then "OK, or adjust before I create them?". The structure is final once entries exist:
+   option names are checked now (no comma, unique regardless of case).
+4. **Create in dependency order,** announcing each call: CRM, then Feedback & Insights (it points to
+   the CRM), then Roadmap (it points to Feedback & Insights). A relation is created only toward a base
+   that exists. Fetch each base after creating it, compare it with its schema, fix a difference while
+   it is still empty, and read its `collection://` URL.
+5. **The fix backlog,** last, so its relations find their targets: run the `pos-fix-backlog` skill
+   ("Create or check the base"). It asks its ID prefix (unique in the Notion workspace) and creates
+   the base, or checks the existing one. A fix backlog that existed before the feedback base or the
+   CRM gets its relations from them: the feedback base's `Fixes` adds `Source feedback` to it, and
+   `Customer to notify` is added on its side once the CRM exists (the CRM schema gives the statement).
+   An added column renames nothing and erases nothing; it is part of the yes to question 1.
+   - `pos-support` not installed: say that this plugin carries the fix backlog, give its install
+     command (`claude plugin install pos-support@product-os --scope project`), and tell the owner to
+     restart the session, set `modules.support` to true, and run setup again. The other bases are
+     created meanwhile.
+6. **The keys:** one diff for all the bases (key, now, proposed: the `collection://` URL), written once
+   on the OK, the same way as Step 6. `pos-fix-backlog` writes its own key the same way.
+
+A base the owner did not want: nothing is created, its key stays empty, and the summary says which
+skills will say so when they need it.
 
 ## Step 8: commit, then hand over
 
@@ -420,7 +463,8 @@ when a module is installed. Each run checks, reports and fills only what is empt
 - Steps 3 and 5 re-establish the table from scratch: nothing is assumed from an earlier run.
 - Step 4 runs only for connectors that are wanted and not usable.
 - Step 6 fills only empty keys and verifies the filled ones; Step 6b lists only what is still template.
-- Step 7 only hands over to `pos-fix-backlog`, which never creates a second base.
+- Step 7 creates only the bases whose key is empty, and checks the others; `pos-fix-backlog` never
+  creates a second base.
 - A run with nothing to do ends on one line: "Set up, nothing missing." followed by the connector
   table.
 

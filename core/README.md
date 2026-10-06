@@ -61,6 +61,7 @@ One file, read by the hooks and by every skill. Strict JSON: no comments.
 | `product.name`, `product.one_liner` | the product in a name and a sentence |
 | `product.ui_language` | language of every user-facing string |
 | `product.team_language` | language the team and the assistant talk in |
+| `product.ai_agents` | `true` when the product runs AI agents for its users (an assistant, a chatbot, generated content). Asked by `pos-setup`; the AI engineering part of Delivery reads it. A missing key reads as `false` |
 | `modules.<function>` | `true` when that product-function plugin is installed. A skill that needs a missing module says so and continues; it never invents what the module would have brought |
 | `libraries.<id>` | `true` when that external skill library is installed. Native skills route to it when present, and do the work themselves or declare it uncovered when absent |
 | `memory.dir` | where memory files live, relative to the repository root |

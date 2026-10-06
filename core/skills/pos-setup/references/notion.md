@@ -79,8 +79,10 @@ For each shared base that already exists (feedback, roadmap, fix backlog, CRM):
 3. A database with several data sources: ask which one is the base.
 4. Propose `collection://<id>` for `databases.<key>` in setup's config step.
 
-A base that does not exist stays empty; the skill that needs it will say so. Setup creates only the
-fix backlog (`fix-backlog-schema.md`).
+A base that does not exist is created in setup's Step 7 when the owner wanted it (question 1 of
+Step 2): the CRM, feedback and roadmap from the schemas in `references/bases/`, the fix backlog by the
+`pos-fix-backlog` skill. A base the owner did not want stays empty; the skill that needs it will say
+so.
 
 A key already filled is checked by fetching it. One that does not resolve is reported as "configured,
 not reachable": the page may not be shared with the signed-in account. Share the page; never create a
