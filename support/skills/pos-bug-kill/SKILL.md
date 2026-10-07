@@ -25,7 +25,9 @@ cause where it lives, leave the regression test. What a bug kill adds: the verif
 is deployed, the priority, the grouping by area, the release, and the closing of the loop.
 
 A bug kill does not frame an evolution (the Discovery module does) and does not ship a feature (the
-Delivery module does). A bug whose fix is a project of its own (effort L) leaves the bug kill.
+Delivery module does). A bug whose fix is a project of its own (effort L) leaves the bug kill as `Requalified dev`, with
+its analysis and the prompt that starts its build session. Fixes to the product's AI agents are
+part of the bug kill: a bug fix is not only code.
 
 Rule numbers refer to the collaboration rules of `pos-core`, principles to its working
 principles. They are not repeated here. Sections of the Support pivot are cited by number:
@@ -105,8 +107,9 @@ this is read. Name the pivot and the config there (`pivot:product_support_contex
    release ships from that worktree (Step 6). With `git.push_deploys` false, `origin/<main>` is the
    shared reference, not proof of what runs: what runs is read where section 7 says.
 2. **Open entries** of the backlog, with the query of the `pos-fix-backlog` skill ("Reading the backlog"),
-   statuses `To triage`, `To fix`, `In progress`. An entry `In progress` with no commit is left over
-   from an interrupted session: it goes back to `To fix`. SQL gives each entry's number alone; it is
+   statuses `To triage`, `To clarify`, `To fix`, `In progress`. An entry `In progress` with no commit
+   is left over from an interrupted session: it goes back to `To fix`. An entry `To clarify` is read
+   first: when the owner has answered in its body, it goes back to triage. SQL gives each entry's number alone; it is
    cited as `<prefix>-n` with the prefix of section 3.
 3. **In-app reports,** read only, with the query in section 2. Each report absent from the backlog
    (its marker `report:<id>` searched in `Reproduction`, every status included) becomes an entry
@@ -145,8 +148,9 @@ Each entry gets one verdict:
 | **To reproduce** | neither the bug nor its absence shows in the code (UI, performance, AI agent) | `To fix`, `Severity`, `Effort`; the hypothesis and the files added to `Reproduction`; the RED decides |
 | **Already fixed** | a commit contained in `origin/<main>` AND deployed code that can no longer produce the symptom | `Released`, `Commit`, `Version` = "live since <date of the commit>"; in `Reproduction`, "Closed at the bug kill of <date>: fixed by <commit>." |
 | **Superseded by ongoing work** | the code concerned is being rebuilt by work that is alive: a branch or a worktree that moves, or the owner confirms it. A memory note saying "framing in progress" is not enough: a framing once cited this way had stopped. A pure UI defect is never sent to a product framing: it stays in the bug kill | `To fix`, out of the batch; `Reproduction` names the work that takes it over |
-| **Too vague** | nobody can tell what to reproduce | stays `To triage`; one question for the owner |
+| **Too vague, or the owner's decision** | nobody can tell what to reproduce, or two behaviours are possible and the choice is the owner's | `To clarify`: the question written in the entry's page body (what was checked, then the question, with a recommendation when there is one). The owner answers there |
 | **Not a bug** | the deployed behaviour is the designed one | `Dropped`, with the reason. If it is an open product decision, tell the owner; an entry in `databases.feedback` is proposed and written on the owner's OK |
+| **A missing function** | a field, a link, a button or a screen that never existed. Test: did it ever work? If not, it is an evolution, not a fix | `Requalified dev`, with its analysis and the prompt for its build session, like an L: a new function gets its mockup and the owner's go before any code |
 | **Security, cross-tenant leak, data loss** | the risk is plausible | **Stop.** Check yourself, at once, who can really get through (does the row-level policy block it? which role does the path run as?), and tell the owner. Out of the batch, handled on its own with a targeted security audit when the risk is real. A missing application check behind a policy that blocks is a defect, not a leak: say which |
 
 - **A residual found while verifying** (a neighbouring defect, a side effect) becomes **its own
@@ -162,8 +166,8 @@ Each entry gets one verdict:
 - **Memory that the deployed code contradicts** (a verification often finds some): fix the memory
   file in the same task (principle 4), or list it in the handoff if the session stops first.
 - **`Not reproduced` is never set at this step.** It needs a real attempt (Step 4).
-- **Questions on vague entries go in one list.** When the owner no longer knows what an entry meant:
-  `Dropped`.
+- **The questions go in one list** in the report, and each is also in the page body of its
+  `To clarify` entry. When the owner no longer knows what an entry meant: `Dropped`.
 - **Adding evidence to `Reproduction`:** read its current value in rows mode or by fetching the page,
   then write the full new value (`pos-fix-backlog`, "Move and close an entry").
 
@@ -183,8 +187,13 @@ Each entry gets one verdict:
 - *XS*: one file, under an hour.
 - *S*: one area, half a day at most.
 - *M*: several files or a migration, a day at most.
-- *L*: more than a day, or a design decision. **An L leaves the bug kill:** it stays `To fix` and goes
-  to the Delivery module's build workflow, or to Discovery when it needs a product decision.
+- *L*: more than a day, or a design decision. **An L leaves the bug kill:** it goes to
+  `Requalified dev`, with in its page body the analysis (what the user sees, the verified cause at
+  `path:line`, why it is a project) and the prompt ready to paste to start its build session (the
+  Delivery module's build skill when installed: what to read, the steps, the decision to put to the
+  owner before any code). An entry that touches the same agents, the same bench or the same files is
+  attached to it (same status, a pointer to its prompt), so two sessions never work on the same
+  files. An L whose project already runs only points to that project.
 
 **Priority** (the default; when section 6 sets another rule, that rule applies):
 
@@ -200,11 +209,13 @@ equal priority: more users affected first, then the smallest effort.
 
 **Out of the batch:**
 
-- the L entries;
-- the entries of an area under ongoing work: they go to that work's session;
-- prompt fixes to a product AI agent that need an evaluation bench and the owner's judgement of the
-  perceived result (rule 26): a separate AI batch, through the AI engineer role and the product's AI
-  change protocol.
+- the L entries (`Requalified dev`);
+- the entries of an area under ongoing work: they go to that work's session.
+
+**Fixes to the product's AI agents are part of the bug kill.** They make their own batches, grouped
+by agent or by evaluation bench, and follow the product's AI change protocol: the AI engineer role, a
+copy of the agent that production does not resolve, a bench before and after, then the owner's
+judgement of the perceived result (rule 26) before the copy is promoted.
 
 **Services that ship separately:** a fix in a service that does not ship with the app (a background
 worker, a function deployed from a console, an archive the owner uploads) is planned now, with its
@@ -255,7 +266,8 @@ its bugs in priority order. For each bug:
 5. **Commit:** named files only (rule 28), one commit per bug,
    `fix(<area>): <what is fixed> (<prefix>-n)`. Two bugs with one cause: one fix, one commit citing
    both IDs.
-6. **Backlog:** `Fixed (to release)`, `Commit` = the short hash.
+6. **Backlog:** stays `In progress`, `Commit` = the short hash. No intermediate status: `Released`
+   only once the fix is live (Step 6).
 
 **No owner checkpoint per bug:** the validation of the batch covers the session. **Stop and say so**
 only when:
@@ -494,4 +506,4 @@ agent cannot read this skill.
 > touch), then a summary table.
 
 The codes map to the verdicts of Step 2 in the same order: Still present, To reproduce, Already
-fixed, Superseded by ongoing work, Too vague, Not a bug, Security.
+fixed, Superseded by ongoing work, Too vague or the owner's decision, Not a bug, Security.

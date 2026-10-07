@@ -153,6 +153,13 @@ Create nothing.
 5. Change nothing without the owner's go. An option that entries carry is never renamed through the
    connector: the `pos-tool-conventions` Notion reference (section 4) says how a rename keeps its values.
    The base's `ID` prefix is never changed to match the pivot.
+6. **`Status` options that differ from the schema's eight,** on the owner's go:
+   - a missing option (`To clarify`, `Requalified dev` on a base created before them) is added by
+     setting the full list, every current option kept and the new ones added
+     (`ALTER COLUMN "Status" SET SELECT(...)`): options whose name is unchanged keep their values;
+   - an option the schema no longer has (`Fixed (to release)`): first move each entry that carries it
+     to `In progress` (its `Commit` stays), read back that none is left, then set the list without
+     it. An option removed while entries carry it erases their status.
 
 ---
 
@@ -239,8 +246,10 @@ leave a backlog that is right.
 
 | Moment | `Status` | Also write |
 |---|---|---|
+| only the owner can say what to reproduce, or which behaviour is wanted | `To clarify` | the question in the page body: what was checked, the question, a recommendation when there is one. The owner answers there |
+| the fix is a project of its own (effort L) | `Requalified dev` | in the page body: the analysis (what the user sees, the verified cause at `file:line`, why it is a project) and the prompt ready to paste to start the build session. An entry on the same agents, bench or files is attached to it (same status, a pointer to its prompt); one whose project already runs points to that project |
 | a session starts fixing it | `In progress` | |
-| the fix is committed | `Fixed (to release)` | `Commit`: the short hash. The commit message cites `<prefix>-n` |
+| the fix is committed | stays `In progress` | `Commit`: the short hash. The commit message cites `<prefix>-n`. No intermediate status |
 | the fix is live | `Released` | `Version`: the version read on the deployed product, never assumed (the `pos-bug-kill` skill, Step 6) |
 | the deployed code already fixes it | `Released` | `Commit`: the commit on `origin/<git.main_branch>`; `Version`: "live since <date of that commit>"; in `Reproduction`, "Closed at the bug kill of <date>: fixed by <commit>." |
 | a real attempt did not reproduce it | `Not reproduced` | in `Reproduction`, what was tried. Never from reading code alone |
@@ -269,10 +278,11 @@ SELECT "userDefined:ID" AS n, id, "Bug", "Status", "Area", "Severity", "Priority
        "Source", "Users affected", "date:Reported on:start" AS reported,
        "Customer to notify", "Commit", "Version"
 FROM "<the collection:// URL in databases.fix_backlog>"
-WHERE "Status" IN (?, ?, ?)
+WHERE "Status" IN (?, ?, ?, ?)
 ```
 
-with `params` such as `["To triage", "To fix", "In progress"]`.
+with `params` such as `["To triage", "To clarify", "To fix", "In progress"]`. `Requalified dev`
+entries are open too, but belong to their build session, not to a bug kill.
 
 - `n` is the bare number: the entry is cited as `<prefix>-n`, with the `ID prefix` of Support pivot
   section 3.

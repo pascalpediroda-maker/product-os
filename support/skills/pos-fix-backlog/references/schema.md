@@ -23,7 +23,7 @@ A base created earlier by the core `pos-setup` skill has this same schema: nothi
 |---|---|---|
 | `Bug` | title | one line: what the user sees go wrong |
 | `ID` | unique ID, with the product's prefix | numbered by Notion (`<prefix>-1`, `<prefix>-2`...); the prefix is recorded in Support pivot section 3, `FIX` by default; commits and messages cite `<prefix>-n` |
-| `Status` | select | `To triage`, `To fix`, `In progress`, `Fixed (to release)`, `Released`, `Not reproduced`, `Dropped` |
+| `Status` | select | `To triage`, `To clarify`, `To fix`, `In progress`, `Requalified dev`, `Released`, `Not reproduced`, `Dropped`. These eight only |
 | `Severity` | select | `Blocker`, `Major`, `Minor`, `Cosmetic`; definitions in the `pos-bug-kill` skill, Step 3 |
 | `Priority` | select | `P0`, `P1`, `P2`, `P3`; set only by a bug kill, when the owner validates the batch |
 | `Area` | select | the product's own list of areas: the Support pivot, section 3 |
@@ -43,9 +43,10 @@ A base created earlier by the core `pos-setup` skill has this same schema: nothi
 | Status | Means | Set by |
 |---|---|---|
 | `To triage` | filed, not verified yet | whoever files it (`pos-fix-backlog`, "File an entry") |
+| `To clarify` | a question only the owner can answer: what to reproduce, or which of two behaviours is wanted. The question is written in the entry's page body, after what was checked, with a recommendation when there is one; the owner answers there | a bug kill, Step 2 |
 | `To fix` | verified against the deployed reference: still present, to reproduce, or taken over by ongoing work (then out of the batch) | a bug kill, Step 2 |
-| `In progress` | a session is fixing it now | the session that starts the fix |
-| `Fixed (to release)` | fixed and committed, not live yet | the session that commits the fix |
+| `In progress` | a session is fixing it, until the fix is live. Once committed, `Commit` is filled and the status stays | the session that starts the fix |
+| `Requalified dev` | effort L: a project of its own, out of the bug kill. The page body holds the analysis (what the user sees, the verified cause at `file:line`, why it is a project) and the prompt ready to paste to start the build session | a bug kill, Step 3 |
 | `Released` | live; `Version` says in which release, or since when | at release, or at triage when the deployed code already fixes it |
 | `Not reproduced` | a real attempt did not reproduce it | a bug kill, Step 4 only; never from reading code |
 | `Dropped` | not a bug, a test report from the team, or nobody remembers what it was | anyone, with the reason in `Reproduction` |
@@ -65,6 +66,9 @@ A base created earlier by the core `pos-setup` skill has this same schema: nothi
 
 ### Choices, and why
 
+- **No status between `In progress` and `Released`.** A fix committed but not live stays `In progress`
+  with `Commit` filled; `Released` comes once it is live. Observed on the working base: an
+  intermediate "fixed, to release" status broke the owner's filters and was removed.
 - **`Status` is a select, not Notion's status type.** A status property sorts its options into
   Notion's fixed groups (`To-do`, `In progress`, `Complete`), and the groups themselves can only be
   changed in Notion. `Not reproduced` and `Dropped` belong to none of them. The connector's schema
@@ -113,7 +117,7 @@ session is the contract: read it first, and follow it where it differs.
 CREATE TABLE (
   "Bug" TITLE,
   "ID" UNIQUE_ID PREFIX '<prefix>',
-  "Status" SELECT('To triage':gray, 'To fix':red, 'In progress':yellow, 'Fixed (to release)':blue, 'Released':green, 'Not reproduced':brown, 'Dropped':default),
+  "Status" SELECT('To triage':gray, 'To clarify':orange, 'To fix':blue, 'In progress':yellow, 'Requalified dev':purple, 'Released':green, 'Not reproduced':brown, 'Dropped':default),
   "Severity" SELECT('Blocker':red, 'Major':orange, 'Minor':yellow, 'Cosmetic':gray),
   "Priority" SELECT('P0':red, 'P1':orange, 'P2':yellow, 'P3':gray),
   "Area" SELECT(<the product's areas, each 'Name':color>),
