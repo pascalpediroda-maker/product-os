@@ -57,7 +57,7 @@ them.
 
 | Skill | Skills it calls | Agents it calls |
 |---|---|---|
-| `pos-setup` | asks four questions about the product, then creates the Notion bases the owner wanted (CRM, feedback and insights, roadmap) and `pos-fix-backlog` for the fix backlog when Support is installed; hands over to `pos-guide` | none |
+| `pos-setup` | asks five questions about the product, then creates the Notion bases the owner wanted (CRM, feedback and insights, roadmap) and `pos-fix-backlog` for the fix backlog when Support is installed; hands over to `pos-guide` | none |
 | `pos-guide` | none: it reads and recommends | none |
 | `pos-orient` | none: it reads and reports | none |
 | `pos-domain` | `pos-tool-conventions` before reading a connected tool | Phase 1, in parallel and read-only: `unit-analyst-model`, `unit-analyst-configuration`, `unit-analyst-ai`, `unit-analyst-knowledge`. The session leads them, following `unit-analysis-lead` |

@@ -142,8 +142,13 @@ function digest(config) {
       + 'conversation. No fix backlog module is installed here (`modules.support` is not true).';
   }
 
+  const easypanel = text(config.deploy?.provider, '').toLowerCase() === 'easypanel';
+  const follow = easypanel
+    ? ' Before it, check with Easypanel that no build is running; after it, follow the build to green and '
+      + 'check the deployed commit, never saying shipped before (`pos-tool-conventions`, Easypanel reference).'
+    : '';
   const push = pushDeploys
-    ? `A push to \`${main}\` ships to production: push only on the owner's explicit go, for that push. Commit freely, by named files.`
+    ? `A push to \`${main}\` ships to production: push only on the owner's explicit go, for that push.${follow} Commit freely, by named files.`
     : 'Push only when the owner asks. Commit freely, by named files.';
 
   const lines = [

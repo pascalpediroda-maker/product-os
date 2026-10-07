@@ -66,6 +66,18 @@ describe('session rules: with a product config', () => {
     assert.match(ctx, /Push only when the owner asks/);
   });
 
+  test('easypanel as deploy provider: check before the push, follow the build after', () => {
+    const p = makeProduct({ config: baseConfig({ deploy: { provider: 'easypanel', project: 'apps', app_service: 'web' } }) });
+    const ctx = contextOf(start(p));
+    assert.match(ctx, /no build is running/);
+    assert.match(ctx, /follow the build to green/);
+  });
+
+  test('no deploy provider: no build follow-up sentence', () => {
+    const p = makeProduct({ config: baseConfig() });
+    assert.doesNotMatch(contextOf(start(p)), /follow the build/);
+  });
+
   test('push_deploys missing counts as true, main branch from the config', () => {
     const p = makeProduct({ config: baseConfig({ git: { main_branch: 'master' } }) });
     assert.match(contextOf(start(p)), /push to `master` ships to production/);

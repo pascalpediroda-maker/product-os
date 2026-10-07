@@ -1,10 +1,10 @@
 ---
 name: pos-tool-conventions
 description: >
-  How to use the connected tools (Notion, Supabase, Amplitude, Gmail) without breaking anything. Read
+  How to use the connected tools (Notion, Supabase, Amplitude, Gmail, Easypanel) without breaking anything. Read
   the tool's reference before the first call to that tool in a session: Notion before any search,
   fetch, query or write; Supabase before any SQL, migration or branch operation; Amplitude before
-  reading a project, a user, a timeline or a chart; Gmail before reading mail or drafting a message.
+  reading a project, a user, a timeline or a chart; Gmail before reading mail or drafting a message; Easypanel before reading a build or a service, before a push that deploys, and before any restart or redeploy.
   Also holds the rules for every tool: find tool names in the session, announce each call, read only
   on a client's data, a connector shown as connected is not proof it can be called, IDs come from the
   product config, nothing destructive without a go, every write is read back.
@@ -13,7 +13,7 @@ description: >
 # Tool conventions
 
 Connected tools act on live, shared data: the team's bases, the production database, the analytics of
-real users, the owner's mailbox. A call that goes wrong there is seen by others at once, and several
+real users, the owner's mailbox, the server production runs on. A call that goes wrong there is seen by others at once, and several
 cannot be undone by the tool that made them. Every rule here and in the references comes from a call
 that went wrong, or from the tool's own documentation.
 
@@ -30,6 +30,7 @@ it again before the next write.
 | runs SQL, applies a migration, touches a branch or reads logs in Supabase | `references/supabase.md` |
 | reads a project, a user, a timeline, a chart or the taxonomy in Amplitude | `references/amplitude.md` |
 | searches or reads mail, or creates a draft, in Gmail | `references/gmail.md` |
+| reads a build, a service or its logs in Easypanel, precedes or follows a push that deploys, or restarts, stops or redeploys a service | `references/easypanel.md` |
 
 A tool with no reference: apply the rules below, and read the tool's own description and parameter
 schema before the first call. When a call to it teaches something, propose a reference for it.
@@ -103,7 +104,8 @@ under a subscription login.
 
 Shared bases and analytics are named in `.claude/product/product.config.json`: `databases.feedback`,
 `databases.roadmap`, `databases.fix_backlog`, `databases.crm` (for Notion, the `collection://` data
-source) and `analytics.provider`, `analytics.project_id`.
+source), `analytics.provider`, `analytics.project_id`, and `deploy.provider`, `deploy.project`,
+`deploy.app_service`.
 
 - Read the config before the first call that needs one of them. An ID recalled from an earlier session,
   or seen in another product, is not used.
@@ -125,6 +127,7 @@ the answer.
 | Supabase | INSERT, UPDATE or DELETE on real data; any migration; merging, resetting or deleting a branch; deploying a function |
 | Amplitude | creating, changing or deleting taxonomy (events, properties); changing cohorts, flags or experiments; sharing a chart, dashboard or notebook |
 | Gmail | sending, replying, forwarding; trash, spam; adding or removing labels |
+| Easypanel | any restart, stop, deploy or reboot, except relaunching once the killed build of your own push (its reference, section 4) |
 
 - Before a destructive write, read the current state and keep it (the values, the page content, the
   rows) so you can restore it.

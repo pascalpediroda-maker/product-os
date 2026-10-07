@@ -1,6 +1,6 @@
 ---
 name: pos-setup
-description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, reconciles an existing CLAUDE.md with the OS rules (names each conflict, proposes a section by diff, never overwrites), asks four questions about the product (its feedback, roadmap, fix backlog and CRM in Notion; fine tracking of users in Amplitude; a Supabase database; AI agents in production) and derives the connectors from the answers, checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in or token, least privilege, where the credential lives, the restart a new server needs), tests each with one harmless read, fills the product config after showing the diff, creates the Notion bases the owner wanted (CRM, feedback and insights, roadmap) from the OS schemas and hands the fix backlog to the Support plugin, lists what is still template, then hands over to `pos-guide`, which shows what the OS offers and where to begin. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/pos-setup".
+description: The first skill a new product runs, and the one to re-run whenever a connection breaks. Finds the product repository and copies the core templates it lacks, reconciles an existing CLAUDE.md with the OS rules (names each conflict, proposes a section by diff, never overwrites), asks five questions about the product (its feedback, roadmap, fix backlog and CRM in Notion; fine tracking of users in Amplitude; a Supabase database; AI agents in production; deployments through Easypanel) and derives the connectors from the answers, checks what is already connected and callable in this session, walks the owner through each missing one (account, verified add command, sign-in or token, least privilege, where the credential lives, the restart a new server needs), tests each with one harmless read, fills the product config after showing the diff, creates the Notion bases the owner wanted (CRM, feedback and insights, roadmap) from the OS schemas and hands the fix backlog to the Support plugin, lists what is still template, then hands over to `pos-guide`, which shows what the OS offers and where to begin. Idempotent. Use on a fresh install, or when someone says "set up", "connect Notion", "install the connectors", "configure the product", "my Notion tools are missing". "/pos-setup".
 ---
 
 # Setup
@@ -50,6 +50,7 @@ What setup guarantees:
 | Supabase | [references/supabase.md](references/supabase.md) |
 | Amplitude | [references/amplitude.md](references/amplitude.md) |
 | Gmail | [references/gmail.md](references/gmail.md) |
+| Easypanel | [references/easypanel.md](references/easypanel.md) |
 | The CRM, feedback and roadmap bases | [references/bases/](references/bases/): one schema each |
 | The fix backlog base | the `pos-fix-backlog` skill of the `pos-support` plugin, which owns its schema |
 
@@ -142,7 +143,7 @@ conflict at its source, with the owner.
 6. **The template's own heading.** A CLAUDE.md copied from the template already has this section below
    its separation line. Step 1b then only checks it against the table.
 
-## Step 2: four questions about the product
+## Step 2: five questions about the product
 
 The owner thinks in product terms, not in connectors. Ask about the product; the connectors, the
 bases and the config follow from the answers.
@@ -152,7 +153,7 @@ bases and the config follow from the answers.
    plugin to its `modules.<function>` key (`pos-support` to `support`, and so on). A plugin you cannot
    match is asked about, never guessed. A key set to `true` for a module whose plugin is not
    installed is reported: a skill would expect what nothing brings. The values are written in Step 6.
-2. **Ask the four questions, in one message, numbered, each answered yes or no.** Each says what a yes
+2. **Ask the five questions, in one message, numbered, each answered yes or no.** Each says what a yes
    brings. On a re-run, ask only those the config does not answer yet.
 
    | # | Question | A yes brings |
@@ -161,8 +162,9 @@ bases and the config follow from the answers.
    | 2 | Do you want to follow what users do in the product, finely: funnels, cohorts, one user's real journey? | the Amplitude connector, `analytics.provider` and `analytics.project_id` |
    | 3 | Does the product have, or will it have, a Supabase database? | the Supabase connector, read-only |
    | 4 | Will the product run AI agents for its users: an assistant, a chatbot, generated content? | `product.ai_agents: true`. The skills, agents and memory for building and tuning production AI agents come with the Delivery module (AI engineering): planned, not built. Say so |
+   | 5 | Does the product run on your own server, deployed with Easypanel (for example at Hetzner)? | the Easypanel connector, read-only by default, and `deploy.*`: every push that deploys is then checked before and followed to a green build after, instead of being assumed live |
 
-   Gmail is not one of the four: when Support or Go-to-Market is installed, add one line, "Gmail,
+   Gmail is not one of the five: when Support or Go-to-Market is installed, add one line, "Gmail,
    optional: customer messages drafted in your mailbox, never sent. Want it?"
 3. **The answers are the go.** A yes to question 1 covers creating every base it names: do not ask
    again base by base (`rules/collaboration.md`, rule 16). What remains to approve is what the owner
@@ -191,6 +193,7 @@ bases and the config follow from the answers.
    | Supabase | `mcp.supabase.com`, `localhost:54321/mcp`, or a command running `@supabase/mcp-server-supabase` |
    | Amplitude | `mcp.amplitude.com` or `mcp.eu.amplitude.com` |
    | Gmail | a claude.ai entry for Gmail, or `gmailmcp.googleapis.com` |
+   | Easypanel | `https://<the panel's domain>/api/mcp` |
 
    Statuses: `✔ Connected`, `! Needs authentication`, `✘ Failed to connect`, and `⏸ Pending approval`
    for a `.mcp.json` server not yet approved. `get` also gives the entry's scope.
@@ -305,6 +308,7 @@ it, and show the result in one line.
 | Supabase | list the project's tables | how many, and one name. Never a row |
 | Amplitude | list the projects the account can access | names and IDs (needed in Step 6) |
 | Gmail | list the mailbox labels | how many. Never a message, never a draft |
+| Easypanel | the last action of the service the owner names (`listActions`, `limit: 1`) | its status and commit message. Never a procedure that returns environment variables |
 
 A read that fails: give the error in one line and check the reference file's traps before trying
 again. A read that fails is not "connected".
@@ -322,6 +326,7 @@ again. A read that fails is not "connected".
    | `databases.feedback`, `databases.roadmap`, `databases.fix_backlog`, `databases.crm` | for each base that exists, its full `collection://<id>` data source URL, read as `references/notion.md` says. A base that does not exist stays empty |
    | `analytics.provider` | `amplitude` when Amplitude is connected |
    | `analytics.project_id` | the project the owner picks from the Step 5 list |
+   | `deploy.provider`, `deploy.project`, `deploy.app_service` | `easypanel` when Easypanel answered its read; the project and the service a push to the main branch deploys, named by the owner and confirmed by that read |
    | `git.main_branch` | `git -C <root> symbolic-ref --short refs/remotes/origin/HEAD` without its `origin/` prefix, confirmed by the owner; if it is not set, ask |
    | `git.push_deploys` | the owner's answer to "Does a push to `<main>` ship to production?" |
 
@@ -329,6 +334,7 @@ again. A read that fails is not "connected".
    - the Supabase project reference: it lives in the connector's address (`project_ref`), in
      `.mcp.json`;
    - the Amplitude data region: in the connector's address;
+   - the Easypanel panel's address: in the connector's address;
    - Gmail: nothing to record.
 3. **What setup leaves alone:** `libraries.*`, `memory.*`, `routing.*`, `reading_gate.*`, `pivots.*`.
    They keep their values; Step 6b says which of them are still template.

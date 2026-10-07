@@ -31,7 +31,7 @@ starts, not in a session already open.
 
 **3. Run `/pos-setup`.** It may be listed as `/pos-core:pos-setup`. It finds the repository, copies the
 templates it lacks without overwriting anything, connects the tools the product needs (Notion,
-Supabase, Amplitude, Gmail) with least privilege and no credential in the repository, fills
+Supabase, Amplitude, Gmail, Easypanel) with least privilege and no credential in the repository, fills
 `.claude/product/product.config.json` after showing you the diff, offers to create the fix backlog
 when Support is installed, and says what is left.
 

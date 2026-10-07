@@ -54,6 +54,11 @@
     "provider": "",
     "project_id": ""
   },
+  "deploy": {
+    "provider": "",
+    "project": "",
+    "app_service": ""
+  },
   "git": {
     "main_branch": "main",
     "push_deploys": true

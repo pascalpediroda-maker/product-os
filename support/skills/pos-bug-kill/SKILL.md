@@ -367,7 +367,9 @@ Over the whole batch, then one report:
   is a production release.
 - **Before the push** (rule 29): fetch, list the batch's commits, check that `origin/<main>` has not
   moved on the same files, and run the type-check and the tests on the combination that will be
-  pushed.
+  pushed. With `deploy.provider` set to `easypanel`: no build running, no push by another session
+  less than three minutes old, the machine calm (`pos-tool-conventions`, Easypanel reference,
+  section 3).
 - **Ship only the batch's commits:** from the bug kill worktree (rebased on `origin/<main>`, then
   `git -C <worktree> push origin HEAD:<main>`), or cherry-picked onto a temporary worktree based on
   `origin/<main>`. Never the local `<main>` when it carries other sessions' work. Remove the temporary
@@ -378,7 +380,10 @@ Over the whole batch, then one report:
   the part of the version the product keeps for functional releases.
 - **Check what is live** (rule 30, principle 7): the batch's commits are in `origin/<main>` fetched
   now, and the version read where the pivot says has changed. A source the pivot marks as not to
-  trust does not count.
+  trust does not count. With `deploy.provider` set to `easypanel`, follow the build of
+  `deploy.app_service` to `done` and check the deployed commit (Easypanel reference, section 4); a
+  killed or orange build of this push is relaunched once, as that section says. No entry goes to
+  `Released` before.
 - **The "Fixes" release note** is the list of entries moved to `Released` with this `Version`: a
   filter on the backlog. No separate document until the product has an in-app changelog (Release &
   Operations).

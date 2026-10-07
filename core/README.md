@@ -22,7 +22,7 @@ It guarantees three things:
 | Session rules | `hooks/session-rules.mjs` | at session start, injects a digest of the rules built from the config (where a deferred bug goes, who pushes, where memory is read), whatever the product's own CLAUDE.md says |
 | Reading gate | `hooks/reading-gate.mjs` | a gated skill cannot run a shell or write a file before it has read the files the config requires |
 | Guards | `hooks/guard-destructive-git.mjs`, `hooks/guard-destructive-delete.mjs` | ask before commands that destroy work: reset to the remote, force push, worktree or branch removal, recursive deletes, a push that deploys |
-| `pos-setup` | `skills/pos-setup/` | the first skill a new product runs: templates in place, an existing CLAUDE.md reconciled with the OS rules, the connectors it needs (Notion, Supabase, Amplitude, Gmail) created, signed in with least privilege and tested, credentials kept out of the repository, the config filled |
+| `pos-setup` | `skills/pos-setup/` | the first skill a new product runs: templates in place, an existing CLAUDE.md reconciled with the OS rules, the connectors it needs (Notion, Supabase, Amplitude, Gmail, Easypanel) created, signed in with least privilege and tested, credentials kept out of the repository, the config filled |
 | `pos-guide` | `skills/pos-guide/` | the tour for this product: which skill to start a session with, what each calls, the agents by trade, where to begin, with one recommendation. Its catalog (`references/catalog.md`) maps every skill and agent of the OS, installed or planned; a plugin that ships updates it in the same commit |
 | `pos-tool-conventions` | `skills/pos-tool-conventions/` | how to use each connected tool without breaking anything, one reference per tool, every fact checked on the vendor's documentation |
 | `pos-orient` | `skills/pos-orient/` | where things stand, re-read from what is written and from git, never recalled |
@@ -75,6 +75,7 @@ One file, read by the hooks and by every skill. Strict JSON: no comments.
 | `pivots.domain` | the domain pivot file name inside `pivots.dir` |
 | `databases.feedback` / `roadmap` / `fix_backlog` / `crm` | the shared bases. For Notion, the full data source URL, `collection://<id>`, used as it is (it is also the table name in Notion's SQL mode). Empty means not configured: the skill that needs it says so |
 | `analytics.provider`, `analytics.project_id` | where product analytics are read |
+| `deploy.provider`, `deploy.project`, `deploy.app_service` | where the product runs, read by the skills that push and check what is live: `easypanel` (the only provider with a reference today), the panel project, and the service a push to `git.main_branch` deploys. Empty means no deployment connector: a skill says it cannot follow the build |
 | `git.main_branch`, `git.push_deploys` | when `push_deploys` is true (the default when the key is missing), a push to `main_branch` ships to production: the git guard asks before it, and it only happens on an explicit go |
 
 A skill that is not listed under `reading_gate.skills` is not gated.
