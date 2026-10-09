@@ -452,7 +452,9 @@ Next
 2. Run `pos-guide`: which skill to start a session with, what each one calls, the agents by trade, and
    where to begin for this product. The skills and agents come from the plugins: the product's
    `.claude/skills` and `.claude/agents` stay empty, and that is expected.
-3. Then the way in it recommends (for a product whose domain pivot is empty, `pos-domain`).
+3. Then the way in it recommends. Never `pos-domain` by default: it integrates a unit of the trade
+   into a product that already runs, and a product with no database or screens yet starts by
+   building them.
 ```
 
 ---
