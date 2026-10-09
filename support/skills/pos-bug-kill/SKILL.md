@@ -25,7 +25,7 @@ cause where it lives, leave the regression test. What a bug kill adds: the verif
 is deployed, the priority, the grouping by area, the release, and the closing of the loop.
 
 A bug kill does not frame an evolution (the Discovery module does) and does not ship a feature (the
-Delivery module does). A bug whose fix is a project of its own (effort L) leaves the bug kill as `Requalified dev`, with
+Build module does). A bug whose fix is a project of its own (effort L) leaves the bug kill as `Requalified dev`, with
 its analysis and the prompt that starts its build session. Fixes to the product's AI agents are
 part of the bug kill: a bug fix is not only code.
 
@@ -71,7 +71,7 @@ In this order, each in full. Nothing else happens before, not even a search in t
    `product.team_language`, `product.ui_language`.
 2. **The Support pivot**, `<pivots.dir>/product_support_context.md`, all of it.
 3. **The memory index** and every file in `memory.always`.
-4. **The release path:** when `modules.release_ops` is true, the Release & Operations pivot that
+4. **The release path:** when `modules.build` is true, the Build pivot that
    section 7 points to; otherwise section 7 itself.
 5. **The backlog contract:** the `pos-fix-backlog` skill (its sections "File an entry", "Move and close an
    entry" and "Reading the backlog") and its schema,
@@ -190,7 +190,7 @@ Each entry gets one verdict:
 - *L*: more than a day, or a design decision. **An L leaves the bug kill:** it goes to
   `Requalified dev`, with in its page body the analysis (what the user sees, the verified cause at
   `path:line`, why it is a project) and the prompt ready to paste to start its build session (the
-  Delivery module's build skill when installed: what to read, the steps, the decision to put to the
+  Build module's build skill when installed: what to read, the steps, the decision to put to the
   owner before any code). An entry that touches the same agents, the same bench or the same files is
   attached to it (same status, a pointer to its prompt), so two sessions never work on the same
   files. An L whose project already runs only points to that project.
@@ -219,7 +219,7 @@ judgement of the perceived result (rule 26) before the copy is promoted.
 
 **Services that ship separately:** a fix in a service that does not ship with the app (a background
 worker, a function deployed from a console, an archive the owner uploads) is planned now, with its
-release path from section 7 or the Release & Operations pivot. Discovered at release, it strands the
+release path from section 7 or the Build pivot. Discovered at release, it strands the
 batch.
 
 **The batch:** all P0, then P1 and P2 grouped by area. **Small batches** unless section 6 sets
@@ -374,9 +374,9 @@ Over the whole batch, then one report:
   `git -C <worktree> push origin HEAD:<main>`), or cherry-picked onto a temporary worktree based on
   `origin/<main>`. Never the local `<main>` when it carries other sessions' work. Remove the temporary
   worktree afterwards (rule 42).
-- **Each service ships its own way,** as section 7 or the Release & Operations pivot says, planned at
+- **Each service ships its own way,** as section 7 or the Build pivot says, planned at
   Step 3. Never ask the owner to trigger by hand a deploy that the push already triggers.
-- **Version:** as section 7 or the Release & Operations pivot defines it. A fix release never moves
+- **Version:** as section 7 or the Build pivot defines it. A fix release never moves
   the part of the version the product keeps for functional releases.
 - **Check what is live** (rule 30, principle 7): the batch's commits are in `origin/<main>` fetched
   now, and the version read where the pivot says has changed. A source the pivot marks as not to
@@ -423,9 +423,9 @@ brought (principle 10).
 | in-app reports (section 2 says none, or is empty) | skips Step 1.3 and says so |
 | `databases.crm` empty | `Customer to notify` stays empty; the customers to tell are listed in the final report by their account, for the owner |
 | `databases.feedback` empty | no `Source feedback`; open product decisions go to the owner in the report |
-| `modules.release_ops` false and section 7 empty | asks the owner how a fix release ships before Step 6 (production is the owner's, rule 13), then proposes the answer for section 7 and writes it on the OK |
-| `modules.delivery` false, or no agent of a role | the main session does the fix and says so; L entries stay `To fix`, noted "no Delivery module" |
-| `modules.assurance` false | the regression test stays with the fix; no suite owner, said once |
+| `modules.build` false and section 7 empty | asks the owner how a fix release ships before Step 6 (production is the owner's, rule 13), then proposes the answer for section 7 and writes it on the OK |
+| `modules.build` false, or no agent of a role | the main session does the fix and says so; L entries stay `To fix`, noted "no Build module" |
+| `modules.build` false | the regression test stays with the fix; no suite owner, said once |
 | a zone of section 3 absent from `routing.zones` | said; the area's memory is found through the memory index, and a correction of section 3 is proposed |
 | no Gmail tool | drafts are given as text in the report |
 
@@ -468,7 +468,7 @@ brought (principle 10).
 |---|---|---|
 | `pos-fix-backlog` | one bug at a time | fills the backlog; its sections "File an entry" and "Move and close an entry" are the contract every backlog write here follows |
 | `pos-bug-kill` | empty the backlog in batches | this skill |
-| Delivery module | an L fix, an evolution | receives what leaves the bug kill; provides the specialist agents |
+| Build module | an L fix, an evolution | receives what leaves the bug kill; provides the specialist agents |
 | Discovery module | a "bug" that is a product decision | receives, through the owner, the `Dropped` entries worth keeping (`databases.feedback`) |
 | Assurance module | regression suite, audits | owns the tests the fixes leave; its full audit is not run here, and its unhandled findings arrive through the backlog (`Source` = `Audit`) |
 | Release & Operations module | release path, version, release notes | Step 6 follows its pivot when it is installed |

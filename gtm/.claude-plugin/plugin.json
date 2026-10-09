@@ -1,0 +1,19 @@
+{
+  "name": "pos-gtm",
+  "displayName": "Product OS: Go-to-Market",
+  "description": "Go-to-Market for the product OS: the GTM router where a session about positioning, pricing, prospecting or content starts, coaching first and producing on a go through a vendored marketing skills library, and the method for social post visuals.",
+  "license": "MIT",
+  "dependencies": [
+    "pos-core"
+  ],
+  "keywords": [
+    "claude-code",
+    "product-management",
+    "saas",
+    "go-to-market",
+    "marketing",
+    "positioning",
+    "pricing",
+    "notion"
+  ]
+}

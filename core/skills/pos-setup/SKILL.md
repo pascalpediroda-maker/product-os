@@ -161,7 +161,7 @@ bases and the config follow from the answers.
    | 1 | The OS keeps the product's feedback and insights (interview notes included), its opportunities and their PRDs (the roadmap), its fix backlog and its contacts (the CRM) in Notion. Do you want these bases? | the Notion connector, then the four bases created in Step 7 with the OS schemas. The owner may leave one out in the same answer ("not the CRM"); otherwise all four |
    | 2 | Do you want to follow what users do in the product, finely: funnels, cohorts, one user's real journey? | the Amplitude connector, `analytics.provider` and `analytics.project_id` |
    | 3 | Does the product have, or will it have, a Supabase database? | the Supabase connector, read-only |
-   | 4 | Will the product run AI agents for its users: an assistant, a chatbot, generated content? | `product.ai_agents: true`. The skills, agents and memory for building and tuning production AI agents come with the Delivery module (AI engineering): planned, not built. Say so |
+   | 4 | Will the product run AI agents for its users: an assistant, a chatbot, generated content? | `product.ai_agents: true`. The skills, agents and memory for building and tuning production AI agents come with the Build module (AI engineering): planned, not built. Say so |
    | 5 | Does the product run on your own server, deployed with Easypanel (for example at Hetzner)? | the Easypanel connector, read-only by default, and `deploy.*`: every push that deploys is then checked before and followed to a green build after, instead of being assumed live |
 
    Gmail is not one of the five: when Support or Go-to-Market is installed, add one line, "Gmail,

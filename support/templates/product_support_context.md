@@ -1,12 +1,13 @@
 # Support context
 
-Skeleton version 2, maintained by `pos-support`.
+Skeleton version 3, maintained by `pos-support`.
 
 Copy this file to `<pivots.dir>/product_support_context.md` (by default
 `.claude/product/product_support_context.md`) and fill it before running a skill of the Support
 module. It is the Support pivot: how bugs and reports reach the team, how the fix backlog is
 organised for this product, who counts as a customer and how they are told, how a fix reaches them,
-and where a bug may be reproduced. The `pos-fix-backlog` and `pos-bug-kill` skills read it first.
+where a bug may be reproduced, where the help center lives, and where the activity of users is read.
+Every skill of the Support module reads it first.
 
 ## Who reads it
 
@@ -14,6 +15,10 @@ and where a bug may be reproduced. The `pos-fix-backlog` and `pos-bug-kill` skil
 |---|---|
 | `pos-fix-backlog` | the channel a bug came through (1), the report marker (2), the Area list and the ID prefix (3), who is in the team (4), how the customer to notify is found (5) |
 | `pos-bug-kill` | all of it: the in-app reports it files (2), the memory each area loads and the ID prefix its commits cite (3), the customer bonus (4), the messages (5), the priority rule (6), the release path (7), where it reproduces (8) |
+| `pos-support` | the channels (1), the areas and their memory (3), the team (4), the customers to notify (5), the test space (8), the activity tables and events that rebuild a user's journey (10) |
+| `pos-kb-article` | the help center: where it lives, its scripts, the screenshot space, the copy the product's AI reads (9); the test space (8) |
+| `pos-user-activity-report` | the activity tables, events and cohorts (10); the team (4), so its accounts are left out |
+| the help content hook | the paths whose change may leave help content or screenshots stale (9) |
 | Any session that meets a bug it will not fix now | the Area list (3) and the team (4), to file the entry right |
 
 ## Rules for everything below the separation line
@@ -33,7 +38,7 @@ and where a bug may be reproduced. The `pos-fix-backlog` and `pos-bug-kill` skil
 5. **Language.** Headings and table columns stay in English, so skills find them. Content is written
    in `product.team_language`.
 6. **Section names are a contract.** Skills cite sections by number and name. Keep them; add the
-   product's own sections after section 8.
+   product's own sections after section 10.
 
 ## The sections
 
@@ -45,8 +50,10 @@ and where a bug may be reproduced. The `pos-fix-backlog` and `pos-bug-kill` skil
 | 4 | The team | who counts as the team, so their reports are not counted as customer reports, and how a test report is recognised |
 | 5 | Customers to notify | how the author of a report is matched to a record in `databases.crm`, how their language is found, how a direct link is built, who sends |
 | 6 | Priority rule | the default rule of the `pos-bug-kill` skill, or this product's override with its reason, and the batch size |
-| 7 | Fix releases | how a minor fix release ships, service by service, how its version is set and read once live; or the pointer to the Release & Operations pivot |
+| 7 | Fix releases | how a minor fix release ships, service by service, how its version is set and read once live; or the pointer to the Build pivot |
 | 8 | Test space | where a bug may be reproduced and a fix tested, what must never be used, the test accounts |
+| 9 | Help center | where the help articles live and the page that tracks their state, the product name to use, the copy the product's AI reads and how it is re-ingested, how screenshots are captured and stored (never a public bucket), the limitations to state, the paths whose change makes help content stale |
+| 10 | Activity | where sign-ups, the server event log, sessions and profiles live, the key that joins them, the events that mark each step of the funnel, the analytics events and where they fire, where the assistant's conversations are read, the cohorts |
 
 ---
 
@@ -214,7 +221,7 @@ write the rule in full and its reason in one sentence.
 
 <!--
 Guidance: how a minor fix release reaches users, and how to prove it did.
-- When the Release & Operations module is installed (`modules.release_ops` true): write one line,
+- When the Release & Operations module is installed (`modules.build` true): write one line,
   the pointer to its pivot by its file name in `pivots.dir`, and nothing else unless a fix release
   differs from a functional one.
 - Otherwise, fill the table: one row per service a fix can touch (the app, a background worker, a
@@ -230,7 +237,7 @@ Guidance: how a minor fix release reaches users, and how to prove it did.
   the fix backlog), until the product has an in-app changelog.
 -->
 
-**Release & Operations pivot:** <!-- file name in pivots.dir, when modules.release_ops is true -->
+**Build pivot:** <!-- file name in pivots.dir, when modules.build is true -->
 
 | Service | Ships by | Who triggers it | How to check it is live |
 |---|---|---|---|
@@ -275,6 +282,142 @@ are the rules; write here the product's facts.
 **Evidence:** <!-- pointer to the folder named in CLAUDE.md -->
 
 **Dev server:**
+
+## 9. Help center
+
+<!--
+Guidance: everything `pos-kb-article` needs to write, illustrate and keep help articles in sync, and
+the paths the help content hook watches. "None" is a finding: a product with no help center yet says
+so, and the skill asks the owner where it should live before writing anything.
+- Lives in: the tool (for example Notion) and the parent page of the help center.
+- Work center: the page that tracks the help center's state: the gap analysis (features with no
+  article), the articles written, the pages to clean. The skill reads it before writing and updates it
+  after. Its page ID is written here: it is a page, not one of the shared bases of the config.
+- Article bases: one row per topic, with the base that holds its articles (`collection://...`) and
+  the name of its title property.
+- Product name: the name every article uses, and any former name that must never appear.
+- Copy read by the product's AI: when the product's AI assistant reads help content, the file that
+  holds the short copy of each article, the section how-to entries go into, and the command that
+  re-ingests it. "None" when no AI reads help content.
+- Screenshots: the capture command, the upload command, how a new shot is added to the capture
+  script, how the script signs in. Storage: a private store only, files reached through signed URLs
+  only; never a public bucket, whatever the content. How an image reaches an article (for example
+  uploaded into the help center tool itself, since a signed link expires).
+- Screenshot space: the test space and account captures are taken from (a pointer to section 8 when
+  it is the same), and which views show empty states there.
+- Obsolete pages: the title prefixes that flag a page for the owner to delete, since a help center
+  page often cannot be deleted through the connector.
+- Known limitations: what an article touching a feature must state, until it changes.
+- Paths: the JSON block below is read by the help content hook after each commit. Each entry is a
+  regular expression matched against the paths a commit changed (relative to the repository root,
+  forward slashes) and the label the reminder shows. `help_content`: paths whose change may leave an
+  article or the AI's copy out of date. `screenshots`: paths of the views the capture script covers.
+  Keep the info string of the block (`json pos-help-paths`): the hook finds the block by it.
+-->
+
+**Lives in:**
+
+**Work center page:**
+
+| Topic | Parent page | Articles base | Title property |
+|---|---|---|---|
+| | | | |
+
+**Product name, and names never used:**
+
+**Copy read by the product's AI, and how it is re-ingested:**
+
+**Capture command:**
+
+**Upload command:**
+
+**Adding a shot, and how the script signs in:**
+
+**Storage, and how an image reaches an article:** a private store, signed URLs only.
+
+**Screenshot space:**
+
+**Obsolete pages are renamed with:** `⚠️ OBSOLETE: <title>` (describes a former product or behaviour), `⚠️ ORPHAN: <title>` (documents something the code no longer has), `⚠️ DUPLICATE: <title>`.
+
+**Known limitations to state:**
+
+| Feature | Limitation | Until |
+|---|---|---|
+| | | |
+
+**Paths that make help content stale (read by the hook):**
+
+```json pos-help-paths
+{
+  "help_content": [],
+  "screenshots": []
+}
+```
+
+## 10. Activity
+
+<!--
+Guidance: where a user's real activity is read, for `pos-user-activity-report` and for the journey
+`pos-support` rebuilds at RED. Placeholders only, no production values, no user named.
+- Accounts: the table that holds sign-ups, and its columns for the ID, the email, the creation date
+  and the confirmation date.
+- Join key: the one ID that is the same across accounts, events, sessions and profiles, and any trap
+  (an ID that looks the same and is not).
+- Server event log: the table, its columns (user, action, details, date, space), and the actions of
+  the funnel in order, each with what it means when it is the last one a user reached.
+- Sessions: the table and its columns (start, last heartbeat, end, duration, entry page, source,
+  device, country).
+- Profile: the table and the columns that say who the person is (name, organisation, role, country).
+- Event roles: the events the cohorts of `pos-user-activity-report` use, each named by its role, with
+  the product's event name and where it is read. The provider and project are in the config
+  (`analytics.*`).
+- Client events fire: where client-side analytics events are sent from (for example production only),
+  and the memory file that lists the events.
+- Assistant conversations: where what a user said to the product's AI assistant can be read (a log
+  route, a table), or "none".
+- Cohorts: "Default." keeps the OS cohorts of `pos-user-activity-report`; otherwise the product's own
+  definitions, in the event roles below.
+- Uncovered unit: how to tell that a unit a user explored is not covered by the product yet (the
+  coverage of the domain pivot), or "not applicable".
+- Default window: how far back a report looks when the owner gives no window (the OS default is 7
+  days).
+-->
+
+**Accounts:**
+
+**Join key, and its traps:**
+
+**Server event log:**
+
+| Step | Action | When it is the last one reached |
+|---|---|---|
+| | | |
+
+**Sessions:**
+
+**Profile:**
+
+**Event roles:**
+
+| Role | Event name | Read in (server log or analytics) |
+|---|---|---|
+| sign-up started | | |
+| sign-up confirmed | | |
+| space created | | |
+| first exploration of a unit | | |
+| activation (first project created) | | |
+| session start | | |
+| deep usage | | |
+
+**Client events fire:**
+
+**Assistant conversations read at:**
+
+**Cohorts:** Default.
+
+**Uncovered unit:**
+
+**Default window:** 7 days.
 
 ## Change log
 

@@ -390,12 +390,12 @@ already settle.
 
 | Signal | Goes to | How |
 |---|---|---|
-| A capability the product lacks | Delivery (`modules.delivery`) | ticket in `databases.roadmap`; built once, for every unit, through Delivery's build workflow |
+| A capability the product lacks | Delivery (`modules.build`) | ticket in `databases.roadmap`; built once, for every unit, through Delivery's build workflow |
 | A capability that misbehaves | Support and Success (`modules.support`) | entry in `databases.fix_backlog` with its reproduction |
 | A prompt change for a product AI agent | Delivery, AI Engineering | the change, its reason, and the pairs to re-run; applied through its change protocol |
-| Calibration pairs and results | Assurance (`modules.assurance`) | the pairs become the unit's evaluations, re-run on every change to a shared evaluator; calibration itself stays here |
+| Calibration pairs and results | Assurance (`modules.build`) | the pairs become the unit's evaluations, re-run on every change to a shared evaluator; calibration itself stays here |
 | A check missing from the QA script | Delivery, then Assurance owns it | ticket |
-| Activation | Release and Operations (`modules.release_ops`) when configuration ships through code; Go-to-Market (`modules.gtm`) to announce; Support and Success for help content | the coverage map line and the record |
+| Activation | Release and Operations (`modules.build`) when configuration ships through code; Go-to-Market (`modules.gtm`) to announce; Support and Success for help content | the coverage map line and the record |
 | Which unit to onboard next | Discovery (`modules.discovery`) | the coverage map, read next to the demand signals in `databases.feedback` |
 
 When a module is not installed, say "`<module>` is not installed: <what is left undone>", write it in

@@ -16,13 +16,16 @@ Code. Nothing else is needed before them: `/pos-setup` copies the templates and 
 ```
 claude plugin marketplace add pascalpediroda-maker/product-os --scope project
 claude plugin install pos-core@product-os --scope project
+claude plugin install pos-build@product-os --scope project
+claude plugin install pos-discovery@product-os --scope project
 claude plugin install pos-support@product-os --scope project
+claude plugin install pos-gtm@product-os --scope project
 ```
 
 - `marketplace add` comes first, once. `marketplace update` only refreshes a marketplace that was
   already added, and fails on a machine where it never was.
-- The second line installs the core. The third is optional: it adds the Support & Success function
-  (fix backlog, bug kill), and installs the core with it if it is not there yet.
+- The core first, then one plugin per router: build, discovery, support, go-to-market. Each
+  installs the core with it if it is not there yet; discovery also installs build.
 - The marketplace is a GitHub repository. While it is private, your own git access to it is what
   lets the CLI fetch it.
 
@@ -35,22 +38,25 @@ Supabase, Amplitude, Gmail, Easypanel) with least privilege and no credential in
 `.claude/product/product.config.json` after showing you the diff, offers to create the fix backlog
 when Support is installed, and says what is left.
 
-**4. Run `/pos-guide`** in a new session. It shows which skill to start a session with depending on the
-situation, what each skill calls, the agents grouped by trade, and where to begin for your product,
-with one recommendation.
+**4. Run `/pos-guide`** in a new session. It shows the four routers, the path of a product (frame the
+app, build the V0.1, ship it, evolve it, with go-to-market alongside), where your product is on it,
+and the router to start the next session with.
+
+**How a session works:** it starts with the router of what you come to do: `/pos-build` to build
+and ship, `/pos-opportunity` for an idea, feedback or a spec, `/pos-support` for a bug or a
+customer, `/pos-gtm` to sell and position. The router loads only that use's pivot, memory and
+connectors, then shows what you can do from there.
 
 The skills and agents live in the plugins: your repository's `.claude/skills` and `.claude/agents`
 stay empty, and that is expected. Every OS skill starts with `pos-`: type `/pos-guide`, `/pos-orient`,
 and so on. The menu may show them with their plugin name in front (`/pos-core:pos-orient`); the short
 form works as long as no other command has the same name, which is what the prefix ensures. `/agents`
-lists the agents. The full map, installed and planned, is the
-[catalog](core/skills/pos-guide/references/catalog.md).
+lists the agents. The full map is the [catalog](core/skills/pos-guide/references/catalog.md).
 
 **Naming rule for every plugin of this marketplace:** the plugin is `pos-<function>`, each skill it
 ships is `pos-<name>`.
 
-Every session then starts with `/pos-orient`: it re-reads the config, the memory and git, and says where
-things stand.
+When unsure where the work stands (checkout, git, open handoffs), `/pos-orient`.
 
 ## Which scope
 
@@ -65,7 +71,10 @@ things stand.
 ```
 claude plugin marketplace update product-os
 claude plugin update pos-core@product-os --scope project
+claude plugin update pos-build@product-os --scope project
+claude plugin update pos-discovery@product-os --scope project
 claude plugin update pos-support@product-os --scope project
+claude plugin update pos-gtm@product-os --scope project
 ```
 
 Then start a new session: an update applies at the next start. Use the scope you installed with.
@@ -75,20 +84,22 @@ Then start a new session: an update applies at the next start. Use the scope you
 | Plugin | Function | What it carries |
 |---|---|---|
 | `pos-core` | Foundation + Domain, always installed | product config and routing table, memory templates, the reading gate, guards on destructive commands, collaboration rules and principles, `pos-setup`, `pos-guide`, `pos-tool-conventions`, `pos-orient`, `pos-handoff`, `pos-domain` and its four analysts |
-| `pos-support` | Customer Support & Success (`modules.support`) | `pos-fix-backlog` (the base where every bug not fixed at once is filed), `pos-bug-kill` (empties it into a minor fix release and closes the loop with customers), the Support pivot |
+| `pos-build` | Build, design, quality, release (`modules.build`) | the `/pos-build` router, `pos-dev` and its team, `pos-check-rls`, `pos-post-impl-checklist`, `pos-audit` and its seven auditors, `pos-visual-identity`, the Build pivot, the heavy-SQL guard |
+| `pos-discovery` | Discovery (`modules.discovery`) | the `/pos-opportunity` router, `pos-prd` with its FO(E)CUSED page and five perspectives, `pos-strategy`, `pos-meeting-notes`, `pos-meeting-transcript`, the Discovery pivot |
+| `pos-support` | Support & Success (`modules.support`) | the `/pos-support` router, `pos-fix-backlog`, `pos-bug-kill`, `pos-kb-article`, `pos-user-activity-report`, the Support pivot |
+| `pos-gtm` | Go-to-market (`modules.gtm`) | the `/pos-gtm` router and coach, the marketing library, `pos-social-visual`, the GTM pivot |
 
-Planned, each built the day a product needs it: Discovery, Design, Delivery, Assurance, Release &
-Operations, Go-to-Market. A skill that needs a module that is not installed says so and continues; it
-never invents what the module would have brought.
+A skill that needs a module that is not installed says so and continues; it never invents what the
+module would have brought.
 
 Each plugin's own README says what it guarantees and what to fill first: [`core/`](core/README.md),
-[`support/`](support/README.md).
+[`build/`](build/README.md), [`discovery/`](discovery/README.md), [`support/`](support/README.md), [`gtm/`](gtm/README.md).
 
 ## In this repository
 
 | Folder | What |
 |---|---|
-| `core/`, `support/` | the plugins |
+| `core/`, `build/`, `discovery/`, `support/`, `gtm/` | the plugins |
 | `.claude-plugin/marketplace.json` | the catalogue the CLI reads |
 | `archive/` | sources kept for layers not built yet. Loaded by no plugin |
 

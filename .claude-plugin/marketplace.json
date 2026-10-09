@@ -2,7 +2,7 @@
   "name": "product-os",
   "description": "A product operating system for Claude Code: the method a Head of Product or a solo product builder uses to run a SaaS from opportunity to shipment and support, organised by product function.",
   "owner": {
-    "name": "Pascal Pediroda"
+    "name": "product-os"
   },
   "plugins": [
     {
@@ -10,8 +10,20 @@
       "source": "./core"
     },
     {
+      "name": "pos-discovery",
+      "source": "./discovery"
+    },
+    {
+      "name": "pos-build",
+      "source": "./build"
+    },
+    {
       "name": "pos-support",
       "source": "./support"
+    },
+    {
+      "name": "pos-gtm",
+      "source": "./gtm"
     }
   ]
 }

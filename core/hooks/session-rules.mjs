@@ -159,8 +159,10 @@ function digest(config) {
     `3. Memory first. Before proposing or asserting how something works, read \`${memoryDir}/${memoryIndex}\` and the files `
       + '`routing.zones` lists for the zone you touch (product config, `' + `${pivotsDir}/product.config.json` + '`). '
       + 'The code confirms what memory says.',
-    '4. Where things stand. Run the `pos-orient` skill at the start of the work, never recall it. To see which '
-      + 'skill fits a situation, what it calls and where to begin, the `pos-guide` skill.',
+    '4. Start with a router. Work begins with the router of what it comes to do: `pos-build` (build, ship), '
+      + '`pos-opportunity` (an idea, feedback, a spec), `pos-support` (a bug, a customer), `pos-gtm` (sell, position). '
+      + 'It loads only that use\'s pivot, memory and connectors. Unsure where things stand: `pos-orient`; '
+      + 'where the product is in its path: `pos-guide`.',
     rules
       ? `5. The full rules, cited by number in the OS skills: \`${join(rules, 'collaboration.md')}\` and \`${join(rules, 'principles.md')}\`.`
       : '5. The full rules are in the `rules/` folder of the pos-core plugin.',

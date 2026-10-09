@@ -9,11 +9,8 @@
   },
   "modules": {
     "discovery": false,
-    "design": false,
-    "delivery": false,
-    "assurance": false,
+    "build": false,
     "support": false,
-    "release_ops": false,
     "gtm": false
   },
   "libraries": {
@@ -24,11 +21,15 @@
   "memory": {
     "dir": ".claude/memory",
     "index": "MEMORY.md",
-    "always": ["architecture.md"]
+    "always": [
+      "architecture.md"
+    ]
   },
   "routing": {
     "zones": {
-      "example-zone": ["archi-example.md"]
+      "example-zone": [
+        "archi-example.md"
+      ]
     }
   },
   "reading_gate": {

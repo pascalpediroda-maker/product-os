@@ -23,17 +23,29 @@ added. The full sequence and the choice of scope are in the [root README](../REA
   Every entry is re-verified against what is deployed, fixed with a test that failed first, shipped
   on the owner's go, checked live, and every customer who reported one has a message drafted for the
   owner to send.
+- **One customer signal is handled end to end, from its memory.** A report, a bug, a stuck user or a
+  drifting AI agent is triaged, reproduced, fixed at the root and left with a regression test; a
+  missing function goes to the build instead of being patched as a fix.
+- **Help content follows the product.** An article is written from the code, illustrated with
+  screenshots stored privately, and the copy the product's AI reads is re-ingested with it; a commit
+  that touches a watched screen says so.
+- **The owner knows who signed up and where they stand,** from the database and the analytics crossed,
+  never from one source alone.
 - **Nothing reaches a customer or production without the owner.** Messages are drafts, the push
-  waits for an explicit go, and the in-app reports store is only read.
+  waits for an explicit go, the CRM is only suggested, and the in-app reports store is only read.
 
 ## What it contains
 
 | Piece | Where | What it does |
 |---|---|---|
-| Support pivot | `templates/product_support_context.md` | the product's support facts: channels, in-app reports and the query that lists them, the fix backlog's ID prefix, the `Area` list and the memory each area loads, who is the team, how a customer is told, the priority rule, how a fix release ships and is read once live, where bugs are reproduced |
+| Support pivot | `templates/product_support_context.md` | the product's support facts: channels, in-app reports and the query that lists them, the fix backlog's ID prefix, the `Area` list and the memory each area loads, who is the team, how a customer is told, the priority rule, how a fix release ships and is read once live, where bugs are reproduced, where the help center lives and the paths that make it stale, where users' activity is read |
+| `pos-support` | `skills/pos-support/` | the support router: a session about one signal (a customer report, a bug, a stuck user, a help center gap, an AI agent that drifts) starts here. Loads only the Support pivot, the fix backlog, the area's memory and the support connectors, triages, routes to the right specialist, and follows RED -> GREEN -> REFACTOR. A missing function goes to the build |
 | `pos-fix-backlog` | `skills/pos-fix-backlog/` | creates the fix backlog base in Notion, or checks an existing one; files an entry after searching for a duplicate; moves and closes entries. The base every other support skill reads and writes |
 | The schema | `skills/pos-fix-backlog/references/schema.md` | the backlog's properties, statuses, sources, the creation statement, and the Notion traps that bite on creation |
 | `pos-bug-kill` | `skills/pos-bug-kill/` | a session that verifies the backlog against the deployed reference, proposes a batch, fixes it area by area in RED -> GREEN -> REFACTOR, ships a minor fix release on a go, and closes the loop |
+| `pos-kb-article` | `skills/pos-kb-article/` | the help center pipeline: read the code, write the article, capture and look at the screenshots, store them privately (signed URLs only, never a public bucket), sync and re-ingest the copy the product's AI reads, update the work center |
+| `pos-user-activity-report` | `skills/pos-user-activity-report/` | the latest sign-ups, each crossed between the database and the analytics, given an engagement cohort, written to the feedback base; a CRM action suggested, never written |
+| Help content hook | `hooks/check-kb-update.mjs` | after a commit, reminds when the changed files match the paths Support pivot section 9 watches: an article, the AI's copy or a screenshot may be stale. Reminds only; never blocks |
 
 ## Fill these first
 
@@ -47,7 +59,12 @@ Worth filling too:
 
 - `databases.crm`: without it, `Customer to notify` does not exist and the customers to tell are only
   listed in the report.
-- `databases.feedback`: without it, an entry cannot point to the feedback it came from.
+- `databases.feedback`: without it, an entry cannot point to the feedback it came from, and the
+  activity report gives its entries as text.
+- `analytics.provider` and `analytics.project_id`: without them, a user's journey and the activity
+  report rest on the database alone, and say so.
+- Support pivot sections 9 and 10: without them, `pos-kb-article` asks where the help center lives,
+  the help content hook stays silent, and `pos-user-activity-report` stops before its first query.
 - A reading gate entry, so a bug kill cannot act before it has read its pivot:
 
   ```json
@@ -56,6 +73,10 @@ Worth filling too:
       "pos-bug-kill": {
         "require": ["pivot:product_support_context.md", "pivot:product.config.json"],
         "min_reads": 4
+      },
+      "pos-support": {
+        "require": ["pivot:product_support_context.md", "pivot:product.config.json"],
+        "min_reads": 3
       }
     }
   }
@@ -71,9 +92,19 @@ may change. Below it: the product's content, which an update never overwrites.
 | Notion | the fix backlog; required |
 | The product's database connector (for example Supabase), read only | the in-app reports, and the data checks of a verification |
 | Gmail, optional | customer drafts in the owner's mailbox; without it, drafts come as text |
-| Analytics, optional | a customer's language and a user's real journey |
+| Analytics (for example Amplitude), optional | a customer's language, a user's real journey, the activity report |
 
 The core `pos-setup` skill connects them; the core `pos-tool-conventions` skill says how each is used.
+
+## Hooks
+
+The plugin ships one hook, declared in `hooks/hooks.json`: after a Bash or PowerShell command that
+makes a commit, `check-kb-update.mjs` compares the files the commit changed with the paths of Support
+pivot section 9 (the fenced block `json pos-help-paths`, below the separation line) and adds a
+reminder to the session when one matches. It needs `modules.support: true` and that block; otherwise
+it does nothing. It never blocks, and logs under the plugin's data directory without command text.
+
+Tests: `node --test "support/hooks/test/*.test.mjs"` (Node 22 or later).
 
 ## How it fits with the core
 
@@ -90,10 +121,10 @@ The core `pos-setup` skill connects them; the core `pos-tool-conventions` skill 
 
 | Module | What it brings to a bug kill | When it is missing |
 |---|---|---|
-| Delivery | the specialist agents (front-end, back-end, database, AI engineer); the build workflow that takes L entries | the main session fixes, and says so |
+| Delivery | the specialist agents (front-end, back-end, database, AI engineer); the build workflow that takes L entries and the missing functions `pos-support` sends | the main session fixes, and says so |
 | Assurance | owns the regression tests the fixes leave; its audit findings arrive as backlog entries | the test stays with the fix, and that is said |
 | Release & Operations | the release path, the version scheme, the release notes | the Support pivot's section 7 holds the release path |
-| Discovery | receives the "bugs" that are product decisions | they go to the owner in the report |
+| Discovery | receives the "bugs" that are product decisions, and reads the entries `pos-user-activity-report` writes in the feedback base | they go to the owner in the report |
 
 A missing module is said, and the work continues without it. Nothing it would have brought is
 invented.

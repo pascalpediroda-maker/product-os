@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__.*execute_sql",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/guard-heavy-sql.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
