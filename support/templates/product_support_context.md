@@ -1,6 +1,6 @@
 # Support context
 
-Skeleton version 3, maintained by `pos-support`.
+Skeleton version 4, maintained by `pos-support`.
 
 Copy this file to `<pivots.dir>/product_support_context.md` (by default
 `.claude/product/product_support_context.md`) and fill it before running a skill of the Support
@@ -14,10 +14,10 @@ Every skill of the Support module reads it first.
 | Reader | What it takes from here |
 |---|---|
 | `pos-fix-backlog` | the channel a bug came through (1), the report marker (2), the Area list and the ID prefix (3), who is in the team (4), how the customer to notify is found (5) |
-| `pos-bug-kill` | all of it: the in-app reports it files (2), the memory each area loads and the ID prefix its commits cite (3), the customer bonus (4), the messages (5), the priority rule (6), the release path (7), where it reproduces (8) |
+| `pos-bug-kill` | all of it: the mail searches of the channels that arrive by mail (1), the in-app reports it files and the team reports it marks handled (2), the memory each area loads and the ID prefix its commits cite (3), the customer bonus (4), the messages (5), the priority rule (6), the release path (7), where it reproduces (8) |
 | `pos-support` | the channels (1), the areas and their memory (3), the team (4), the customers to notify (5), the test space (8), the activity tables and events that rebuild a user's journey (10) |
 | `pos-kb-article` | the help center: where it lives, its scripts, the screenshot space, the copy the product's AI reads (9); the test space (8) |
-| `pos-user-activity-report` | the activity tables, events and cohorts (10); the team (4), so its accounts are left out |
+| `pos-user-activity-report` | the activity tables, events, function markers and cohorts (10); the team (4), so its accounts are left out |
 | the help content hook | the paths whose change may leave help content or screenshots stale (9) |
 | Any session that meets a bug it will not fix now | the Area list (3) and the team (4), to file the entry right |
 
@@ -44,12 +44,12 @@ Every skill of the Support module reads it first.
 
 | # | Section | What it must answer |
 |---|---|---|
-| 1 | Channels | where reports and bugs reach the team, who reads each channel, which `Source` of the fix backlog each one feeds |
-| 2 | In-app reports | where reports made inside the product live, who can see them, the read-only query that lists the new ones, whether anything may be written back, the marker a report carries in the fix backlog |
+| 1 | Channels | where reports and bugs reach the team, who reads each channel, which `Source` of the fix backlog each one feeds, and for a channel that arrives by mail the search that finds its mails |
+| 2 | In-app reports | where reports made inside the product live, who can see them, the read-only query that lists the new ones (every category that can carry a bug), whether anything may be written back, how the team's own reports are marked handled, the marker a report carries in the fix backlog |
 | 3 | Areas | the prefix of the fix backlog's `ID` (unique across the whole Notion workspace), the product's `Area` list for the fix backlog, and for each area the `routing.zones` key whose memory a bug kill loads, plus any rule that area imposes |
 | 4 | The team | who counts as the team, so their reports are not counted as customer reports, and how a test report is recognised |
 | 5 | Customers to notify | how the author of a report is matched to a record in `databases.crm`, how their language is found, how a direct link is built, who sends |
-| 6 | Priority rule | the default rule of the `pos-bug-kill` skill, or this product's override with its reason, and the batch size |
+| 6 | Priority rule | the default rule of the `pos-bug-kill` skill, or this product's override with its reason, and the angle a bug kill takes when the owner names none |
 | 7 | Fix releases | how a minor fix release ships, service by service, how its version is set and read once live; or the pointer to the Build pivot |
 | 8 | Test space | where a bug may be reproduced and a fix tested, what must never be used, the test accounts |
 | 9 | Help center | where the help articles live and the page that tracks their state, the product name to use, the copy the product's AI reads and how it is re-ingested, how screenshots are captured and stored (never a public bucket), the limitations to state, the paths whose change makes help content stale |
@@ -72,12 +72,16 @@ demo). One row each.
 - Source in the fix backlog: one of the base's `Source` options (User feedback, Support,
   Interview / demo, In-app feedback, Audit, E2E, Dev session, Legacy notes). The `pos-fix-backlog` skill
   uses this column to set `Source` on an entry.
+- Mail search: for a channel that arrives by mail (the mail copy the in-app form sends, the support
+  mailbox), the search that finds its mails (the sender, the subject tags), placeholders only. A bug
+  kill runs it itself, since the last bug kill, rather than asking the owner which mail. Customers'
+  own mails are found through the senders of `databases.crm` and need no line here.
 - A channel nobody reads is a finding: say so here.
 -->
 
-| Channel | Where it arrives | Who reads it | `Source` in the fix backlog |
-|---|---|---|---|
-| | | | |
+| Channel | Where it arrives | Who reads it | `Source` in the fix backlog | Mail search |
+|---|---|---|---|---|
+| | | | | |
 
 ## 2. In-app reports
 
@@ -90,12 +94,19 @@ Guidance: the reports users make from inside the product (a feedback or bug form
   example its admin) can see the status, nothing may be written back: a status change made by the
   team would show up at the customer's.
 - Lists the new ones: the read-only query, with the columns a bug kill needs: the report's ID, its
-  date, the page it was made from, the reporter's account, the reporter's space, the text. Filter on
-  what makes a report a bug and new. Placeholders only, no production values.
-- Marked as seen: how the owner marks a report as handled, only if that way is invisible to the
-  reporter's workspace. Otherwise write "Nothing is written back": the marker in the fix backlog is
-  then the only record that a report was taken in. The skills never write to this store; they list
-  the reports fixed, and the owner acts.
+  date, its category, the page it was made from, the reporter's account, the reporter's space, the
+  text. Filter on "new" and on every category that can carry a bug, not only the "bug" one: a report
+  sent as feedback often carries a bug, and a query on the bug category alone misses it. The bug
+  kill's verdict then sorts the bug from the idea. Placeholders only, no production values.
+- Marked as seen: how the owner marks a customer's report as handled, only if that way is invisible
+  to the reporter's workspace. Otherwise write "Nothing is written back": the marker in the fix
+  backlog is then the only record that a report was taken in. The skills never write a customer's
+  report; they list the reports fixed, and the owner acts.
+- Team reports marked handled: when the product has its own "handled" action on a report (a button
+  in its settings), the write that action makes, as a shape (the table, the status column and its
+  "handled" value). A bug kill marks the owner's and the team's own reports, from the team's own
+  space, as handled when their fix goes live, through that same write: one row, filtered on its ID,
+  its space and its "new" status. "None" when the product has no such action: nothing is written.
 - Marker: the text an entry carries in `Reproduction` so the report is never filed twice. The OS
   default is `report:<id>`, where <id> is the report's primary key.
 - Page link: which part of the report's URL may be copied into an entry (the path only; never a
@@ -110,13 +121,15 @@ Guidance: the reports users make from inside the product (a feedback or bug form
 
 ```sql
 -- Shape only. Replace every <...> with this product's names.
-select r.<id>, r.<created_at>, r.<page_url>, r.<reporter_account>, r.<reporter_space>, r.<text>
+select r.<id>, r.<created_at>, r.<category>, r.<page_url>, r.<reporter_account>, r.<reporter_space>, r.<text>
 from <reports table> r
-where r.<category> = '<bug>' and r.<status> = '<new>'
+where r.<category> in ('<bug>', '<feedback>') and r.<status> = '<new>'
 order by r.<created_at>
 ```
 
 **Marked as seen:** Nothing is written back. <!-- or the way, by the owner, that the reporter's workspace cannot see -->
+
+**Team reports marked handled by:** None. <!-- or the shape of the product's own "handled" write -->
 
 **Marker in the fix backlog:** `report:<id>`
 
@@ -209,13 +222,15 @@ the core is the rule for a support message; write here only what is specific to 
 Guidance: the `pos-bug-kill` skill carries the default grid (severity, effort, priority, and the bonus
 for a bug a customer reported). Write "Default." unless this product has a reason to differ; then
 write the rule in full and its reason in one sentence.
-- Batch size: the default is small batches (one or two areas, about five bugs), each shipped and
-  closed before the next opens. Change it here if the owner works otherwise.
+- Angle: a bug kill takes one entry at a time, in the angle the owner chooses at launch (by priority,
+  by area, or quick burn: small entries that need no AI call or import). "Default." means the bug
+  kill asks for the angle in one line; write an angle here only if the owner wants it taken without
+  asking.
 -->
 
 **Priority:** Default.
 
-**Batch size:** Default.
+**Angle:** Default.
 
 ## 7. Fix releases
 
@@ -365,8 +380,9 @@ Guidance: where a user's real activity is read, for `pos-user-activity-report` a
   (an ID that looks the same and is not).
 - Server event log: the table, its columns (user, action, details, date, space), and the actions of
   the funnel in order, each with what it means when it is the last one a user reached.
-- Sessions: the table and its columns (start, last heartbeat, end, duration, entry page, source,
-  device, country).
+- Sessions: the table and its columns (start, last heartbeat, end, duration, entry page, referrer,
+  source, device, country). Say which columns are in fact empty (then read in the analytics), and
+  what the duration measures (a tab left open is not working time).
 - Profile: the table and the columns that say who the person is (name, organisation, role, country).
 - Event roles: the events the cohorts of `pos-user-activity-report` use, each named by its role, with
   the product's event name and where it is read. The provider and project are in the config
@@ -375,6 +391,10 @@ Guidance: where a user's real activity is read, for `pos-user-activity-report` a
   and the memory file that lists the events.
 - Assistant conversations: where what a user said to the product's AI assistant can be read (a log
   route, a table), or "none".
+- Function use: for each function whose use the report counts, where its use is read (the AI usage
+  log, a business table, an event) and its trap: a marker shared with another function, a row that
+  only means a page was opened. Each function also names its stage of the chain of work (GTM pivot,
+  section 1), since a rate of use is read only against the users who reached that stage.
 - Cohorts: "Default." keeps the OS cohorts of `pos-user-activity-report`; otherwise the product's own
   definitions, in the event roles below.
 - Uncovered unit: how to tell that a unit a user explored is not covered by the product yet (the
@@ -412,6 +432,12 @@ Guidance: where a user's real activity is read, for `pos-user-activity-report` a
 **Client events fire:**
 
 **Assistant conversations read at:**
+
+**Function use:**
+
+| Function | Stage of the chain of work | Read in | Trap |
+|---|---|---|---|
+| | | | |
 
 **Cohorts:** Default.
 

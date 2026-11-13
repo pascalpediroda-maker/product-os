@@ -35,7 +35,7 @@ context stays on the problem.
 |---|---|---|
 | `pos-support` | one signal: a report, a bug, a stuck user, a drift, a tuning, a help center gap | this skill: triage, then RED -> GREEN -> REFACTOR |
 | `pos-fix-backlog` | a bug not fixed now | called by this skill; its "File an entry" and "Move and close an entry" are the contract for every backlog write here |
-| `pos-bug-kill` | empty the backlog in batches into a minor fix release | takes over what this skill files |
+| `pos-bug-kill` | empty the backlog one entry at a time, the fixes shipped together as a minor fix release | takes over what this skill files |
 | `pos-kb-article` | an article missing or outdated, or the help content of a fix a user can see | called by this skill |
 | `pos-user-activity-report` | who signed up lately and how they use the product | same sources (database and analytics), another purpose |
 | The build agents, when the Build module (`pos-build`) is installed | the fix itself | `frontend-dev`, `backend-dev`, `db-engineer`, `ai-engineer`, with `qa-engineer` for the test; `audit-ai` and `audit-security` in targeted mode (the Assurance module). When the session offers no agent of a role, the session does the work itself and says so |
@@ -72,9 +72,10 @@ that leaves the user lost is not a fix.
 
 **A bug not fixed now never stays in the conversation.** It goes to the fix backlog through
 `pos-fix-backlog`, with enough to pick it up without rediscovering it. A bug noted in a thread or in a
-todo is a bug lost. An entry being fixed here stays `In progress` with `Commit` filled once committed;
-it moves to `Released` with its `Version` once live, then the customer in `Customer to notify` gets a
-draft message. The commit message cites `<prefix>-n`.
+todo is a bug lost. An entry being fixed here is `In progress`; once coded, tested and committed it
+moves to `Ready to deploy` with `Commit` filled; it moves to `Released` with its `Version` and
+`Closed on` once live, then the customer in `Customer to notify` gets a draft message. The commit
+message cites `<prefix>-n`.
 
 ---
 
@@ -127,7 +128,9 @@ Announce the triage to the owner BEFORE starting. The possible cases:
 
 **A missing function is not support.** When the signal comes down to "a field, a link, a button, a
 relation between elements or a screen is missing", it is not a bug but an evolution: it goes to the
-build (`pos-build`, with a mockup, the owner's go, then code). Support fixes what existed and broke.
+build (`pos-build`, with a mockup, the owner's go, then code). Every mockup follows `pos-mockup` (in
+`pos-build`; without `modules.build` that skill is missing, and it is said). Support fixes what
+existed and broke.
 Observed: missing links between three kinds of elements were handled here as a fix, shipped without a
 mockup, with a grey "+", a field of the detailed level visible at the overview level, no creation
 button and no explanation. Test: **did it ever work?** If not, it is not support. Without the Delivery
@@ -221,7 +224,7 @@ never ask to validate a RED that misses one of the entry's requirements.
 - **Tuning:** an evaluation added for the target output.
 - **Help center gap:** the screenshot captured and looked at, the AI's copy re-ingested
   (`pos-kb-article`).
-- **The bug came from the fix backlog:** update the entry (`Status` stays `In progress`, `Commit`
+- **The bug came from the fix backlog:** update the entry (`Status` = `Ready to deploy`, `Commit`
   filled) and cite `<prefix>-n` in the commit message (`pos-fix-backlog`, "Move and close an entry").
 
 ## Step 5: after the fix

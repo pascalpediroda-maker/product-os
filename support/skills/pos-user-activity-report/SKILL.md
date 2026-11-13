@@ -37,6 +37,14 @@ team, 10 Activity.
    Amplitude and Notion references, before the first call of each tool.
 5. **The feedback base's schema:** `pos-core`, `skills/pos-setup/references/bases/feedback.md`. Its
    property names are the OS's, in English.
+6. **The chain of work, BEFORE reading any data:** the stages of the user's work the product covers,
+   in the GTM pivot (`<pivots.dir>/product_gtm_context.md`, section 1, "Scope along the chain of
+   work"). Every gesture a user makes belongs to one stage, and some stages last months. The report
+   says which stage each user has reached and which path they follow. A figure about a function is
+   read only against the users who have reached that function's stage, never against all sign-ups.
+   Observed: two uses of a drafting function, a later stage, were read against thirty sign-ups and
+   concluded "they do not write", while most of them had not reached that stage. No GTM pivot, or
+   section 1 empty: say so, and give no rate of use for a function.
 
 Section 10 empty: say so, list what it must hold, and stop. Never guess a table or an event name.
 
@@ -51,10 +59,12 @@ sign-ups", an email domain. **Without one: the default window of section 10** (7
 |---|---|---|
 | Accounts | the new sign-ups: ID, email, created, confirmed | section 10, Accounts |
 | Server event log | the server-side funnel: each action, its details, its date, its space, its user | section 10, Server event log |
-| Sessions | start, last heartbeat, end, duration, entry page, source, device, country | section 10, Sessions |
+| Sessions | start, last heartbeat, end, duration, entry page, referrer, source. A column section 10 marks as empty (device, location) is read in the analytics instead. The duration is the time a tab stayed open, not working time | section 10, Sessions |
 | Profile | who the person is: name, organisation, role, country, last activity | section 10, Profile |
-| Analytics | the behavioural timeline per user (client events) | `analytics.project_id`; the user identified by the join key of section 10, never by email (`pos-tool-conventions`, Amplitude reference) |
+| Analytics | the behavioural timeline per user (client events), with event properties: the views opened inside an item are often only in the page location property of the page view event | `analytics.project_id`; the user identified by the join key of section 10, never by email: a lookup by email can answer "not found" for a user who exists (`pos-tool-conventions`, Amplitude reference). An output too long to read is saved to a file and read by script |
 | Assistant conversations | what the user said to the product's AI assistant | section 10, Assistant conversations. **Only when there are some;** otherwise nothing is written |
+| Functions used | which functions the user used, stage by stage: the AI usage log and the business tables | section 10, Function use: each function read by its own marker, with its traps (a marker shared with another function, a row created by merely opening a page, which is not use) |
+| Server logs | the server-side course of a session (sign-up, assistant, views), when needed | section 10, or the logs memory the index names. **Only when there are some;** otherwise nothing is written |
 
 Join every source on the **join key** of section 10, and check its traps there (an ID that looks the
 same and is not). Check the schema before any unusual query: wrong column names are the most common
@@ -88,9 +98,11 @@ do not force a cohort, say so.
      confirmed: **a suspected mail deliverability problem**, grouped by email domain. Confirmed and no
      space created: dropped at onboarding. A space created and no activation: not activated. The
      funnel steps and what each means are in section 10;
-   - the sessions: how many, total duration, entry page and source, device, country;
+   - the sessions: how many, total duration, entry page, referrer and source; device and country from
+     the analytics when the sessions table leaves them empty;
    - the profile: who this person is;
    - the analytics timeline: which units they explored, with what intent;
+   - the functions used, each by its marker of section 10, placed in its stage of the chain of work;
    - the assistant conversations, when there are some.
 3. **Assign the cohort** (the table above).
 4. **Infer the persona** from the role or profile when it can be identified, among the options of the
@@ -125,6 +137,8 @@ Body:
   they came from (entry page, source).
 - **Funnel:** where they are, or where they dropped off, with the timestamps (in the analytics
   project's timezone, stated).
+- **Stage and path:** the stage of the chain of work they have reached, and their path (Read first,
+  item 6).
 - **Cohort:** the cohort assigned, and why.
 - **Deliverability signal:** sign-up started and never confirmed on an institutional domain: flagged
   explicitly.
@@ -148,7 +162,7 @@ or the CRM), say so in the entry.
 
 At the end of the run, in `product.team_language`, status first (rule 22):
 
-- **N sign-ups** in the window, by cohort.
+- **N sign-ups** in the window, by cohort and by stage of the chain of work.
 - **The 2 or 3 users to act on first** (Uncovered interested: cover their unit; Committed: build on it;
   a suspected deliverability problem on an institutional domain).
 - **The deliverability signal** in aggregate: how many sign-ups started and never confirmed, by domain.
@@ -167,6 +181,8 @@ At the end of the run, in `product.team_language`, status first (rule 22):
    the summary.
 6. **Cross with what exists:** a user who matches a known contact (feedback base or CRM) is said.
 7. **The CRM is a suggestion only.**
+8. **A figure is read against its stage:** a rate of use of a function counts only the users who
+   have reached that function's stage of the chain of work (Read first, item 6).
 
 ## How it fits
 

@@ -1,7 +1,7 @@
 # Fix backlog: the schema
 
 The fix backlog is the shared base where a bug that is not fixed in the session that sees it is
-written down, so a bug kill session can empty it in batches (core principle 8, collaboration
+written down, so a bug kill session can empty it one entry at a time (core principle 8, collaboration
 rule 20). The Support module owns it: the `pos-fix-backlog` skill creates it in Notion when
 `databases.fix_backlog` is empty and the owner says yes, and checks an existing base against this
 schema (its section "Create or check the base").
@@ -23,9 +23,9 @@ A base created earlier by the core `pos-setup` skill has this same schema: nothi
 |---|---|---|
 | `Bug` | title | one line: what the user sees go wrong |
 | `ID` | unique ID, with the product's prefix | numbered by Notion (`<prefix>-1`, `<prefix>-2`...); the prefix is recorded in Support pivot section 3, `FIX` by default; commits and messages cite `<prefix>-n` |
-| `Status` | select | `To triage`, `To clarify`, `To fix`, `In progress`, `Requalified dev`, `Released`, `Not reproduced`, `Dropped`. These eight only |
+| `Status` | select | `To triage`, `To clarify`, `To fix`, `In progress`, `Requalified dev`, `Ready to deploy`, `Released`, `Not reproduced`, `Dropped`. These nine only |
 | `Severity` | select | `Blocker`, `Major`, `Minor`, `Cosmetic`; definitions in the `pos-bug-kill` skill, Step 3 |
-| `Priority` | select | `P0`, `P1`, `P2`, `P3`; set only by a bug kill, when the owner validates the batch |
+| `Priority` | select | `P0`, `P1`, `P2`, `P3`; set only by a bug kill, when it presents the entry to the owner |
 | `Area` | select | the product's own list of areas: the Support pivot, section 3 |
 | `Source` | select | `User feedback`, `Support`, `Interview / demo`, `In-app feedback`, `Audit`, `E2E`, `Dev session`, `Legacy notes` |
 | `Users affected` | number | how many users are known to hit it |
@@ -36,6 +36,7 @@ A base created earlier by the core `pos-setup` skill has this same schema: nothi
 | `Customer to notify` | relation to the base in `databases.crm`, one-way | only when that base is configured |
 | `Commit` | text | the commit that fixes it |
 | `Version` | text | the release that ships the fix |
+| `Closed on` | date | when the entry was closed: the date the fix was checked live (`Released`), or the day it went to `Dropped` or `Requalified dev`; the statistics views of the base read it |
 | `Created` | created time | set by Notion |
 
 ### What each status means
@@ -43,13 +44,14 @@ A base created earlier by the core `pos-setup` skill has this same schema: nothi
 | Status | Means | Set by |
 |---|---|---|
 | `To triage` | filed, not verified yet | whoever files it (`pos-fix-backlog`, "File an entry") |
-| `To clarify` | a question only the owner can answer: what to reproduce, or which of two behaviours is wanted. The question is written in the entry's page body, after what was checked, with a recommendation when there is one; the owner answers there | a bug kill, Step 2 |
-| `To fix` | verified against the deployed reference: still present, to reproduce, or taken over by ongoing work (then out of the batch) | a bug kill, Step 2 |
-| `In progress` | a session is fixing it, until the fix is live. Once committed, `Commit` is filled and the status stays | the session that starts the fix |
-| `Requalified dev` | effort L: a project of its own, out of the bug kill. The page body holds the analysis (what the user sees, the verified cause at `file:line`, why it is a project) and the prompt ready to paste to start the build session | a bug kill, Step 3 |
-| `Released` | live; `Version` says in which release, or since when | at release, or at triage when the deployed code already fixes it |
+| `To clarify` | a question only the owner can answer (the field, the customer, the product scope), once the answer was looked for in the code, the official documents, the database and the captures. The question is written in the entry's page body, after what was checked, with a recommendation; the owner answers there | a bug kill, Step 2 |
+| `To fix` | verified against the deployed reference: still present, to reproduce, or taken over by ongoing work (then not taken); or lowered by the owner as minor, with their remark | a bug kill, Step 2 |
+| `In progress` | a session is fixing it | the session that starts the fix |
+| `Requalified dev` | effort L: a project of its own, out of the bug kill. The page body holds the analysis (what the user sees, the verified cause at `file:line`, why it is a project) and the prompt ready to paste to start the build session | a bug kill, Steps 2 and 3 |
+| `Ready to deploy` | coded, tested and committed, not live yet; `Commit` is filled | the session that committed the fix |
+| `Released` | live; `Version` says in which release, or since when | at release, or at verification when the deployed code already fixes it |
 | `Not reproduced` | a real attempt did not reproduce it | a bug kill, Step 4 only; never from reading code |
-| `Dropped` | not a bug, a test report from the team, or nobody remembers what it was | anyone, with the reason in `Reproduction` |
+| `Dropped` | a proven "not a bug"; a proven "Don't do" (a real defect whose fix brings nothing to a user and closes no real access, or costs more in risk than it brings); a test report from the team; or nobody remembers what it was. Never an entry the owner only called minor | anyone, with the reason in `Reproduction` |
 
 ### Where an entry comes from (`Source`)
 
@@ -66,9 +68,13 @@ A base created earlier by the core `pos-setup` skill has this same schema: nothi
 
 ### Choices, and why
 
-- **No status between `In progress` and `Released`.** A fix committed but not live stays `In progress`
-  with `Commit` filled; `Released` comes once it is live. Observed on the working base: an
-  intermediate "fixed, to release" status broke the owner's filters and was removed.
+- **One status between `In progress` and `Released`, and no other.** A fix coded, tested and
+  committed but not live is `Ready to deploy`, with `Commit` filled; `Released` comes once it is live.
+  The owner added that one status on the working base, so the fixes waiting for the push can be seen
+  apart from the ones still being made. Statuses are the owner's to set: an earlier "fixed, to
+  release" status, invented by a session, broke the owner's filters and was removed.
+- **`Closed on` is a date, set at every closing** (`Released`, `Dropped`, `Requalified dev`): the
+  statistics views of the working base read it.
 - **`Status` is a select, not Notion's status type.** A status property sorts its options into
   Notion's fixed groups (`To-do`, `In progress`, `Complete`), and the groups themselves can only be
   changed in Notion. `Not reproduced` and `Dropped` belong to none of them. The connector's schema
@@ -117,7 +123,7 @@ session is the contract: read it first, and follow it where it differs.
 CREATE TABLE (
   "Bug" TITLE,
   "ID" UNIQUE_ID PREFIX '<prefix>',
-  "Status" SELECT('To triage':gray, 'To clarify':orange, 'To fix':blue, 'In progress':yellow, 'Requalified dev':purple, 'Released':green, 'Not reproduced':brown, 'Dropped':default),
+  "Status" SELECT('To triage':gray, 'To clarify':orange, 'To fix':blue, 'In progress':yellow, 'Requalified dev':purple, 'Ready to deploy':pink, 'Released':green, 'Not reproduced':brown, 'Dropped':default),
   "Severity" SELECT('Blocker':red, 'Major':orange, 'Minor':yellow, 'Cosmetic':gray),
   "Priority" SELECT('P0':red, 'P1':orange, 'P2':yellow, 'P3':gray),
   "Area" SELECT(<the product's areas, each 'Name':color>),
@@ -130,6 +136,7 @@ CREATE TABLE (
   "Customer to notify" RELATION('<crm data source id>'),
   "Commit" RICH_TEXT,
   "Version" RICH_TEXT,
+  "Closed on" DATE,
   "Created" CREATED_TIME
 )
 ```
@@ -141,7 +148,8 @@ CREATE TABLE (
 ## How the properties read back
 
 - In SQL, the unique ID column named `ID` reads as `"userDefined:ID"` (a property named `id` or `url`
-  takes the `userDefined:` prefix), and the date reads as `"date:Reported on:start"`.
+  takes the `userDefined:` prefix), and the dates read as `"date:Reported on:start"` and
+  `"date:Closed on:start"`.
 - **The `ID` value depends on how it is read** (observed 2026-10-06):
   - in SQL, `"userDefined:ID"` is an integer column and gives the bare number (`152`);
   - a fetched entry page gives the full ID with its prefix (`"userDefined:ID": "FIX-152"` on a base
@@ -184,6 +192,8 @@ Read on 2026-09-26, unless marked otherwise.
   connected session. It has no public URL; re-read it in the session before use.
 - Observed in use, September 2026: renaming select options erased the values of the renamed options;
   the unique ID column read as `"userDefined:ID"` in SQL.
+- Read on the working base, 2026-11-13: the nine `Status` options (`Ready to deploy` between
+  `Requalified dev` and `Released`) and the `Closed on` date property.
 - Observed in use, 2026-10-06: creating a second product's backlog in the same Notion workspace with
   the prefix the first product's backlog already used failed with a 409; SQL returned the `ID` as a
   bare integer, a fetched entry page returned it with its prefix, and a fetch of the base or data
