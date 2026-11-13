@@ -76,6 +76,7 @@ One file, read by the hooks and by every skill. Strict JSON: no comments.
 | `databases.feedback` / `roadmap` / `fix_backlog` / `crm` | the shared bases. For Notion, the full data source URL, `collection://<id>`, used as it is (it is also the table name in Notion's SQL mode). Empty means not configured: the skill that needs it says so |
 | `analytics.provider`, `analytics.project_id` | where product analytics are read |
 | `deploy.provider`, `deploy.project`, `deploy.app_service` | where the product runs, read by the skills that push and check what is live: `easypanel` (the only provider with a reference today), the panel project, and the service a push to `git.main_branch` deploys. Empty means no deployment connector: a skill says it cannot follow the build |
+| `build.test_auth_state` | the saved session state of the test account, relative to the repository, written by the test setup of Build pivot section 10; read by the `pos-mockup` scripts to open the real pages signed in. Asked by `pos-setup` when `modules.build` is true. Empty: no snapshot of a signed-in page, and the skill says so |
 | `git.main_branch`, `git.push_deploys` | when `push_deploys` is true (the default when the key is missing), a push to `main_branch` ships to production: the git guard asks before it, and it only happens on an explicit go |
 
 A skill that is not listed under `reading_gate.skills` is not gated.
@@ -91,4 +92,4 @@ A skill that is not listed under `reading_gate.skills` is not gated.
 - **A required file that does not exist is dropped and named**, rather than locking the session with no way out.
 - **A hook never blocks by crashing.** Every failure exits cleanly and is logged under the plugin's data directory, without command text.
 
-Tests: `node --test "core/hooks/test/*.test.mjs"` (Node 22 or later).
+Tests: `node --test core/hooks/test/*.test.mjs` (Node 22 or later; a directory argument, `node --test core/hooks/test/`, runs no test on Node 24).

@@ -84,10 +84,10 @@ Then start a new session: an update applies at the next start. Use the scope you
 | Plugin | Function | What it carries |
 |---|---|---|
 | `pos-core` | Foundation + Domain, always installed | product config and routing table, memory templates, the reading gate, guards on destructive commands, collaboration rules and principles, `pos-setup`, `pos-guide`, `pos-tool-conventions`, `pos-orient`, `pos-handoff`, `pos-domain` and its four analysts |
-| `pos-build` | Build, design, quality, release (`modules.build`) | the `/pos-build` router, `pos-dev` and its team, `pos-check-rls`, `pos-post-impl-checklist`, `pos-audit` and its seven auditors, `pos-visual-identity`, the Build pivot, the heavy-SQL guard |
-| `pos-discovery` | Discovery (`modules.discovery`) | the `/pos-opportunity` router, `pos-prd` with its FO(E)CUSED page and five perspectives, `pos-strategy`, `pos-meeting-notes`, `pos-meeting-transcript`, the Discovery pivot |
+| `pos-build` | Build, design, quality, release (`modules.build`) | the `/pos-build` router, `pos-dev` and its team, `pos-check-rls`, `pos-post-impl-checklist`, `pos-audit` and its seven auditors, `pos-visual-identity`, `pos-mockup`, the Build pivot, the heavy-SQL guard |
+| `pos-discovery` | Discovery (`modules.discovery`) | the `/pos-opportunity` router, `pos-prd` with its FO(E)CUSED page and five perspectives, `pos-strategy`, `pos-meeting-notes`, `pos-meeting-transcript`, `pos-roadmap-review`, the Discovery pivot |
 | `pos-support` | Support & Success (`modules.support`) | the `/pos-support` router, `pos-fix-backlog`, `pos-bug-kill`, `pos-kb-article`, `pos-user-activity-report`, the Support pivot |
-| `pos-gtm` | Go-to-market (`modules.gtm`) | the `/pos-gtm` router and coach, the marketing library, `pos-social-visual`, the GTM pivot |
+| `pos-gtm` | Go-to-market (`modules.gtm`) | the `/pos-gtm` router and coach, the marketing library, `pos-campaign`, `pos-social-visual`, the persona avatar template, the GTM pivot |
 
 A skill that needs a module that is not installed says so and continues; it never invents what the
 module would have brought.

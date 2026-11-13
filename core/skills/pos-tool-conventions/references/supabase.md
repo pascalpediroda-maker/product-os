@@ -50,6 +50,13 @@ application's users have. Operation names are Supabase's (`execute_sql`, `apply_
   reference memory documents, on a go.
 - **Fetch little.** Select the columns you need, add `LIMIT`, aggregate. Don't pull users' documents,
   amounts or names into the conversation or into a file when a count or an id answers the question.
+- **Bound every analysis query on production.** Start it with `set local statement_timeout = '5s'`
+  (the statement already runs in a transaction, so `set local` holds for it). A low cost estimate
+  proves nothing (observed: a regular-expression split over a table of a few dozen rows, estimated
+  cheap, took 25 seconds per query while the production API timed out). Regular expressions, a
+  `::text` cast of a `jsonb`, an unbounded join and `generate_series` are heavy by default. An analysis
+  that needs more runs on a local export, never on the database. Once broken, this rule climbs to a
+  hook on the SQL tool that refuses a query without the bound (`principles.md`, the rungs).
 
 ## 3. Writing
 

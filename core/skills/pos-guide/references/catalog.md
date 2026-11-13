@@ -40,13 +40,14 @@ handoffs). To know where the product is in its path and which router comes next:
 | close a step: tests, interface gate, risk card before a push, commit, report | `/pos-post-impl-checklist` |
 | audit the code on seven axes | `/pos-audit` |
 | define or evolve the visual identity and its tokens | `/pos-visual-identity` |
+| a mockup of a screen, built on snapshots of the real pages and passed through five gates before anyone sees it; for any skill that asks for one | `/pos-mockup` |
 | migrations and access policies | `db-engineer` |
 | routes, server logic, LLM calls | `backend-dev` |
 | screens and components | `frontend-dev` |
 | end-to-end tests | `qa-engineer` |
 | infrastructure, security, cost, deployment | `devsecops` |
 | the product's AI agents | `ai-engineer` |
-| a mockup before a structural interface choice | `prd-ux` |
+| the pattern of a structural interface choice, and the review of its mockup | `prd-ux` |
 | one audit axis each: security, architecture, code quality, performance, tests, interface, AI | `audit-security`, `audit-architecture`, `audit-code-quality`, `audit-performance`, `audit-tests`, `audit-ui`, `audit-ai` |
 
 ### `/pos-opportunity`: discovery
@@ -55,7 +56,8 @@ handoffs). To know where the product is in its path and which router comes next:
 |---|---|
 | a full PRD, five perspectives that converge, written into the opportunity's FO(E)CUSED page | `/pos-prd`, guided by `prd-facilitator` (read, never spawned) |
 | assess an opportunity or a strategy in one page | `/pos-strategy` |
-| write up a meeting into the feedback base | `/pos-meeting-notes` |
+| write up a meeting into the feedback base, linked to the opportunities, bugs and contacts it touches, with the recap email | `/pos-meeting-notes` |
+| review the roadmap: statuses against what is shipped, priorities against the objectives, duplicates | `/pos-roadmap-review` |
 | transcribe a recording on the machine | `/pos-meeting-transcript` |
 | the perspectives of a PRD: product, tech, voice of the customer, GTM | `prd-pm`, `prd-tech`, `prd-voc`, `prd-gtm` (and `prd-ux` from `pos-build`) |
 
@@ -69,7 +71,7 @@ handoffs). To know where the product is in its path and which router comes next:
 | You want to | Skill or agent |
 |---|---|
 | file a bug that will not be fixed now | `/pos-fix-backlog` |
-| empty the fix backlog into a fix release | `/pos-bug-kill` |
+| fix the backlog one entry at a time, shipped together as a fix release | `/pos-bug-kill` |
 | write or update a help center article | `/pos-kb-article` |
 | see who signed up lately and how they use the product | `/pos-user-activity-report` |
 | fix: the build agents of the bug's kind | from `pos-build` |
@@ -82,7 +84,9 @@ A missing function is not support: if it never worked, it goes to `/pos-build`.
 |---|---|
 | a state of play and three priorities for the week (coach mode) | `/pos-gtm` |
 | execute: copy, sequences, pricing, SEO, referral... | the marketing library, routed by `/pos-gtm` |
-| visuals for posts | `/pos-social-visual` |
+| run the campaigns: the batch of the day, a mail of the sequence, the follow-up, the reminders | `/pos-campaign` |
+| persona avatars that read a text as the target would | built by `/pos-gtm` from the GTM pivot, agents in the product's `.claude/agents/` |
+| visuals and product videos for posts | `/pos-social-visual` |
 | a product-shaped topic | `/pos-opportunity` |
 
 ## 3. The path of a product

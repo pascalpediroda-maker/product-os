@@ -60,6 +60,9 @@
     "project": "",
     "app_service": ""
   },
+  "build": {
+    "test_auth_state": ""
+  },
   "git": {
     "main_branch": "main",
     "push_deploys": true

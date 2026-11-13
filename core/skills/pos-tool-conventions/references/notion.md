@@ -109,6 +109,11 @@ paragraphs, headings and lists. The traps:
 | `replace_content` | replaces the **whole** page content | rewriting or restructuring |
 | `update_properties` | changes property values; omitted properties are left unchanged | title, status, tags, dates, relations |
 
+- **Properties change only through `update_properties`.** `replace_content`, `update_content` and
+  `insert_content` silently ignore a `properties` argument (observed): a status, a date or a title
+  change needs its own `update_properties` call, then a fetch to check that it took. Never announce a
+  status the fetch does not show.
+
 - **Fetch right before any content update.** Each `old_str` must match the current content exactly,
   whitespace and newlines included, at exactly one place; otherwise the call returns an error (unless
   `replace_all_matches` is set). Copy `old_str` from that fetch, never from memory or from an earlier
@@ -135,6 +140,11 @@ paragraphs, headings and lists. The traps:
   person is an array of user IDs; `null` clears a value.
 - Properties named `id` or `url` take the `userDefined:` prefix here too.
 - A page outside a database has a single property: `title`.
+- **Never write a priority or a status in a page's text.** They live in properties and they change:
+  the text contradicts the property as soon as the owner moves the entry (observed: a spec said
+  "decided: next" while the owner had just moved it to "later"). Write the arguments and the
+  decisions of substance; a review note says what was decided ("not to drop", "not a duplicate of
+  ..."), never the priority value.
 
 ### Creating pages
 
@@ -144,7 +154,18 @@ paragraphs, headings and lists. The traps:
 - Up to 100 pages per call; split larger batches.
 - Search before creating: you cannot delete a duplicate (section 5).
 - No destination named: create a private draft (`creation_mode: "draft"`) and say that it is private.
-- Shared pages name no client or institution (collaboration rule 41).
+- **Never nest a page under another without the owner's agreement.** Don't set a parent or sub-item
+  relation (any self-relation that nests rows) on creation or update unless the owner asked for it or
+  agreed in the conversation. A table folds sub-items under their parent's group, and views that
+  filter on parents only then show the new page nowhere (observed). Link related pages with a mention
+  in the body instead.
+- **A page that carries a visual or a video** (a post, a mockup) embeds the file itself, uploaded with
+  `notion-create-file-upload` (give the content type explicitly for a video, for example
+  `video/mp4`), never only its local path: the owner reads Notion, not the disk. One upload attaches
+  once; a second page needs its own upload.
+- A page that leaves the team (the help center, a public page) names no client, person or institution
+  without the owner's word that the person agreed; internal pages (roadmap, feedback, CRM, fix
+  backlog, framing and PRD pages) keep the names (collaboration rule 41).
 
 ## 4. Databases
 
@@ -233,7 +254,11 @@ Before each write:
       values without a go.
 - [ ] Not trying to delete a page or to change status options.
 - [ ] Background task awaited; result fetched and checked.
-- [ ] No client or institution named on a shared page.
+- [ ] Property changes in their own `update_properties` call, checked by a fetch.
+- [ ] No priority or status written in the page's text.
+- [ ] No parent or sub-item relation set without the owner's agreement.
+- [ ] A visual or a video embedded through a file upload, not left as a local path.
+- [ ] No client or institution named on a shared page without the owner's word.
 
 ---
 
@@ -260,4 +285,7 @@ Before each write:
   database kept its URL.
 - Observed in use, October 2026: SQL on a unique ID column returned the number without its prefix, an
   entry fetch showed `<prefix>-<n>`, and a prefix already used by another base of the same workspace
-  was refused with a 409.
+  was refused with a 409. A page created with a parent relation disappeared from views that filter
+  on parents only; a priority written in a page's text contradicted its property once the entry moved.
+- Observed in use, November 2026: a `properties` argument passed to a content command was ignored
+  without an error, and the page kept its old status and date.

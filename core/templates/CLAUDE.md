@@ -139,7 +139,9 @@ and the duplication script that makes a test copy. -->
 Branch policy: work on the main branch by default? when is a separate branch or working copy allowed,
 and who agrees to it?
 What gets committed (code, scripts, memory, skills) and what never does (credentials, session files).
-How a push reaches production, and how to check the deployed build afterwards. -->
+How a push reaches production, and how to check the deployed build afterwards.
+The paths a push may touch without deploying anything (rules, memory, docs, tooling the build does
+not run): such a push needs no go (collaboration rule 27). -->
 
 ## UI
 

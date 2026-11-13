@@ -327,6 +327,7 @@ again. A read that fails is not "connected".
    | `analytics.provider` | `amplitude` when Amplitude is connected |
    | `analytics.project_id` | the project the owner picks from the Step 5 list |
    | `deploy.provider`, `deploy.project`, `deploy.app_service` | `easypanel` when Easypanel answered its read; the project and the service a push to the main branch deploys, named by the owner and confirmed by that read |
+   | `build.test_auth_state` | only when `modules.build` is true: the owner's answer to "Where does your test setup save the signed-in session of the test account (a path in the repository)?". The test setup's own configuration may already name it: read it there and confirm. No test setup yet: left empty, and `pos-mockup` says so when it needs it |
    | `git.main_branch` | `git -C <root> symbolic-ref --short refs/remotes/origin/HEAD` without its `origin/` prefix, confirmed by the owner; if it is not set, ask |
    | `git.push_deploys` | the owner's answer to "Does a push to `<main>` ship to production?" |
 
@@ -382,6 +383,10 @@ Read each schema file in full first, and the `pos-tool-conventions` Notion refer
 1. **What already exists.** For each base the owner wanted: a filled key is fetched and compared with
    its schema, never recreated; differences are reported. The owner may also name a base they already
    have: fetch it, compare, and point the key to it on the config diff. Only the rest is created.
+   A base made by an earlier version of its schema lacks what the schema gained since (each schema's
+   section "When the base already exists" lists it): the missing properties and options are added on
+   the owner's go, with the statements that section gives; nothing is renamed, retyped or backfilled
+   without the owner asking.
 2. **Ask once, together, what only the owner knows:** the parent page that will hold the bases (one for
    all, where the team's shared pages live; without it the connector creates private pages nobody else
    sees), and the option lists the schemas leave to the product: its personas, the roadmap's areas

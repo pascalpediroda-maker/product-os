@@ -1,13 +1,27 @@
 ---
 name: pos-handoff
-description: Write a handoff that another session, or this one after a compaction, can pick up without redoing anything and without skipping the method. Use when stopping before the work is finished, when splitting work across parallel sessions, or when the human asks for one. Covers the cleanup that comes first, the reading-order line, the status-first structure, where the file goes, how it is committed, and how a handoff is closed or superseded.
+description: Write a handoff that another session can pick up without redoing anything and without skipping the method, kept current at each step crossed and written before any compaction. Use when stopping before the work is finished, when nearing the context limit, when splitting work across parallel sessions, or when the human asks for one. Covers when to write it, the cleanup that comes first, the reading-order line, the status-first structure (the validated inputs whole at the top, the whole rest of the work), where the file goes, how it is committed, and how a handoff is closed or superseded.
 ---
 
 # Handoff
 
 A handoff exists so that the next session does not redo what this one established, and does not
-skip the method that governs the work. It carries the state and the pointers. The detail lives
-elsewhere: in a plan, in memory, in a database.
+skip the method that governs the work. It carries the state, the whole rest of the work, and the
+pointers. The detail lives elsewhere: in a plan, in memory, in a database. One exception: the
+reasoning supports the owner validated go into it whole (below).
+
+---
+
+## When to write it (collaboration rule 45)
+
+- **Kept current at each step crossed** (QA done, a lot committed, a push), not only at the end. A
+  session that stops without warning then leaves a handoff that is right. A push alone is not a
+  reason to stop.
+- **Before compaction, never after.** When the session nears the context limit (several hundred tool
+  calls, a system signal, or the owner's word: never your own estimate, rule 12), update the
+  handoff, give the owner its absolute path and say to continue in a new session. A compacted
+  session forgets what the owner already gave (a go, a decision) and asks for it again.
+- After a compaction anyway, the first move is this handoff, then the answer.
 
 ---
 
@@ -66,17 +80,24 @@ past it. Line 1 is the only place sure to be read before that happens.
 ## What goes in it, in this order
 
 1. **`Status: open`**, on its own line under the title. `pos-orient` reads it to list open handoffs.
-2. **Where it stands.** Its first line is "Finished." or "Not finished: X and Y remain." Then:
+2. **Inputs the owner validated.** The reasoning supports the owner validated for this work (a state
+   machine, a map, the decisions taken), whole, at the top, as inputs, with no instruction on how
+   to use them. Never reduced to a pointer or one sentence at the end: a next session that gets "see
+   the state machine" cannot rebuild the reasoning. None: the section says "none".
+3. **Where it stands.** Its first line is "Finished." or "Not finished: X and Y remain." Then:
    - the working base: repository, worktree path, branch, and the `origin/<main>` commit it
      started from;
    - what is done, each item with its commit hash and whether it is pushed. A cherry-picked
      commit has a new hash on origin: give that one. With `git.push_deploys` true, pushed to
      `<main>` means deployed once the deploy has run: say whether you checked that it ran.
-3. **Waiting on the human.** Decisions and questions, numbered, each listed once. Other sections
+4. **Waiting on the human.** Decisions and questions, numbered, each listed once. Other sections
    refer to them by number. Keep them apart from the next steps: a list that mixes "to build" and
    "waiting on an answer" stalls on the first blocked item.
-4. **Next.** The steps, in order. Each says where its detail lives.
-5. **Where the detail lives.** Pointers, not copies:
+5. **Next: the whole rest of the work, never only the next step.** Every remaining lot of the work's
+   framing page or plan, in order, each with its prerequisites, the screens and decisions it rests
+   on, and the linked backlog entries (ID and title), each with the source that holds its detail. A
+   handoff that names only the next small lot drops the others for good.
+6. **Where the detail lives.** Pointers, not copies:
    - a database by its config key (`databases.fix_backlog`, `databases.roadmap`, and so on) and
      the entry IDs;
    - the plan in `.claude/plans/`, with the section;
@@ -84,26 +105,27 @@ past it. Line 1 is the only place sure to be read before that happens.
 
    A decision, a finding or a study result that exists only in this conversation is written where
    it belongs first (the plan, a memory file, the database), then pointed to.
-6. **Already verified.** What the next session must not redo. Each fact with its method and the
+7. **Already verified.** What the next session must not redo. Each fact with its method and the
    ref it was checked against: "read at `origin/<main>` `<hash>`, `path:line`", "full read of X",
    "query on table Y". The ref tells the next session whether the fact still holds; a date does
    not. A negative says how it was obtained: a partial scan and a full read are different claims.
-7. **Traps.** What cost time here and is not in memory. A trap that will recur beyond this work
+8. **Traps.** What cost time here and is not in memory. A trap that will recur beyond this work
    goes into memory, or better into a gate or a test; the handoff then carries only the pointer.
-8. **Memory inconsistencies found.** The file, what it says, what is true, the evidence. Each
+9. **Memory inconsistencies found.** The file, what it says, what is true, the evidence. Each
    marked "fixed in `<hash>`" or "to fix".
-9. **Cleaned up.** One line: what you removed, what you handed over, which worktrees of other
-   sessions you left untouched.
+10. **Cleaned up.** One line: what you removed, what you handed over, which worktrees of other
+    sessions you left untouched.
 
-A screen or two is enough. Past that, the handoff is carrying detail that belongs in the plan or
-in memory.
+Apart from the validated inputs and the list of remaining lots, a screen or two is enough. Past
+that, the handoff is carrying detail that belongs in the plan or in memory.
 
 ## What stays out
 
 - **The story of the session**: what was tried, believed, then dropped. At most one line per
   rejected option, with its reason, and only if the next session would otherwise try it again.
 - **Copies**: of a plan, of a database's content, of another handoff, of a commit's file list
-  (git has it).
+  (git has it). The reasoning supports the owner validated are not copies in this sense: they go
+  in whole (section 2).
 - **Numbers someone else will change.** Count at read time. Counts of your own finished work are
   fine.
 - **Secrets.** Name the variable or the file that holds them, never the value.
@@ -156,6 +178,9 @@ Then give the path in full, on its own line, so it opens in one gesture.
 
 Status: open
 
+## Inputs the owner validated
+<the state machine, map or decisions, whole; or "none">
+
 ## Where it stands
 Not finished: <X> and <Y> remain.
 - Base: `<repo>`, worktree `<path>`, branch `<branch>`, from `origin/<main>` `<hash>`.
@@ -165,9 +190,10 @@ Not finished: <X> and <Y> remain.
 1. <decision, with the options in one line>
 2. <question>
 
-## Next
-1. <step>. Detail: `<plan>` section <name>.
-2. <step>, once 1 is answered.
+## Next (the whole rest of the work)
+1. <lot or step>. Prerequisites: <...>. Rests on: <screens, decisions>. Backlog: <ID title>. Detail: `<plan>` section <name>.
+2. <lot>, once 1 is answered.
+3. <every remaining lot of the framing page or plan, to the last>.
 
 ## Where the detail lives
 - Plan: `.claude/plans/<plan>.md`

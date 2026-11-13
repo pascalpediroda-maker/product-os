@@ -49,7 +49,8 @@ sources); the tool details do not. Operation names are Amplitude's (`get_amplitu
   in the project timezone, event, page, the properties that matter).
 - Cite the source of every fact: "Amplitude timeline", "server event log", "current table state".
 - Profiles hold personal data (email, country, device). Copy into shared pages only what the purpose
-  needs, and never a client's name (collaboration rule 41).
+  needs; a client's name goes only into internal pages, never into one that leaves the team
+  (collaboration rule 41).
 
 ## 4. Events that are not there
 
