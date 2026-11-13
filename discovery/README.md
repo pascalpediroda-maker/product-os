@@ -38,7 +38,8 @@ only works once the marketplace has been added. The full sequence and the choice
 | `pos-prd` | `skills/pos-prd/` | the PRD workshop: five perspectives debate and converge, the result written into the FO(E)CUSED page |
 | The FO(E)CUSED template | `skills/pos-prd/references/focused-template.md` | the four phases of an opportunity's page, its quality criteria, the roadmap statuses by phase, the page skeleton |
 | `pos-strategy` | `skills/pos-strategy/` | an opportunity or a strategy assessed as a one-pager: opportunity gate, diagnosis, cascade, 7 Powers |
-| `pos-meeting-notes` | `skills/pos-meeting-notes/` | a transcript, notes or an email turned into one entry of the feedback base |
+| `pos-roadmap-review` | `skills/pos-roadmap-review/` | the roadmap squared up in three passes: statuses against the code in production, priorities against the current objectives, duplicates grouped; a numbered report first, then only what the owner validates |
+| `pos-meeting-notes` | `skills/pos-meeting-notes/` | a transcript, notes or an email turned into one entry of the feedback base, linked to its opportunities, bugs and contacts, with the recap email to the participants |
 | `pos-meeting-transcript` | `skills/pos-meeting-transcript/` | a meeting recording transcribed locally, then handed to `pos-meeting-notes` |
 | `prd-facilitator` | `agents/prd-facilitator.md` | the guide the session follows to facilitate a PRD workshop. Never spawned |
 | `prd-pm`, `prd-tech`, `prd-voc`, `prd-gtm` | `agents/` | the product, technical, Voice of Customer and GTM perspectives |
@@ -60,6 +61,8 @@ Continuous Discovery by Teresa Torres, with an Explore step added before the cla
 Worth filling too:
 
 - `databases.crm`: without it, a meeting entry is not linked to its contact.
+- `databases.fix_backlog` (created by `pos-support`): without it, a bug seen in a meeting or a
+  defect found during a roadmap review is only listed in the report.
 - `analytics.provider` and `analytics.project_id`: without them, no usage figure backs a decision.
 - A reading gate entry, so the router cannot act before it has read its pivot:
 

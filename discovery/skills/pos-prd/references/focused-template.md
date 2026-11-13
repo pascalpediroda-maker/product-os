@@ -99,7 +99,8 @@ It is structured in **four phases** in the page.
 #### EXECUTE (design)
 
 - Design discussions (the product's design system).
-- Mock-up, wireframe, prototype.
+- Mock-up, wireframe, prototype. Every mockup follows `pos-mockup` (in `pos-build`); without
+  `modules.build` that skill is missing, and it is said.
 - **Step and Stretch versions:** the minimal version and the ambitious one.
 - First user feedback on the UI and UX trials.
 
@@ -145,7 +146,7 @@ It is structured in **four phases** in the page.
 
 | Phase | `Status` | `Priority` |
 |---|---|---|
-| New opportunity | `Unqualified` | `LATER` |
+| New opportunity | `Discovery` (or a later status when the work is further along), never `Unqualified` | empty, unless the owner gave one |
 | Problem discovery complete | `Discovery` | `NEXT` or `NOW` |
 | Solution discovery complete | `Solutioning / Featuring` | `NOW` |
 | GO decided | `Ready for development` | `NOW` |
@@ -218,8 +219,10 @@ When someone wants to challenge a feature:
 ## Writing to the roadmap base
 
 - **A new opportunity** is a new entry in `databases.roadmap`: `Name` = the problem, then the feature
-  name once a solution is chosen; `Status` = `Unqualified`; `Priority` = `LATER`; the page body = the
-  skeleton below. Feedback entries that support it are linked through `Feedback & Insights`.
+  name once a solution is chosen; `Status` = the first working status of the method, `Discovery` (or
+  a later one when the work is further along), never `Unqualified`, which is an entry nobody triaged;
+  `Priority` stays empty unless the owner gave one (the priority is the owner's call); the page body =
+  the skeleton below. Feedback entries that support it are linked through `Feedback & Insights`.
 - **An existing one** is fetched before any write, and only the sections of the current phase change.
 - The `pos-tool-conventions` skill of the core, its Notion reference, is read before the first call.
 

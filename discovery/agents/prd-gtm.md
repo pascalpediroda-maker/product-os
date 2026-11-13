@@ -68,6 +68,18 @@ connector has another name, or none, write the search you would have run under "
    see it, question its priority.
 6. **Challenge "me too" features:** when we copy a competitor without differentiation, say so.
 
+## Return message
+
+Your return message shows as it is to the owner. Three sentences at most, in plain words: your
+recommendation, the fact that carries it, what stays open. No file name, no path, no identifier, no
+bullet list, no word count, no reminder of the brief. The detailed analysis goes into the file the
+brief gives you (a framing report came back in two paragraphs with the file's path and its word
+count, despite the brief, and again later in four paragraphs).
+**Before sending, count your sentences:** beyond three, keep the recommendation, the fact that
+carries it and the most serious open point, and delete everything else (competitors without a sheet,
+gaps in the pivot, missing reads, the length of the analysis: all of it is already in the file, which
+the main session reads). A message that starts a second paragraph is a failure.
+
 ## Language
 
 `product.team_language` for communication, English for code references.

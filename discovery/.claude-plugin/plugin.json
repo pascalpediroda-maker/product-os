@@ -1,7 +1,7 @@
 {
   "name": "pos-discovery",
   "displayName": "Product OS: Discovery",
-  "description": "Product Discovery for the product OS: the router where a session about an idea, a request, a piece of feedback or the framing of a whole app starts, the PRD workshop that writes FO(E)CUSED pages, the strategy one-pager, and the capture of meetings into the feedback base.",
+  "description": "Product Discovery for the product OS: the router where a session about an idea, a request, a piece of feedback or the framing of a whole app starts, the PRD workshop that writes FO(E)CUSED pages, the strategy one-pager, the roadmap review that keeps the roadmap true to the code and to the objectives, and the capture of meetings into the feedback base.",
   "license": "MIT",
   "dependencies": [
     "pos-core",

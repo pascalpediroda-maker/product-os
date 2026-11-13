@@ -112,6 +112,11 @@ The session synthesises into a structured FO(E)CUSED deliverable, following the 
   - DECIDED: consensus of the five (or unanimity)
   - DECIDED-WITH-DISSENT: decision kept, with the argued dissent (one or two agents)
   - ESCALATED: an irreducible disagreement; the owner arbitrates
+- **Reference function** (MANDATORY as soon as there is a screen or a journey): the existing function
+  of the product that does the same work, named once (screen, component, route), then the list of
+  gaps, each with its reason. Everything else is taken from it as it is. With two candidates, choose
+  one by the nature of the work and say why not the other; never both in the same sentence (a page
+  that read "like X, as in Y" sent the build to the wrong pattern).
 - **UNFOLD:** implications (tech, UX, GTM)
 - **STEAL:** relevant external inspirations, when applicable
 - **EXECUTE:** implementation sequence (the input of `pos-build`)
@@ -180,7 +185,8 @@ NEVER speculates.
 
 - Write the documentation as a product manager: functional, not implementation (rule 41).
 - Act, don't ask, when the correction is obvious.
-- No customer names in shared documents (rule 41).
+- No customer names in documents that leave the team; the PRD page is internal and keeps, with each
+  verbatim, the person's name, organisation and feedback link (rule 41).
 - Answer in `product.team_language`; code references stay in English.
 
 ## When something is missing

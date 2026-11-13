@@ -1,6 +1,6 @@
 # Discovery context
 
-Skeleton version 1, maintained by `pos-discovery`.
+Skeleton version 2, maintained by `pos-discovery`.
 
 Copy this file to `<pivots.dir>/product_discovery_context.md` (by default
 `.claude/product/product_discovery_context.md`) and fill it before running a skill of the Discovery
@@ -16,7 +16,8 @@ installed. The `pos-opportunity` skill reads it first and passes what each agent
 | `pos-prd` | the personas (1) for the first use case, the sources (2) for OBSERVE, the events (3) for the success criteria and the tracking of the specs |
 | `pos-meeting-notes` | the personas (1), to set `Persona` on the entry |
 | `pos-meeting-transcript` | the transcription tool (4); it asks the owner once and writes the answer there |
-| `prd-voc` | the personas (1) and the sources (2), in the order section 2 gives |
+| `pos-roadmap-review` | the in-app reports row of the sources (2), when the Support module is not installed |
+| `prd-voc` | the personas (1) and the sources (2), in the order section 2 gives; the events (3) for the real usage of a function when the Support module is not installed |
 | `prd-pm`, `prd-tech`, `prd-gtm`, `prd-ux` | the personas (1) |
 
 ## Rules for everything below the separation line
@@ -84,7 +85,11 @@ Guidance: every source of user signal, in the order the Voice of Customer reads 
    read-only query, and this row points to it; otherwise write the store and the read-only query
    here, without any column that identifies a user;
 4. the positioning and pain points of the Go-to-Market pivot, when `modules.gtm` is true: context,
-   never a raw source; a verbatim taken from it is cited with its origin.
+   never a raw source; a verbatim taken from it is cited with its origin;
+5. the real usage in production, as soon as a subject touches an existing function: the database and
+   the analytics crossed (only the two together tell "never seen" from "clicked then abandoned"),
+   read by the method of `pos-user-activity-report` when the Support module is installed (its
+   pivot's section 10 names the tables and the join key), otherwise from the events of section 3.
 Add the product's own (a support mailbox, a chat, a survey tool), by type, with how it is read.
 Mark the ones that hold personal data: their content is paraphrased, never copied with an identity.
 -->
@@ -94,6 +99,7 @@ Mark the ones that hold personal data: their content is paraphrased, never copie
 | 1 | Personas document | section 1 | |
 | 2 | Feedback base | `databases.feedback` | yes |
 | 3 | In-app reports | | yes |
+| 4 | Real usage in production | | no: counts only |
 
 ## 3. Analytics events
 
