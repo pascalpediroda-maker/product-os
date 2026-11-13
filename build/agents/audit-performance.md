@@ -3,7 +3,9 @@ name: audit-performance
 description: >
   Front-end and back-end performance expert. Audits the bundle (lazy loading, code splitting),
   database queries (select all columns, N+1, pagination), React patterns (re-renders, useEffect),
-  APIs (cache, parallelisation), and images. Read-only, reports only.
+  APIs (cache, parallelisation), images, AND scalability: everything that triggers requests without
+  a user action, or whose cost multiplies with tabs, users and events (prefetched links, tab
+  wake-up, real-time, checks). Read-only, reports only.
 tools: Glob, Grep, Read, Bash, SendMessage
 model: sonnet
 color: yellow
@@ -49,6 +51,36 @@ bottlenecks.
 ### 5. CSS
 - [ ] Repeated inline styles
 - [ ] CSS modules and utility classes duplicating each other
+
+### 6. Triggers and fan-out (scalability)
+
+**Read first** the pivot's load rules (S13, S14 and S17, with its patterns already measured in
+production) and its section 7 (the database's connection limit, the number of instances, how many
+tabs a user keeps open).
+
+For each mechanism that runs per page, per tab, per event or per user, write: the trigger, the
+requests per trigger, the frequency, and the result in requests per minute for 1 tab, 2 tabs, then 10
+users with 3 tabs each. Rank by decreasing cost. Look in particular for:
+- [ ] **Implicit triggers of the framework**, invisible as a call in the code: a link that the
+      framework prefetches in a menu, a list or a card of the signed-in app (one server render per
+      visible link); data re-read by the layout or the middleware on each navigation; a router
+      refresh set on an event
+- [ ] Auth events broadcast to every tab (sign-in, token refreshed) that trigger a render or a read
+      per tab
+- [ ] Wake-up listeners (visibility, focus, online, real-time reconnection) that re-read without a
+      freshness guard, or that double up (visibility and focus)
+- [ ] A real-time event that re-reads a whole collection, or relaunches a server computation, per tab
+      and per user
+- [ ] The number of real-time bindings per tab, delete listeners without a filter, channels outside
+      the shared subscription layer
+- [ ] Polling (intervals, recursive timeouts), permanent or conditional; heartbeats
+- [ ] Server computations duplicated per user or per tab instead of per item
+- [ ] Bulk writes (a version restore, an import, an assistant's batch of changes) that cause a re-read
+      per tab
+- [ ] Lists that can exceed 50 rows without pagination or a server filter
+
+Say also what is ALREADY protected (a guard, a test, a single channel), so it is not reported a
+second time. A load finding without a computed figure is incomplete.
 
 ## Report format
 

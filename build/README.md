@@ -27,8 +27,12 @@ repository, run `/pos-setup` (it connects the database and deploy connectors), a
   rollback), local commits, and a push only on an explicit go, watched for 15 minutes after.
 - **The SaaS stays isolated and the database stays up.** Authentication on every route with a local
   check, tenant isolation in policies and code, row-level security on every table, coupled writes in
-  one transaction, load costed before it ships, and a hook that refuses an unbounded heavy query on
-  the database.
+  one transaction, load designed and costed before the code (the triggers and the fan-out of every
+  new mechanism), every schema write shown to the owner before it is applied, and a hook that refuses
+  an unbounded heavy query on the database.
+- **A mockup is faithful to the app before anyone sees it.** It starts from snapshots of the real
+  pages in the test space and passes five gates: contrast, side by side with the app, components
+  copied element by element, the information inventory, and a review by the UX agent.
 - **The product's AI changes through one protocol.** When the product runs AI agents, every change
   goes through the AI engineer, a copy production never resolves, a bench before and after, and a
   full snapshot for rollback.
@@ -37,15 +41,16 @@ repository, run `/pos-setup` (it connects the database and deploy connectors), a
 
 | Piece | Where | What it does |
 |---|---|---|
-| Build pivot | `templates/product_build_context.md` | above its separation line, the rules every build applies: building a multi-tenant SaaS (S1 to S16), engineering the product's AI (AI1 to AI16), tests (T1 to T6); below it, the product's facts those rules need: stack, paths, auth helpers, tenants and roles, data conventions, database, runtime and failure modes, interface, AI agents, tests, commits |
+| Build pivot | `templates/product_build_context.md` | above its separation line, the rules every build applies: building a multi-tenant SaaS (S1 to S19), engineering the product's AI (AI1 to AI18), tests (T1 to T7); below it, the product's facts those rules need: stack, paths, auth helpers, tenants and roles, data conventions, database, runtime and failure modes, interface, AI agents, tests, commits |
 | `pos-build` | `skills/pos-build/` | the router a build session starts with: what it loads, what you can do from here, the tiers TRIVIAL, MINI and FEATURE, read before asking, an up-to-date base |
 | `pos-dev` | `skills/pos-dev/` | the FEATURE tier: the session as dev lead with six specialists in dependency order, and the item-by-item check of every delivery |
 | `pos-check-rls` | `skills/pos-check-rls/` | row-level security checked both ways (blocked and exposed), definer functions, fix patterns |
 | `pos-post-impl-checklist` | `skills/pos-post-impl-checklist/` | the gates that close every step, the interface gate and the risk card included |
 | `pos-audit` | `skills/pos-audit/` | an audit of the code on several axes, by the `audit-*` agents |
+| `pos-mockup` | `skills/pos-mockup/` | a mockup built on snapshots of the real pages, with its scripts (snapshot, contrast and click check, side-by-side comparison, the shared scenario bar) and its five gates; for any skill that asks for a mockup |
 | `pos-visual-identity` | `skills/pos-visual-identity/` | the visual identity, its tokens, and the cascade into components |
 | `dev-lead` | `agents/dev-lead.md` | the lead's operating guide, read by the session, never spawned |
-| Specialist agents | `agents/db-engineer.md`, `backend-dev.md`, `frontend-dev.md`, `qa-engineer.md`, `devsecops.md`, `ai-engineer.md`, `prd-ux.md` | database, back end, front end, end-to-end tests, infrastructure and security, the product's AI, mockups and UX review |
+| Specialist agents | `agents/db-engineer.md`, `backend-dev.md`, `frontend-dev.md`, `qa-engineer.md`, `devsecops.md`, `ai-engineer.md`, `prd-ux.md` | database, back end, front end, end-to-end tests, infrastructure and security, the product's AI, mockups and UX review. None starts a dev server or kills a process (T1); each returns a three-sentence message for the owner and writes its detail to the notes file its brief names |
 | Auditors | `agents/audit-*.md` | one audit axis each, for `pos-audit` |
 | Heavy SQL guard | `hooks/guard-heavy-sql.mjs` | refuses a query on the database connector that holds a heavy construct (regex, a text cast of JSON, `generate_series`, a cross join) unless it starts with a statement timeout of 10 s at most |
 
@@ -62,6 +67,7 @@ the others are limited to reading, editing and messaging.
 | `product.ai_agents` | the product config | `true` when the product runs AI agents for its users: the AI rules and `ai-engineer` then apply |
 | `git.main_branch`, `git.push_deploys` | the product config | the reference the build checks its base against, and whether a push ships |
 | `deploy.provider`, `deploy.project`, `deploy.app_service` | the product config | so a push is followed to a green build |
+| `build.test_auth_state` | the product config | the saved session state of the test account (a path relative to the repository), read by the `pos-mockup` scripts |
 
 Worth filling too:
 

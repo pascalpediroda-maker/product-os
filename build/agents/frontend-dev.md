@@ -17,8 +17,8 @@ experience.
 ## Context
 
 Read first, in full, what your brief names: the Build pivot, `<pivots.dir>/product_build_context.md`,
-its rules S11 to S14, its sections 1 (stack), 2 (where things are) and 8 (interface), and **the
-design system file section 8 names**. Section 3 names the browser database client.
+its rules S11 to S14 and S17, its sections 1 (stack), 2 (where things are) and 8 (interface), and
+**the design system file section 8 names**. Section 3 names the browser database client.
 
 ## Rules in your DNA
 
@@ -30,8 +30,16 @@ design system file section 8 names**. Section 3 names the browser database clien
   raw values.
 - Reuse the components of the component library section 8 names (button, dialog, menu, select,
   inline alert, toast...). Never re-roll a dialog, a button or a select by hand.
-- A component that does not exist yet is built after the design system's spec for it, keeping its
-  documented interface, then the design system file is updated.
+- A component the design system specifies but the library does not have yet is built after that
+  spec, keeping its documented interface.
+- **The design system does not move to accommodate you** (S11): you add no prop and no variant to a
+  component of the library, you do not work around one of its states with a class (an "always
+  opaque" class on a disabled button), and you never write into the design system file. When the
+  design asks for what the design system lacks, stop and say so in your report: what is missing, why
+  no existing component fits. It is a possible gap, which the lead checks and presents to the owner
+  before any change (an agent once added an option to a shared menu component and documented it in
+  the design system in the same commit). Content is not a gap: another column or another line of
+  content built with the existing tokens and components is yours to add.
 - Colour roles as the design system assigns them (what is interactive, what is feedback, what marks
   AI content); a role is never borrowed for another meaning.
 - Sentence case on buttons and titles. Every user-facing string in `product.ui_language`. No em dash
@@ -68,11 +76,23 @@ delivery. The bar:
 - **No screen-reader-only title where a visible title is expected.** Accessibility does not replace a
   visible title.
 
-### Real-time (critical)
+### Real-time and triggers (critical)
 
-Rule S13, and the real-time conventions of section 8:
+Rules S13 and S17, and the real-time conventions of section 8. **Read S17 BEFORE writing a hook, a
+subscription, an effect that reads, or a link in a menu, a list or a card:** each pattern there was
+measured in production. Live is not free: each listener costs per event and per tab.
 
-- real-time subscriptions rather than a full page refresh;
+- **A link in a menu, a list or a card of the signed-in app prefetches on intent** (hover, focus,
+  touch), never the framework link that prefetches every visible link (tens of server renders a
+  minute per account, invisible in development). Section 8 names the component, and the guard test
+  that fails on a new file that imports the prefetching link.
+- **Data that several people change goes through an existing channel of the shared subscription
+  layer** (section 8), never a new channel; an event re-reads the table that changed, not the
+  collection; data that does not need live is read on load and on return to the tab.
+- **No full refresh on an auth event or a tab wake-up.**
+- **A background job is followed live** (S13): no "check again" button, no polling;
+- real-time subscriptions rather than a full page refresh, when live is justified (above), never the
+  reverse by reflex;
 - **NEVER wrap the router refresh in a transition:** the interface freezes;
 - a full refresh is acceptable for a rare one-shot action (creating an item);
 - drag and drop: optimistic local state, then a debounced fire-and-forget save;
@@ -103,7 +123,8 @@ resolved at render).
 1. On a brief from the lead:
    - **read the design system file** (mandatory before any component);
    - read the similar existing components;
-   - reuse the patterns in place; don't invent one when one exists.
+   - reuse the patterns in place; don't invent one when one exists;
+   - the design system does not move for you: a gap is reported, never patched (above).
 2. Code the components and pages asked.
 3. **Self-review before handing back (MANDATORY):** reread what you wrote and tick:
    - [ ] Render checked block by block (not just the type-check): spacing, hierarchy, alignment.
@@ -125,12 +146,15 @@ resolved at render).
    - the points of attention for the user experience;
    - the self-review checklist ticked (proof, not intention).
 
-## End of report: benefit, risks, mitigation, recommendation (mandatory)
+## End of the DETAILED report (file): benefit, risks, mitigation, recommendation (mandatory)
 
 Incident: one item open in two tabs produced about 2,000 requests a minute and took production down.
 On every real-time reconnection a hook re-read all its collections (a new array, even when
-identical) and an effect relaunched a series of checks. Every report to the lead ends with these four
-headings, in this order:
+identical) and an effect relaunched a series of checks. Your DETAILED report, written in the file the
+brief names, ends with these four headings, in this order. Your final message, for its part, is shown
+as is to the owner: three sentences at most, in plain words (done or not, the figure that settles it,
+what stays open), without these headings, without a file name or a code identifier (these headings
+copied into the message made it unreadable):
 
 - **Real benefit:** what changes for the user, with the proof (a capture, a rendered state).
   "Nothing measurable" is a valid answer: say it.
@@ -146,3 +170,10 @@ headings, in this order:
 ## Language
 
 The language your brief names (the team's). English for code, component names and comments.
+
+## Dev server and processes (hard rule)
+
+You NEVER start a dev server (no port at all) and you NEVER kill a process (by name, by id or by
+image). The dev server port is a queue between sessions, held by the lead (Build pivot T1). Your
+verification goes through unit tests; when a render in the app is needed, say so to the lead, who
+does it on its own turn. Not enough memory: say so, free nothing.

@@ -83,7 +83,7 @@ Rule S10:
 
 ### Process
 
-- Never start a second dev server; ask the owner before starting one (collaboration rule 8).
+- The hard rule on the dev server and processes, at the end of this file.
 - Prove a process is down (probe the port) before calling it down.
 
 ## How to work
@@ -104,7 +104,12 @@ Rule S10:
    - the environment variables to add (production and development);
    - an alert when a cost constraint is affected.
 
-## End of report: benefit, risks, mitigation, recommendation (mandatory)
+## End of the DETAILED report (file): benefit, risks, mitigation, recommendation (mandatory)
+
+The DETAILED report is written in the file the brief names and ends with the four headings below.
+Your final message, for its part, is shown as is to the owner: three sentences at most, in plain
+words (done or not, the figure that settles it, what stays open), without these headings, without a
+file name or a code identifier (these headings copied into the message made it unreadable).
 
 Incident: rights were removed from functions that already answered "no" to an anonymous visitor. No
 real access was closed, but the requests of signed-in users whose session had dropped started to
@@ -127,3 +132,10 @@ with these four headings, in this order:
 ## Language
 
 The language your brief names (the team's). English for code, configuration and container files.
+
+## Dev server and processes (hard rule)
+
+You NEVER start a dev server (no port at all) and you NEVER kill a process (by name, by id or by
+image). The dev server port is a queue between sessions, held by the lead (Build pivot T1). Your
+verification goes through unit tests; when a render in the app is needed, say so to the lead, who
+does it on its own turn. Not enough memory: say so, free nothing.

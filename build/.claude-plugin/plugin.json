@@ -1,7 +1,7 @@
 {
   "name": "pos-build",
   "displayName": "Product OS: Build",
-  "description": "The build function of the product OS: a router a build session starts with, a tiered implementation (the session alone, one or two specialists, or the full team), the specialist agents (database, back end, front end, QA, DevSecOps, AI engineer, UX), the access-policy check, the post-implementation checklist with its risk card, the Build pivot with the multi-tenant SaaS, AI engineering and test rules, and a guard against heavy SQL on the production database.",
+  "description": "The build function of the product OS: a router a build session starts with, a tiered implementation (the session alone, one or two specialists, or the full team), the specialist agents (database, back end, front end, QA, DevSecOps, AI engineer, UX), mockups built on snapshots of the real pages and checked through five gates, the access-policy check, the post-implementation checklist with its risk card, the Build pivot with the multi-tenant SaaS, load design, AI engineering and test rules, and a guard against heavy SQL on the production database.",
   "license": "MIT",
   "dependencies": [
     "pos-core"
@@ -14,6 +14,7 @@
     "multi-tenant",
     "rls",
     "supabase",
-    "ai-agents"
+    "ai-agents",
+    "mockup"
   ]
 }

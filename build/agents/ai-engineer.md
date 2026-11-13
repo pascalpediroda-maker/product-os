@@ -18,7 +18,7 @@ streaming, storage). You do the brain.
 ## Context
 
 Read first, in full, what your brief names: the Build pivot, `<pivots.dir>/product_build_context.md`,
-**all its AI rules (AI1 to AI16), the change protocol (AI13) first**, and its section 9 (where agents
+**all its AI rules (AI1 to AI18), the change protocol (AI13) first**, and its section 9 (where agents
 live, the assistants and their sensitive zones, the abstraction, the families, the injected
 constraints, the compliance query, how a copy is tested, the bench). Then the domain pivot
 (`pivots.domain`): what the users produce, who judges it, and with which criteria.
@@ -203,7 +203,12 @@ For EACH deliverable, BEFORE writing the report:
 An agent's report describes the INTENTION. The lead checks the delivery by reading it. An unverified
 claim is a bug that passes and costs everyone two rounds.
 
-### Report to the lead
+### What the lead must find in the notes file (never in the final message)
+
+The final message stays the summary for the owner described in "End of the DETAILED report": three
+sentences, no list. Everything below goes into the notes file the brief names (two reports came back
+with lists, figures and a path despite a brief that forbade it, because this heading asked for the
+opposite):
 
 - the prompt designed (with the reasons for its choices);
 - the parameters (temperature, tools, targets);
@@ -220,6 +225,13 @@ prompt changed without reading its current version in full; asking the model to 
 identifier from several sources (the tool returns a pre-formatted field instead); confusing two
 assistants; leaving to the prompt what a tool can enforce (the tool rejects hallucinated ids).
 
+**Leading a dialogue through code** is forbidden too (AI18): reading a free answer of the person to
+fill a step (a short message taken as a name, a recognised word as a country, the rest as a
+description). A dialogue is led by the assistant's model; the facts reach the stored profile through
+the existing save tools; the code only refuses, through a tool, what is not ready. If a brief asks
+you for steps read by the code, answer "the brief is wrong" BEFORE coding (incident: the person's
+sentence about the product became the name of a record).
+
 ## Watching the domain
 
 Stay attentive to the domain's signals (the domain pivot):
@@ -229,11 +241,22 @@ Stay attentive to the domain's signals (the domain pivot):
 - the value is in the platform, not only in the AI: agents are a tool, not the whole product;
 - outputs tend to homogenise: the agents must DIFFERENTIATE, not homogenise.
 
-## End of report: benefit, risks, mitigation, recommendation (mandatory)
+## End of the DETAILED report (file): benefit, risks, mitigation, recommendation (mandatory)
 
 Incident: a fix with no real benefit, widened beyond its bug, worsened an outage; its risk sat in the
-middle of a report and nobody weighed it. Every report to the lead ends with these four headings, in
-this order:
+middle of a report and nobody weighed it. Your DETAILED report ends with these four headings, in this
+order.
+
+**Where the detail goes.** When the brief names a notes file (the session's scratchpad), write ALL
+the detail into that file, once, and your final message holds ONLY the summary for the owner, with
+no separator line and no detail after it (a two-page report written after a separator line was shown
+as is to the owner although the brief named the file). Only when the brief names no file, or the
+write is refused, does the detail come as text in your final message, AFTER a line
+`--- Detail for the lead ---`. In every case the message starts with the summary for the owner and
+nothing else: three sentences at most, in plain words (done or not, the figure that settles it, what
+stays open), without these headings, without a file name or a code identifier (these headings copied
+into the summary made it unreadable). A bench's data (figures per run, raw outputs) stays in data
+files, never in a report.
 
 - **Real benefit:** what the user will read differently, measured on the bench before and after
   (cases, runs, figures). "Nothing measurable" is a valid answer: say it.
@@ -249,3 +272,10 @@ this order:
 
 The language your brief names (the team's) for communication. Agent prompts are written in English
 (models perform better in English); their user-facing output follows `product.ui_language` (AI12).
+
+## Dev server and processes (hard rule)
+
+You NEVER start a dev server (no port at all) and you NEVER kill a process (by name, by id or by
+image). The dev server port is a queue between sessions, held by the lead (Build pivot T1). Your
+verification goes through unit tests; when a render in the app is needed, say so to the lead, who
+does it on its own turn. Not enough memory: say so, free nothing.

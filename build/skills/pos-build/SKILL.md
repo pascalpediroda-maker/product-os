@@ -21,7 +21,7 @@ owner's go. It decides the grain of orchestration (the session alone, one or two
 full team), delivers code that follows the Build pivot, and never pushes without an explicit go.
 
 It does not frame a topic (the Discovery module does), and it does not fix a bug a user reported (the
-Support module does: `pos-fix-backlog` files it, `pos-bug-kill` fixes it in a batch). A bug met while
+Support module does: `pos-fix-backlog` files it, `pos-bug-kill` fixes it one entry at a time). A bug met while
 building, outside the request, is filed with `pos-fix-backlog` (collaboration rule 20).
 
 ## What it loads, and what it does not
@@ -50,6 +50,7 @@ input is a spec that lives in Notion, the session fetches that page as its input
 | Check the access policies of a table, both ways | `pos-check-rls` | any new query, new table, schema change, or an unexpected empty result |
 | Close a step: tests, interface gate, gaps, security, risk card, commit, report | `pos-post-impl-checklist` | after every implemented step, every tier |
 | Audit the code on several axes | `pos-audit` | after a build, before a release; never inside a build |
+| Make a mockup faithful to the app, through its gates | `pos-mockup` | any mockup, whatever skill asks for it |
 | Define or evolve the visual identity and its tokens | `pos-visual-identity` | before an interface redesign |
 | Migrations and access policies | `db-engineer` agent | schema changes |
 | Routes, server logic, LLM calls | `backend-dev` agent | server work |
@@ -86,16 +87,51 @@ Before ANY question to the owner, including a question of scope or priority:
    shell commands and writes until they are read.
 2. **Locate the area** in the code: does the route, the component, the agent's tool exist?
 3. **Read the pivot files of the area:** the page, the component, the route, the agent's prompt.
-4. **Read the zone's memory** (`routing.zones.<zone>` for every zone the request touches), and as the
-   request needs:
+4. **Read the zone's memory** (`routing.zones.<zone>` for every zone the request touches), in full: a
+   long file is read page after page to its last line. And as the request needs:
    - interface: the design system file (Build pivot section 8), before any interface work (rule 4);
-   - tests: the test rules (T1 to T6) and Build pivot section 10;
+   - tests: the test rules (T1 to T7) and Build pivot section 10;
    - database or migration: the database connector's reference in `pos-tool-conventions`, Build
      pivot sections 4 to 6, and `pos-check-rls`;
    - **an AI zone** (Build pivot section 9, sensitive zones): the AI rules in full, the change
      protocol first (AI13). Delegation to `ai-engineer` is mandatory; the session does not edit
-     these zones unless the owner explicitly accepts the shortcut.
-
+     these zones unless the owner explicitly accepts the shortcut;
+   - **a background job:** it is followed live (S13). A screen that waits for a click to know whether
+     the job is done is a defect. Costing keeps live within the budget, never gives it up without
+     asking the owner. Creating or changing a component or a rule of the design system means finding
+     the screens already built on the same pattern, and migrating or listing them (S11). A ratchet
+     test that says the opposite of the architecture is contested: it is not a product rule;
+   - **a change that triggers requests or grows with the data** (a hook, a real-time subscription, an
+     effect that reads, a link in a menu, a list or a card, checks, a relaunch on tab wake-up, a list
+     that can exceed 50 rows): rules S14 and S17. **Answer the six design questions of S17 in writing
+     BEFORE the code**, cost it (triggers x reads x tabs x users, for 1, 2, then N), and put that
+     figure and the patterns to avoid in each agent's brief. A pattern of S17 without a test that
+     fails the day someone repeats it elsewhere is not delivered: the guard (a ratchet test) goes in
+     the same batch.
+5. **A build with a validated mockup: ALL its screens opened, plus the untouched existing ones,**
+   before any opinion to the owner (order of the batches, a tab to remove, what the customer sees),
+   any write to a shared document and any agent brief, not only before the code. The answer says how
+   many screens were opened out of how many; a screen never opened is never cited. The full list of
+   screens goes into each agent's brief. (A first batch was coded after 3 screens out of 25, with a
+   team view and a second table nobody had decided, and was withdrawn from production; the same
+   evening, an opinion on the order of the batches was given after 5 screens out of 25.)
+6. **The reference function is read in the spec, before any brief.** The spec is what the owner
+   validated, whatever its form (a page in the shared base, a spec, a framing card in the session's
+   plans); a validated card is not copied elsewhere before the code. It must name ONE existing
+   reference function and its gaps (the framing rule of the Discovery module); when it does not, the
+   session picks it from the code and writes it into each brief, without making it a prerequisite.
+   When it names two, none, or an ambiguous sentence, it does not become a question for an agent: the
+   session looks for the decision (spec, handoff, owner), corrects the spec, and each agent's brief
+   starts with "Reference function: X; describe only the gaps, each with its reason". (A brief that
+   asked an agent to choose between two existing patterns produced a spec on the wrong one; the owner
+   had decided the other.)
+7. **When the AI exchanges with the person, the "intent-driven" block is written BEFORE any brief or
+   code** (AI18): who reads what the person types (the model, never our code), which existing tools
+   carry the facts, what the code refuses and through which tool. It goes into the session's answer
+   AND into each agent's brief. It is an obligation of the session that DESIGNS, not an optional
+   check. A session that resumes a handoff checks that the block exists and holds; when it is missing
+   or wrong, it says so and redoes the design before the code. The owner's decisions are authoritative;
+   a session's design choices are not.
 A question to the owner that a search or a read could have answered is forbidden. A read always
 costs less than a badly calibrated question. Typical case: the owner lists three or four topics at
 once. Do not ask "which first?" before reading the areas: the reading often shows that two topics are
@@ -169,9 +205,9 @@ Voice example:
 ### Reading: the order of search before coding
 
 1. **Interface:** the design system first. When it covers the need (button, dialog, form, state),
-   follow it. **Every mockup goes through `prd-ux`** (placement, labels, states, then a review of the
-   captures at the narrowest width) before the owner sees it; a reference capture the owner gave is
-   part of its brief.
+   follow it. **Every mockup goes through `pos-mockup`** (snapshots of the real pages, `prd-ux` for
+   the pattern and the review, the gates) before the owner sees it; a reference capture the owner gave
+   is part of its brief.
 2. **Not covered by the design system:** find the similar pages and mirror them trait for trait.
    **Rereading the design system is not enough: compare with the neighbour.** For every control
    added, open the neighbouring screen that does the same thing and take the SAME component, the same
@@ -191,14 +227,16 @@ Voice example:
 ### Code and patterns
 
 - **Fix at the root** (rule 18).
-- **The SaaS rules of the Build pivot** (S1 to S16): authentication on every route, policies and
+- **The SaaS rules of the Build pivot** (S1 to S19): authentication on every route, policies and
   application checks, tenant isolation, standard status codes.
 - **The design system for every component**, the interface states of S11, `product.ui_language`
   for every string, no em dash in shipped copy (rule 40).
 
 ### Database
 
-- **Migrations through the connector's migration operation only** (S16).
+- **Migrations through the connector's migration operation only** (S16), and **every schema write,
+  additive included, shown to the owner and applied on its own go** (S16), never on the go of a code
+  batch.
 - **Before a DROP or an irreversible ALTER, check the consumers' history** (S16). Without that check
   written down, no migration is applied.
 - **Coupled inserts in one transaction** (S9).
@@ -207,6 +245,21 @@ Voice example:
 
 - **Verify every agent delivery:** open the files and check them item by item against the brief. An
   agent's report describes its intention, not its delivery.
+- **A bench's cases come from the whole history of the subject, before any request to spend**
+  (AI13, step 5). When the subject has a register of incidents (the fix backlog, handoffs, feedback,
+  real conversations), each incident and each patch ends in a case or in a written reason for not
+  having one, with a traceability table; the cases play the real words, a "yes" when the method
+  depends on it, and a variant the prompt does not contain. A list taken from the owner's latest
+  conversations is not a bench (five cases taken from recent threads, while the register held 175
+  lines).
+- **A bench entrusted to an agent is driven by gates, never relayed.** Gate 1: the bench's reference
+  reproduces what the product shows (the counter, the panel, the screen), part by part, BEFORE any
+  run. Gate 2: before the runs, the session itself rereads what is asked and what is offered, with
+  each exclusion counted and proven. Gate 3: each measurement is read against the reference before it
+  is announced. The agent stops at each gate (a message to the session) and waits for the go. Its
+  progress events are not relayed to the owner: only verified results are. (A bench's reference gave
+  77 pages where the product showed 85, a whole part was wrongly excluded, and a conclusion was drawn
+  from a worthless run; the owner found all three.)
 - **Act when the action is obvious** (a correction of a mistake the owner just pointed at, rule 16).
 - **Run `pos-post-impl-checklist`** at the end of every step.
 
@@ -240,6 +293,11 @@ Voice example:
   guaranteed debt.
 - **Prefer a quick patch to a clean architecture.** When a bug reveals a design problem, fix the
   design. Ask: is this the right layer?
+- **Name a table, a column, a function, a type or a constant after one unit of the domain** (the
+  units the domain pivot lists): the product is generic, and what differs from one unit to another
+  lives in the data (a template, the unit's rules, reference tables), never in a name nor in a
+  hard-coded list. An official label or identifier issued by the domain is data about it, not a name
+  of the model.
 - **Create a new flow, view or component** when an existing one can be reused (rule 4).
 
 ### Environment

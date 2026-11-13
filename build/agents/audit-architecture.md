@@ -57,6 +57,12 @@ otherwise write the query you would have run and list it under "Not verified".
 - [ ] `router.refresh()` on paths that should be realtime subscriptions (per the pivot's realtime
       direction): flag, do not demand the replacement
 - [ ] Realtime subscriptions cleaned up (unsubscribe on unmount), no broken manual reconnection
+- [ ] The trigger and fan-out patterns of the pivot's rule S17: a menu, list or card link that the
+      framework prefetches instead of a link that prefetches on intent, a channel per feature
+      instead of the shared subscription layer, an event that re-reads the whole collection, a new
+      unfiltered delete listener, a wake-up listener (visibility, online) that re-reads, a new array
+      in the dependencies of an effect that reads, a pass of checks per user instead of per item.
+      Each is HIGH when it grows with tabs x users
 
 ### 3. API conventions
 - [ ] Every route authenticates through the auth helper the pivot names + 401; a public route

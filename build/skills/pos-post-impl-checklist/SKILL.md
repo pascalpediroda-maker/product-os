@@ -119,7 +119,7 @@ the card itself, never the agent in its place:
 |---|---|---|---|---|
 
 1. **Benefit:** what changes for a user, or the real access closed (what a caller obtains today).
-   "Nothing measurable" means the change does not ship (verdict "Don't"), even when it is already
+   "Nothing measurable" means the change does not ship (verdict "Don't do", as in `pos-bug-kill`), even when it is already
    coded.
 2. **Pre-mortem:** look for how it breaks, not for reassurance. Run the change against the known
    failure modes of Build pivot section 7 (for example a session that drops, so a signed-in user's
@@ -132,7 +132,8 @@ the card itself, never the agent in its place:
    own proven benefit.
 5. **A migration that changes the behaviour of what exists** (S16) is presented on its own line, with
    its rollback migration written; it is never applied to production before the go that names it. An
-   additive migration that live code does not read yet keeps the normal path of development.
+   additive migration (a new table, a new column) is also shown to the owner and applied on its own
+   go, never on the go of a code batch (S16).
 
 ### Gate 6: local commits (as soon as the work holds)
 
@@ -169,9 +170,19 @@ In the transcript:
 - the verdict visible or back-end only (Gate 3);
 - the risk card of Gate 5b, never omitted: the push request carries it, line by line.
 
+**The push request is asked on proof** (rule 27): what ships, in functional terms (what was broken
+or missing for the user, what now works), and for each point the capture that proves it (its
+absolute path) or "not proven, because ...", plus the QA proposed to the owner. A request with the
+risk card alone does not let the owner decide.
+
 Then wait for the owner:
 
 - QA validated: the work is already committed; **wait for an explicit "push"**.
+- Before pushing on that go (rule 29): **no long job running.** A deploy restarts the application and
+  kills any computation it still carries (an import, an analysis, an evaluation), without a trace.
+  Run the product's check named in Build pivot section 7 (or the Release & Operations pivot); anything
+  running, wait for it to end. No check named there: say so, and ask the owner where in-flight work
+  is read before the first push.
 - A bug found: fix it before moving on.
 - No time to test: state the risk explicitly, and agree to move on without a net.
 

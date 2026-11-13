@@ -1,6 +1,6 @@
 # Build context
 
-Skeleton version 1, maintained by `pos-build`.
+Skeleton version 2, maintained by `pos-build`.
 
 Copy this file to `<pivots.dir>/product_build_context.md` (by default
 `.claude/product/product_build_context.md`) and fill it below the separation line before running a
@@ -16,15 +16,16 @@ tests, commits).
 | `pos-build` | all of it before the first code: the rules, then the sections the request touches |
 | `pos-dev` | the same, and it injects into each agent's brief the rules and sections that agent needs |
 | `pos-check-rls` | rules S7, S16; sections 4 and 6 |
-| `pos-post-impl-checklist` | rules S2, S14, S16; sections 3, 6, 7, 8, 10, 11 |
+| `pos-post-impl-checklist` | rules S2, S14, S16, S17; sections 3, 6, 7, 8, 10, 11 |
 | `pos-audit` and its auditors | the rules as the reference an audit checks against; sections 1 to 9 |
-| `db-engineer` | rules S7 to S10, S15, S16; sections 4, 5, 6 |
-| `backend-dev` | rules S1 to S10, S14; the AI rules when it touches an LLM call; sections 1, 3, 4, 9 |
-| `frontend-dev` | rules S11 to S14; sections 1, 2, 8 |
-| `qa-engineer` | rules T1 to T6; section 10 |
+| `pos-mockup` | rule S11, T1; sections 8 and 10 |
+| `db-engineer` | rules S7 to S10, S15, S16, S18; sections 4, 5, 6 |
+| `backend-dev` | rules S1 to S10, S14, S17, S19; the AI rules when it touches an LLM call; sections 1, 3, 4, 9 |
+| `frontend-dev` | rules S11 to S14, S17; sections 1, 2, 8 |
+| `qa-engineer` | rules T1 to T7; section 10 |
 | `devsecops` | rules S2, S8, S10, S14, S15; sections 4, 7 |
 | `ai-engineer` | the AI rules, all of them; section 9 |
-| `prd-ux` | section 8 |
+| `prd-ux` | rule S11; section 8 |
 
 ## Rules for everything below the separation line
 
@@ -145,6 +146,22 @@ fail silently, the route still answered 200, and orphan items reached production
   box. Never `alert()` or `confirm()`.
 - A large or growing list loads by infinite scroll (an observer on a sentinel element, a `hasMore`
   flag), never by pagination buttons.
+- **The design system never bends to fit a screen, and it governs how things are built, not what
+  they contain.** Appearance and behaviour are the design system's: no new visual variant or state on
+  a component of the library, no class that overrides one of its states (an "always opaque" class on
+  a disabled button), no line written into the design system file to legitimise what a screen does.
+  Content is the screen's: another column of a table or another line of content in a card, built
+  with the design system's tokens and components, is added without asking, and a brief never tells an
+  agent to stop on it. First look for a layout the existing components cover. Only a new look or a
+  new behaviour that nothing existing provides (checked) changes the design system: it is presented
+  to the owner (what is missing, why nothing existing fits, the proposed pattern) and the design
+  system is updated after the go, never in the same commit as the screen that needed it. Why: an
+  agent added an option to a shared menu component and documented it in the design system in the
+  same commit as the screen that wanted it.
+- **Creating or changing a component or a rule of the design system means finding the screens
+  already built on the same pattern**, and migrating them or listing them in the report. A status
+  component that showed live progress was built for one screen and never propagated: another screen
+  of the same pattern stayed frozen on "0 of 1" for two weeks.
 
 **S12. Performance.**
 - Heavy components (rich text editors, document editors, anything over about 30 KB with complex
@@ -159,6 +176,14 @@ fail silently, the route still answered 200, and orphan items reached production
 - Never wrap the router refresh in a transition: the interface freezes.
 - Drag and drop: optimistic local state, then a debounced save.
 - Navigation state lives in the URL query parameters; every link is a real navigation with history.
+- **Live is the default; costing keeps it within the budget, never gives it up.** A background job
+  (a build, a read, an import, an evaluation) is followed on screen without a click, through the
+  job-status component and the subscription layer of section 8: a subscription only while the job
+  runs, re-reads grouped, zero at rest, a hidden tab parked. A "check again" button, a frozen progress
+  bar or a polling loop is a defect: a session that meets one judges it instead of describing it.
+  Giving up live is put to the owner. A ratchet test that forbids live cites the owner's decision;
+  without one, it is contested, not obeyed (a screen stayed frozen for two weeks behind a test that
+  had fixed that renunciation without asking).
 
 **S14. Load is costed before it ships.**
 - Any mechanism that runs per page open, per tab or per element (a real-time subscription, a
@@ -173,6 +198,8 @@ fail silently, the route still answered 200, and orphan items reached production
   observed), the result in requests per minute for 1, 2, then N tabs and users. A load report
   without that line is incomplete, even when the mechanism is found. The mechanism that amplifies is
   not the cause that starts it: a cause is stated only once its trigger is measured.
+- The costing is designed before the code, with the questions and patterns of S17, and goes into the
+  brief of each agent, not only into the final report.
 
 **S15. One production database: analysis is bounded.**
 - Every analysis query sent through the database connector runs inside a transaction that starts with
@@ -212,13 +239,82 @@ fail silently, the route still answered 200, and orphan items reached production
 - Before a `DROP` or an irreversible `ALTER`, list the consumers and their history
   (`git log --all --source -- <consumer>`). Without that check written down, the migration is not
   applied.
-- **Additive or behaviour-changing.** An additive migration (a new table with its policies, a new
-  column that live code does not read yet) follows the normal path of development. A migration that
-  changes what exists (GRANT or REVOKE, a policy of a table in service, a function the policies call,
-  a column live code reads, a deletion) is written with its rollback migration, presented on its own
-  line of the risk card (`pos-post-impl-checklist`, Gate 5b) and never applied before the go that
-  names it. It never rides along in the go of a code batch.
+- **Every schema write, additive included, is shown to the owner before it is applied.** A new
+  table or a new column: what it adds, why the existing model does not already carry it (the links
+  reread in the data-model architecture file), and who will read it. It is applied on its own go,
+  never on the go of a code batch. Why: a links table was applied without being shown, and it
+  duplicated a path the model already carried through another table.
+- **A migration that changes what exists** (GRANT or REVOKE, a policy of a table in service, a
+  function the policies call, a column live code reads, a deletion) is also written with its rollback
+  migration and presented on its own line of the risk card (`pos-post-impl-checklist`, Gate 5b).
+- Two gestures stay the session's own, said to the owner afterwards: adding a table to the database's
+  real-time publication, once the S17 questions are answered with measured figures; and removing what
+  the session itself just created by mistake.
 - The public-surface invariant test (section 6) stays green.
+
+**S17. Triggers and fan-out are designed before the code.** Every default below was a defect of the
+initial design, not of the implementation: none was visible on the finished screen, all became
+visible with several tabs and several users (one item open in two tabs reached about 2,000 requests
+a minute and production went down).
+
+Before the code or the brief of any change that triggers requests or grows with the data (a hook, a
+real-time subscription, an effect that reads, a link in a menu, a list or a card, checks, a relaunch
+on tab wake-up, a list that can exceed 50 rows), answer in writing:
+
+1. What triggers this work? A click, or also: a visible link, a tab wake-up, a reconnection, another
+   user's event?
+2. How many reads per trigger, and are they bounded to what changed?
+3. What does the cost become with seven tabs and five users on the same item?
+4. Live is the default (S13): not "do we need live?" but "how do we keep it within the budget?"
+5. Which existing channel carries it? If none, why a new one?
+6. Which test fails the day someone repeats the mistake elsewhere?
+
+Triggers: what starts server work without a click.
+
+| Pattern to avoid | Do instead | Why |
+|---|---|---|
+| A framework link that prefetches, in a menu, a list or a card of the signed-in app | a link that prefetches on intent (hover, focus, touch) | the framework prefetches every link that enters the screen: tens of server renders a minute for one account, invisible in development where nothing is prefetched |
+| A refresh or a re-read on every auth event | refresh only when the token changed, once (debounced), visible tab only | the auth library broadcasts its sign-in event to every tab on each return to the foreground: T tabs, T server renders |
+| A wake-up listener (visibility, online, focus, real-time reconnection) that re-reads everything | count each such listener as a trigger; one catch-up on return, no re-read of data read less than a minute ago | wake-up relaunches multiply by tabs x tables |
+| A new array or object (same content) in the dependencies of an effect or a hook | compare the content before replacing the state; an identical re-read keeps its reference | a new array relaunched a series of checks on every reconnection |
+| A hidden tab that stays connected and re-reads | a hidden tab is parked: no reconnection, no re-read, one catch-up on return | users keep five to seven tabs open all day |
+
+Fan-out: one write, how many reads.
+
+| Pattern to avoid | Do instead | Why |
+|---|---|---|
+| An event that re-reads the whole collection, or every links table | re-read only the table that changed | editing one indicator went from 25 requests to 7 |
+| A pass of checks per user and per tab | one pass per item (a server-side coalescer keyed on the item, membership checked before joining a pass, a server cap) | U people on one item meant U passes |
+| Subscribing to tables the item's template never writes | listen only to what the template writes | one tab opened about a hundred subscriptions, a third of them on empty tables |
+| Several channels per tab, one per feature | one channel per scope (the item, the user's notifications) through the shared subscription layer of section 8 | real-time messages are events x subscribed tabs; connections count too |
+| A delete listener without a filter | no new unfiltered delete listener: a delete event does not carry the filter, so any deletion wakes every tab | |
+| Listening to a table without checking it is published | check the real-time publication first | the listener stays silent, with no error |
+
+- A principle set on one screen holds for every screen of the same pattern. It is guarded by a
+  ratchet test (a closed list, any addition to which fails), never by the memory of whoever codes. A
+  pattern of this catalogue shipped without that test is not delivered: the guard goes in the same
+  batch.
+- A load fix is measured before and after with the same bench. What works in development (one tab, a
+  dev server that prefetches nothing) proves nothing.
+
+**S18. In the database, one rule per direction of a relation, without exception.** A foreign key
+points to the entity that carries the MEANING of the link (a partner of this item points to the
+item's partner row, never to the global organisation). When the target of a relation changes, every
+column with that meaning migrates, found in the catalogue of constraints (`pg_constraint`), never in
+a hand-made list, with its unique constraints, guards and scripts (duplication, snapshots). Only a
+column whose meaning differs stays on the old target, with its reason written. No special case, no
+two lasting columns for one fact. Why: two kinds of links were left on the old target "so as not to
+break anything", and the model carried the same fact twice.
+
+**S19. No limit blocks a user without the owner's explicit decision.** A quota per day, per item or
+per user, a cap on runs, a forced delay between two actions: the only legitimate usage limit is the
+plan's (its AI budget, its seats, what the customer paid for). Any other is put to the owner in
+plain words, at the top of a message, before the code: what it protects and what a user who hits it
+lives. It never slips into a batch, a migration or an agent's brief. Allowed without asking, because
+they cost nothing to normal use: one run at a time (no duplicate), a guard against a loop, a
+per-minute limit no human reaches. Why: a cap of ten runs per item per day, set by the session that
+coded the feature with no link to any plan, was found only because it blocked a bench; it would have
+blocked a user the day before a deadline.
 
 ---
 
@@ -339,7 +435,11 @@ follows it, without exception.
    promote byte for byte after a full snapshot of the live value, and deactivate the copy. Every brief
    carries the line "LIVE <row> FORBIDDEN; only <copy> may change".
 5. **A bench before and after,** several runs, with a judge per item rather than a string match
-   (collaboration rule 9).
+   (collaboration rule 9). Its cases come from the whole history of the subject (the fix backlog,
+   handoffs, real conversations): each incident ends in a case, or in a written reason for not having
+   one. Before any paid run, read the input each case actually sends and check that it tests what the
+   measure must decide; a case that cannot leaves the bench before any spend (two paid runs out of six
+   measured nothing: the item chosen sent only its code, name and description).
 6. **A full snapshot before any update of a stored prompt:** the complete text, not its length. A
    rollback delivered truncated made a revert impossible.
 
@@ -380,6 +480,37 @@ same input pattern giving very different outputs, a judge score that drops on th
 capture the bad output with its real inputs; compare with a known-good output to localise; GREEN, fix
 the prompt at the root, never a parser downstream; REFACTOR, add the case to the bench with a judge
 per item, so the regression cannot pass silently again.
+- **The first gesture is to read everything the agent receives.** Before any hypothesis, any bench
+  and any spend: get the full text of a real turn (the composed prompt, the common rules, the context,
+  the notes, the tool definitions and the tool results) and read it in full yourself. A size, a sample
+  or an agent's report does not replace that reading. What is in it is judged scope by scope: an
+  instruction written for one use ships only on that use. Why: a rule written for one assistant's
+  drafting task ("everything in English, use the codes") shipped on every assistant; its weight showed
+  on every bench, and nobody opened it.
+- **What worked and no longer works is dated before any proposal:** the rate before and after on the
+  data already there, what the model received in a case that works and in one that breaks, the
+  commits of the breaking date. One failed case is never presented as a trend.
+
+**AI17. Choosing a model or an effort starts from the model reference.** The memory file section 9
+names records every measurement that settles something about a model (the case, the setting, the
+figure, the verdict, the source). A session that measures a model adds its result there at each
+decisive measurement; a session or an agent that works on a model receives that file, never only the
+figures of the last bench. Why: a setting was copied from one assistant to another without reading
+what it had given, and a higher effort was considered for a whole assistant without the measurements
+already made on another feature.
+
+**AI18. A dialogue with the person is led by the model, never by the code.** As soon as the AI
+exchanges with the person (an assistant, a button that opens a turn, a question the AI asks and
+waits for), the design writes, before any brief or code, a block with three answers:
+1. **Who reads what the person types?** The model, never our code. Otherwise the design is wrong and
+   is redone.
+2. **Which existing tools carry the facts** to where they are stored (read in the tools file, and why
+   they suffice or not)?
+3. **What does the code refuse, through which tool**, and what does the model do with the refusal?
+Without this block, no brief leaves and no code is written. A session that resumes a handoff checks
+that the block exists and holds. Why: a dialogue was filled by code (a short message read as a name,
+a recognised word as a country); in production, the person's sentence about the product became the
+name of a record.
 
 ---
 
@@ -389,6 +520,15 @@ per item, so the regression cannot pass silently again.
 (memory exhaustion and a corrupted build cache on a single machine). If none runs, the test runner
 may start one itself when its configuration reuses an existing server. A session asks the owner
 before starting a server (collaboration rule 8).
+- The dev server port is a queue between sessions: take it free or handed over, say what runs before
+  going ahead, check which working copy it runs from, free it and tell the session that waits. A
+  session that wants the port while another holds it asks to be notified when it is free.
+- **Never kill a process you did not start.** Stop only your own server, by its process id; never a
+  kill by image name (every Node process of the machine), never a second port.
+- **An agent never starts a server and never kills a process.** Its verification goes through unit
+  tests; when a render in the app is needed, it says so to the lead, who does it on its own turn.
+  Not enough memory: it says so and frees nothing. Why: a brief that named a second port made an
+  agent start a second server, which then killed every Node process on the machine.
 
 **T2. Authentication in tests.** A setup step signs in with a test account's password and saves the
 session state that the authenticated tests reuse. Credentials live in the local environment file,
@@ -411,6 +551,14 @@ the permissions (a non-member is refused, each role sees what it should); the in
 
 **T6. A failing test is triaged.** A bug in the code goes to whoever owns that code, with the
 detail. A bug in the test is fixed in the test.
+
+**T7. The full suite is the session's, sized on the free memory.** On a machine that several
+sessions share, the full unit suite runs through the launcher section 10 names, which reads the free
+memory and picks the number of worker processes (per-worker cost plus a margin, capped), and refuses
+to start below a minimum: then say at the top of the message how much memory to free, or wait for
+another session's run to end. Never a raw runner call, never a slowed run forced through. One test
+file runs through the single-file command of section 10. An agent never runs the full suite. Why: a
+full run at maximum parallelism on a machine with one gigabyte free crashed the editor twice.
 
 ---
 
@@ -601,6 +749,9 @@ Guidance: what runs, and how the product breaks.
   session), several tabs (the auth lock, real-time sockets), the auth server's rate limit on the
   single server IP, the database connection limit under a burst, automatic client relaunches, a
   deploy during a long job.
+- Long jobs before a push: the query or check that says whether a long job is running (an import, an
+  analysis, an evaluation, a background build), all at 0 or wait. A deploy restarts the application
+  and kills what it still carries (collaboration rule 29; pos-post-impl-checklist, Gate 8).
 - Cost constraint: the plan the product stays on, and what an increase needs.
 - Environment variables: where they live in production, which ones may reach the client (public
   values only).
@@ -618,6 +769,8 @@ Guidance: what runs, and how the product breaks.
 
 -
 
+**Long jobs running (checked before a push):**
+
 **Cost constraint:**
 
 **Environment variables:**
@@ -632,7 +785,10 @@ Guidance: what a front-end change must follow. Point to the design system; do no
 - Mobile primitives (list rows, bottom navigation, sheets) and the minimum touch target.
 - Display levels: when the product shows a field only at a deeper level of detail, name the levels
   and the switch, so a new field is placed at its level.
-- Real-time conventions: the subscription layer, autosave debounce, what may still use a full refresh.
+- Real-time conventions: the subscription layer (the shared channels, S17), the job-status component
+  that follows a background job live (S13), the link component that prefetches on intent and the
+  guard test that keeps the prefetching link out of the signed-in app (S17), autosave debounce, what
+  may still use a full refresh.
 - Rich text conventions (how mentions or embedded references are stored and displayed).
 -->
 
@@ -669,6 +825,7 @@ Guidance: fill only when `product.ai_agents` is true; otherwise write "No AI age
   that selects it.
 - Bench: where it lives, how a run is launched, how results are judged.
 - Bounded exceptions to AI5, if any, with where they live.
+- Model reference (AI17): the memory file where each decisive measurement of a model is recorded.
 -->
 
 **Agents live in:**
@@ -701,15 +858,18 @@ Guidance: fill only when `product.ai_agents` is true; otherwise write "No AI age
 
 **Bench:**
 
+**Model reference:**
+
 ## 10. Tests
 
 <!--
-Guidance: the facts rules T1 to T6 need.
+Guidance: the facts rules T1 to T7 need.
 - Runners (end-to-end, unit), their configuration files and test folders; the commands to run one
-  file and all.
+  file and all (T7: the launcher that sizes the full suite on the free memory, and its minimum).
 - Dev server port, and the memory file that says how it is started.
 - Test setup: the file that signs in, where the session state is saved, the variables that hold the
-  credentials.
+  credentials. The scripts of `pos-mockup` read that session state file from the config key
+  `build.test_auth_state`; point to it here rather than writing the path twice.
 - Test accounts by role, credentials by variable name.
 - Test space and test copies: if `CLAUDE.md` names them, point to it. What must never be used.
 - Guard tests (unit invariants) the checklist runs: one per line, with what each guards.

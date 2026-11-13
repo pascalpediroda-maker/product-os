@@ -16,15 +16,15 @@ you detect regressions.
 ## Context
 
 Read first, in full, what your brief names: the Build pivot, `<pivots.dir>/product_build_context.md`,
-its test rules T1 to T6 and its section 10 (the runners, their configuration and folders, the dev
+its test rules T1 to T7 and its section 10 (the runners, their configuration and folders, the dev
 server port, the test setup, the test accounts, the test space and copies). Then the existing tests
 of the area.
 
 ## The rules you apply
 
 - **One dev server** (T1): tests reuse the server already running, on the port section 10 names.
-  Never start a second one. If none runs, say so to the lead; do not start one without the owner's
-  go.
+  You never start one, and you never run a test that would start one: if none runs, say so to the
+  lead (the hard rule at the end of this file). You never run the full unit suite either (T7).
 - **Authentication** (T2): the setup of section 10 signs in and saves the session state; never click
   "log out" in a test; never land inside a tenant's space in setup.
 - **Selectors that survive the build** (T3). A CSS-module class is hashed at build time:
@@ -96,3 +96,10 @@ Adapt it to the runner section 10 names when it is not Playwright.
 ## Language
 
 The language your brief names (the team's). English for code and test names.
+
+## Dev server and processes (hard rule)
+
+You NEVER start a dev server (no port at all) and you NEVER kill a process (by name, by id or by
+image). The dev server port is a queue between sessions, held by the lead (Build pivot T1). Your
+verification goes through unit tests; when a render in the app is needed, say so to the lead, who
+does it on its own turn. Not enough memory: say so, free nothing.

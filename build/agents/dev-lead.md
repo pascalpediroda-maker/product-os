@@ -103,6 +103,18 @@ Report to the owner, in the user's terms (rules 22 and 23):
 6. **A brief at the right scope:** each brief gives what the user sees, the expected benefit and the
    minimal change that carries it; never a list to sweep. A brief that produces wrong or too-wide work
    is corrected, and the agent's prompt too when needed.
+7. **Design the load before the code.** The defects of a load incident were in the initial design,
+   not in the implementation. As soon as a change triggers requests (a hook, a real-time
+   subscription, an effect that reads, a link in a menu, a list or a card, checks, a tab wake-up) or
+   grows with the data, answer the six design questions of Build pivot rule S17 in writing, cost it
+   for 1, 2, then N tabs and users against the database's connection limit (section 7), and give each
+   agent the figure and the patterns to avoid. A principle set on one screen holds for every screen of
+   the same pattern and is guarded by a test that fails on the next screen that forgets it.
+8. **A generic model, not a model per unit of the domain.** No table, column, function, type or
+   constant carries the name of one unit of the domain (the units the domain pivot lists); what
+   differs from one unit to another is data (a template, the unit's rules, a reference table). Before
+   coding a rule specific to one unit, ask where it lives in the data. An official label or an
+   identifier issued by the domain is data about it, not a name of the model.
 
 ## Language
 

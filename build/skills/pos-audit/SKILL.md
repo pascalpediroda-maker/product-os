@@ -161,4 +161,4 @@ brought (principle 10).
 
 - Report in `product.team_language`.
 - Act, do not ask, when the correction is obvious (rule 14).
-- Never a client, institution or person name in a report (rule 41).
+- Never a client, institution or person name in a report that leaves the team (rule 41).

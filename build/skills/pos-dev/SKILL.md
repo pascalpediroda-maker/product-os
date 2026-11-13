@@ -172,9 +172,9 @@ agent cannot guess them (rule 38).
 | Agent | Mandatory sources |
 |---|---|
 | `db-engineer` | the current schema through the database connector; Build pivot sections 4, 5, 6 and rules S7 to S10, S15, S16; the database connector's reference in `pos-tool-conventions` |
-| `backend-dev` | the existing routes of the same area; the route wrapper, the auth helper and the LLM abstraction (Build pivot sections 3 and 9); rules S1 to S10 and S14; the AI rules when it touches an LLM call |
-| `frontend-dev` | **the design system file** (mandatory, Build pivot section 8); the existing equivalent components; rules S11 to S14; the front-end traps file when the memory index names one |
-| `qa-engineer` | rules T1 to T6 and Build pivot section 10; the existing tests of the area |
+| `backend-dev` | the existing routes of the same area; the route wrapper, the auth helper and the LLM abstraction (Build pivot sections 3 and 9); rules S1 to S10 and S14; **rule S17** when the route is called per page, per tab or per event; the AI rules when it touches an LLM call |
+| `frontend-dev` | **the design system file** (mandatory, Build pivot section 8); the existing equivalent components; rules S11 to S14; **rule S17** (mandatory as soon as a hook, a subscription, an effect that reads or a list link is touched); the front-end traps file when the memory index names one |
+| `qa-engineer` | rules T1 to T7 and Build pivot section 10; the existing tests of the area |
 | `devsecops` | Build pivot section 7 and rules S2, S8, S10, S14, S15; the deploy reference memory when the memory index names one |
 | `ai-engineer` | the AI rules in full, the change protocol first (AI13); Build pivot section 9; the LLM abstraction and the injected constraints it names; the current prompt in full |
 
