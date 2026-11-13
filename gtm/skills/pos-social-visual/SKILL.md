@@ -1,13 +1,14 @@
 ---
 name: pos-social-visual
 description: >
-  Social post visuals: single images (branded text cards, cropped product captures) and multi-slide
-  PDF carousels (LinkedIn document posts), built with sharp and pdf-lib. The image is the Attention of
-  AIDA, readable at phone size, every rendered image looked at before delivery, captures anonymised,
-  the post delivered ready to publish in the posts base. Brand tokens come from the product's design
+  Social post visuals: single images (branded text cards, cropped product captures), multi-slide
+  PDF carousels (LinkedIn document posts), built with sharp and pdf-lib, and short product videos
+  (Playwright captures edited with ffmpeg). The image is the Attention of AIDA, readable at phone
+  size, brand assets found rather than redrawn, every rendered image looked at before delivery,
+  captures anonymised, the post delivered ready to publish in the posts base. Brand tokens come from the product's design
   system, the voice from the GTM pivot. Ordered by `pos-gtm` in execute mode. Use when someone says
-  "make an image for the post", "a carousel", "a LinkedIn visual", "slides", "a PDF carousel", "crop
-  this capture", "blur this screenshot", "/pos-social-visual".
+  "make an image for the post", "a carousel", "a LinkedIn visual", "slides", "a PDF carousel", "a
+  product video", "crop this capture", "blur this screenshot", "/pos-social-visual".
 ---
 
 # Social post visuals (images and carousels)
@@ -15,8 +16,8 @@ description: >
 ## Role
 
 Produce the **visuals of posts**, for the product's account or the owner's own: single images
-(branded text cards, cropped product captures) and **multi-slide PDF carousels** (LinkedIn document
-post). It is the visual production arm of `pos-gtm`.
+(branded text cards, cropped product captures), **multi-slide PDF carousels** (LinkedIn document
+post) and **short product videos**. It is the visual production arm of `pos-gtm`.
 
 It does NOT write the post's copy (that is `pos-gtm` execute mode, with the voice of the GTM pivot,
 section 7, and its subsection "The owner's voice" when the owner posts in person), does NOT define
@@ -60,9 +61,45 @@ exactly the outcome they hope for. Zero feature on screen.
 **Corollary:** if the punchline is already the first line of the post, the image does not repeat it.
 Read twice, it is dead the second time. The image shows what the text cannot show.
 
+**Exception, the testimonial.** A testimonial post shows the person. Their face, their name and their
+strongest quote go large on the image, with the context of what they did clearly visible, even when
+the quote also opens the post: the image travels alone in the feed, shared and picked up, and a
+peer's face is the social proof. The visual goes with the post to the person for validation, so no
+separate request for a photo. The photo of a person quoted under their name is never put to the owner
+as a question: it goes on the visual (the owner's verdict on such a question: "there is nothing to
+discuss"). Formats of visuals are not compared one post at a time.
+
 **Confidentiality guardrail:** these visual objects often come from real documents (reports,
 evaluations, captures). A real customer document NEVER serves as the source, even cropped: reproduce
 the layout and mask the identifying fields (rule 2 below, and section 16).
+
+## Process rule 0 ter: look for the asset BEFORE redrawing it
+
+As soon as a brand, a logo or an identifiable icon must appear (the product's, a tool's, an issuer's,
+a partner's), **look for the source file before writing a single line of SVG that imitates it.**
+Improvising a shape that "looks like" a logo produces a fake (mistaken for another product, or a
+wrong reconstruction); it is never an acceptable shortcut.
+
+**The default reflex to correct:** generating code is the fastest action, so it is the one done
+without thinking. Before any brand asset, ask explicitly "does this file already exist somewhere (the
+visuals folder, the scratchpad, Downloads), or did the owner just mention it?", and search, never
+assume.
+
+Observed: the owner had put a tool's icon file on disk and mentioned it in passing. Instead of
+searching for the file, a lookalike shape was drawn by hand and presented as that tool's icon. Two
+faults stacked: not searching, then not saying that the search had failed or had not been done,
+delivering an invention without flagging it.
+
+**What to do:**
+
+1. `Glob` the plausible places (the post's current folder, the visuals folder the pivot names, the
+   scratchpad, Downloads, any path the owner just cited) **before** writing the SVG.
+2. Found: integrate it as it is (`sharp().composite()` for a raster, or read the SVG if it is one).
+   Never retrace it by hand, even "to fit the style".
+3. Not found after a real search: say so explicitly ("I cannot find the file there, can you give me
+   the path?") rather than deliver a drawn approximation in silence as the real brand.
+4. A third-party brand's logo has a fixed, known shape: never "reinterpret" it by changing its
+   proportions or its base colours.
 
 ## Process rule 0 bis: legibility in a mobile feed, and nothing else
 
@@ -182,6 +219,44 @@ Then assemble the PNGs into a PDF with pdf-lib (pages `[1080,1350]`).
   light border.
 - **Stamp** (for example "TESTED"): a double-bordered red rectangle rotated `rotate(-12)`, with a
   semi-opaque cream backing for legibility on a busy background.
+
+## Product video recipe
+
+A feature that shows itself by a gesture (a click, a result that appears, a value corrected
+everywhere) is shown in **video**, not in a carousel: a carousel can only tell the gesture. Proposed
+unasked for any feature of that kind.
+
+**Storyboard, to follow:** (1) the work view in a wide shot, to place it (the viewer sees a SaaS and
+the object the user works on); (2) a zoom on the button that triggers the feature; (3) a cut to the
+result in a wide shot; (4) zooms on ONE item of the result: what it found, the choice, the action;
+(5) the corrected value where it lives; (6) an end card (the feature's name, one line of promise, the
+logo, the domain). 20 to 30 seconds.
+
+**Never launch a paid processing for the video:** hover the button without clicking, then open an
+existing result. Never a fake loading.
+
+**Format:** a desktop-only screen is filmed at 1440x900 and output as a **square 1080x1080** (on a
+phone, 16:9 becomes a strip, and a portrait crop loses the screen). Subtitles burned into dark bands
+at the top and bottom (48 px, white at the top, the light accent at the bottom), no sound needed.
+
+**Shooting** (a re-runnable script in the visuals folder, copied for another feature): Playwright on
+the test space the product's `CLAUDE.md` names, on demonstration data only (rules 32 and 33);
+sign-in with the test account; `deviceScaleFactor: 2`; **a 2x PNG capture at each state** (it makes
+the video: the raw Playwright video is too blurry once zoomed); a network guard that blocks any
+processing launch and any write outside the filmed item; a single write (the filmed action), undone
+right after and checked in the database. The shooting can go to a background agent with these
+constraints (rule 36).
+
+**Editing** (a second re-runnable script, taking the captures folder): sharp crops each state (to the
+ratio of the useful area, 1080x780, with a zone blur on whatever must not be read, test notes of the
+demo data included); ffmpeg (on the shell's PATH) makes a slight zoom-in per shot (`zoompan`), lays
+the bands, chains the shots with 0.4 s crossfades (`xfade`), and outputs an H.264 mp4 with
+`+faststart`. Before delivering: extract 6 to 8 frames (`-ss`) into a contact sheet and look at it
+(rule 1).
+
+**Publication:** the same video, native, on the company page AND on the owner's account, the same
+day, with two texts (the page speaks of the feature, the owner in their own name); never a mere
+reshare.
 
 ## Anonymise a capture
 

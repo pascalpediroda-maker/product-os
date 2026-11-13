@@ -26,16 +26,26 @@ marketplace has been added. The full sequence and the choice of scope are in the
   brand voice, the real verbatims, one motion per copy, the pricing state, what the product really
   covers.
 - **Nothing reaches the public or a prospect without the owner.** Posts and emails are replies and
-  drafts; the owner publishes and sends.
+  drafts; the owner publishes, and a campaign leaves the sending tool on the owner's launch. The only
+  exceptions are those the owner records as standing decisions (for example LinkedIn invitations
+  without a note).
+- **No text leaves without its review.** A mail of a sequence goes through a fixed copywriting chain:
+  the persona read in full, compared angles, the review grid, the persona avatars, the owner's voice,
+  one version shown.
+- **The prospecting pipeline moves without being asked.** Every campaign session opens on the
+  pipeline in figures, the next batch is ready the evening before, and the follow-up (bounces,
+  replies, unsubscribes, CRM) is done every evening.
 
 ## What it contains
 
 | Piece | Where | What it does |
 |---|---|---|
-| GTM pivot | `templates/product_gtm_context.md` | the product's go-to-market in sixteen sections: product and business model, audience, pains, competition and moats, customer language, objections, voice (and the owner's own voice), proof, positioning and wedges, use cases, buying journey, channels, motions, account types, pricing state, compliance and trust; then the canonical sources and the changelog |
-| `pos-gtm` | `skills/pos-gtm/` | the GTM router and coach: coach mode (state of play, three priorities, questions), execute mode (routes to the marketing library, applies the pivot's constraints, saves each output in its place), reading and synthesis mode; hands product subjects to Discovery |
-| `pos-social-visual` | `skills/pos-social-visual/` | the method for post visuals: the image as the Attention of AIDA, legibility floors for a phone feed, every image looked at before delivery, captures anonymised, carousels assembled to PDF, the post delivered ready to publish in the posts base |
-| Marketing library | `skills/marketing/` | the upstream marketingskills library (MIT, `skills/marketing/LICENSE`), vendored as is: 40 skills nested so they are not auto-discovered, read inline by `pos-gtm` |
+| GTM pivot | `templates/product_gtm_context.md` | the product's go-to-market in sixteen sections: product and business model, audience (persona sheets, adoption profile), pains, competition and moats, customer language, objections, voice (lexicon, cold-mail rules, the owner's own voice), proof, positioning and wedges, use cases, buying journey, channels, motions, account types, pricing state, compliance and trust; then the canonical sources and the changelog |
+| `pos-gtm` | `skills/pos-gtm/` | the GTM router and coach: coach mode (state of play, three priorities, questions), execute mode (routes to the marketing library, applies the pivot's constraints, saves each output in its place), campaign plan mode (a sending strategy in eight steps), the CRO posture (master plan, month plan, the owner's 1:1s), the persona avatars, reading and synthesis mode; hands product subjects to Discovery |
+| `pos-campaign` | `skills/pos-campaign/` | the daily running of email campaigns: the routine of the day, the mandatory copywriting chain for a mail of the sequence, the follow-up (mailbox, sending tool reports, unsubscribes, CRM), LinkedIn prospecting, the reminders calendar; the campaigns base schema |
+| Persona avatar template | `templates/persona-avatar.md` | the shape of an agent that reads an outreach text as one persona would and says its reaction; instantiated in the product's `.claude/agents/` by `pos-gtm` from the pivot's persona sheets |
+| `pos-social-visual` | `skills/pos-social-visual/` | the method for post visuals: the image as the Attention of AIDA, brand assets found rather than redrawn, legibility floors for a phone feed, every image looked at before delivery, captures anonymised, carousels assembled to PDF, short product videos, the post delivered ready to publish in the posts base |
+| Marketing library | `skills/marketing/` | the upstream marketingskills library (MIT, `skills/marketing/LICENSE`): 40 skills nested so they are not auto-discovered, read inline by `pos-gtm` and `pos-campaign`. Vendored as is, except the OS additions its README lists (the avatar review grid) |
 
 ## Fill these first
 
@@ -50,7 +60,10 @@ Worth filling too:
 - `databases.crm`: without it, the state of play has no deals.
 - `databases.feedback`: without it, verbatims come from the pivot only.
 - In the pivot's appendix "Canonical sources": the posts base, a GTM actions base if the product keeps
-  one, the visuals folder, the competitor watch and campaign pages.
+  one, the visuals folder, the competitor watch and campaign pages; for prospecting, the master plan,
+  the campaigns base, the sequence texts, the contact pool, the sending tool, the claims reference
+  and the feature sheet.
+- In the pivot's section 2: the persona sheets, from which `pos-gtm` builds the persona avatars.
 
 The pivot carries the core's separation line. Above it: the skeleton, which an update of this plugin
 may change. Below it: the product's content, which an update never overwrites.
@@ -59,8 +72,9 @@ may change. Below it: the product's content, which an update never overwrites.
 
 | Connector | Needed for |
 |---|---|
-| Notion | the CRM, the feedback base, the posts base and the GTM pages; required |
-| Gmail, optional | outreach drafts in the owner's mailbox, never sent; without it, drafts come as text |
+| Notion | the CRM, the feedback base, the posts base, the campaigns base and the GTM pages; required |
+| Gmail, optional | outreach drafts in the owner's mailbox, never sent; reading replies and bounces for `pos-campaign`; without it, drafts come as text |
+| A sending tool, optional | the sequences of `pos-campaign` and their reports, through its API; named in the pivot's appendix with where its key lives, never in the repository. Gmail stays set up with sending denied: mails leave through the sending tool |
 
 The core `pos-setup` skill connects them; the core `pos-tool-conventions` skill says how each is used.
 

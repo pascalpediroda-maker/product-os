@@ -79,6 +79,16 @@ For each pillar, ask:
 
 ---
 
+## Product OS: review a post with the avatar grid
+
+Added by the product OS on top of the upstream library (see the library README). A post is reviewed
+with the avatar grid of `../copywriting/SKILL.md` (questions tagged [Po] and [all]): a clear position
+whose "them" is the status quo, never the reader or their peers; the reader inside the "we" of the
+profession; their words, from the lexicon of the GTM pivot (section 7). The owner's voice, when the
+owner posts in person, is the subsection of section 7.
+
+---
+
 ## Hook Formulas
 
 The first line determines whether anyone reads the rest.

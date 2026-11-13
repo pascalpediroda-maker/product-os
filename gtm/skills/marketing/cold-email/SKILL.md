@@ -46,6 +46,19 @@ See [personalization.md](references/personalization.md) for the 4-level system a
 
 The reader should see their own situation reflected back. "You/your" should dominate over "I/we." Don't open with who you are or what your company does.
 
+### Product OS: the review grid and the "you" that gains
+
+Added by the product OS on top of the upstream library (see the library README).
+
+- **Only the "you" that gains or decides counts** in "you/your should dominate over I/we": a "your
+  team" that is the subject of a lack is what made an expert reader with twenty years in the trade
+  close on a cold mail.
+- **The avatar review grid** is in `copywriting/SKILL.md`, section "Product OS: the avatar review
+  grid". Apply its questions tagged [M] and [all] (or [1:1] and [all] for a LinkedIn or 1:1 message)
+  before showing any mail. This skill keeps what is specific to the channel: subject lines, length,
+  personalisation and first line, follow-ups, benchmarks. When the two disagree, the cold-mail rule
+  wins for the subject line only (2 to 4 lowercase words).
+
 ### One ask, low friction
 
 Interest-based CTAs ("Worth exploring?" / "Would this be useful?") beat meeting requests. One CTA per email. Make it easy to say yes with a one-line reply.

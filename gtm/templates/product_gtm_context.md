@@ -1,12 +1,14 @@
 # Product marketing context (GTM pivot)
 
-Skeleton version 1, maintained by `pos-gtm`.
+Skeleton version 2, maintained by `pos-gtm`.
 
 Copy this file to `<pivots.dir>/product_gtm_context.md` (by default
 `.claude/product/product_gtm_context.md`) and fill it before running a skill of the
 Go-to-Market module. It is the GTM pivot: the single source of truth for go-to-market. Every GTM
-skill reads it before acting: `pos-gtm`, `pos-social-visual`, and every skill of the vendored
-marketing library, which expects a `product-marketing-context.md` file and is pointed here instead.
+skill reads it before acting: `pos-gtm`, `pos-campaign`, `pos-social-visual`, and every skill of the
+vendored marketing library, which expects a `product-marketing-context.md` file and is pointed here
+instead. `pos-gtm` and `pos-campaign` read it in full at every launch, the persona sheets of section 2
+included: a skill that read only some sections wrote emails without knowing the personas.
 
 ## Why it exists
 
@@ -19,8 +21,10 @@ owner before a meeting or a decision.
 
 | Reader | What it takes from here |
 |---|---|
-| `pos-gtm`, coach mode | section 1 and the sections the subject touches (for example 13 for a motion), the motions (13), the channels (12), the open pricing topics (15), the sources (appendix) |
-| `pos-gtm`, execute mode | the constraints it enforces on every output: confidentiality (16), voice (7), verbatims (5), motions (13), moats by audience (4), pricing state (15), what the product covers (1), the channel anti-patterns (12), the positioning (9) |
+| `pos-gtm`, coach mode | the whole pivot; its state of play draws on section 1 and the sections the subject touches (for example 13 for a motion), the motions (13), the channels (12), the open pricing topics (15), the sources (appendix) |
+| `pos-gtm`, execute and campaign plan modes | the constraints it enforces on every output: confidentiality (16), voice and lexicon (7), verbatims (5), motions (13), moats by audience (4), pricing state (15), what the product covers (1), the channel anti-patterns (12), the positioning (9); the prospecting plan, the campaigns page and the claims reference (appendix) |
+| `pos-campaign` | the whole pivot: the persona sheets and the adoption profile (2), the verbatims (5), the voice, the lexicon and the cold-mail rules (7), the chain of work (9); the campaigns base, the sending tool, the sequence texts, the feature sheet and the claims reference (appendix) |
+| The persona avatars (built by `pos-gtm`) | the persona sheets and the adoption profile (2), the verbatims (5) |
 | `pos-social-visual` | the personas (2), the pains (3), the voice (7), the proof points and how a figure is hedged (8), the posts base (appendix) |
 | The marketing library | everything a `product-marketing-context.md` holds: product, audience, pains, competition, language, objections, voice, proof, positioning |
 | The GTM perspective (`prd-gtm`, in `pos-discovery`) | positioning, personas, competition and pricing, when a product decision has a GTM side |
@@ -40,7 +44,7 @@ owner before a meeting or a decision.
 
 1. **One fact, one place.** The OS bases stay in the product config (`databases.crm`,
    `databases.feedback`) and are never copied here. Bases that only GTM uses (a GTM actions base, a
-   posts base) are named in the appendix "Canonical sources" with their data source URL. A detailed
+   posts base, a campaigns base) are named in the appendix "Canonical sources" with their data source URL. A detailed
    source (a personas document, a competitive analysis, a launch plan) is pointed to, not copied. A
    section that outgrows a screen moves to a file under `<memory.dir>/gtm/`, listed in the memory
    index, and this page keeps a one-line pointer.
@@ -60,12 +64,12 @@ owner before a meeting or a decision.
 | # | Section | What it must answer |
 |---|---|---|
 | 1 | Product overview & business model | what the product is in one canonical descriptor, its scope along the user's chain of work, its mission, what it is not, the business model and plans, the revenue target, the stack and the single domain, the product state (released, in progress) |
-| 2 | Target audience & decision-makers | the personas and their GTM priority, the buyer matrix (who buys, who decides, who influences, at which tier), the anti-personas |
+| 2 | Target audience & decision-makers | the persona sheets (who, temperaments, what vexes them, their pains in their words, their SONCAS profile, what makes them reply or close), the adoption profile that crosses the personas, the personas and their GTM priority, the buyer matrix (who buys, who decides, who influences, at which tier), the anti-personas |
 | 3 | Problems, pain points, switching dynamics | the dominant pains ranked by recurrence, where prospects come from, what stops them switching |
 | 4 | Competitive landscape & differentiation | the categories of competitors and their threat, the structural moats and what is not a moat, which moats to put forward per audience, the argument against each alternative |
 | 5 | Customer language | the verbatims to reuse as they are, by theme |
 | 6 | Objections & how to handle | each objection heard and the answer |
-| 7 | Brand voice | the voice principles, the tone per channel, the signature phrases, the words to avoid, and the owner's own voice when the owner writes in person |
+| 7 | Brand voice | the voice principles, the tone per channel, the signature phrases, the words to avoid, the lexicon (their words, our words), the cold-mail rules learnt from real sends, and the owner's own voice when the owner writes in person |
 | 8 | Proof points | the proof available today, and the proof still to acquire |
 | 9 | Positioning & wedge | the tagline, the one-liner, the market context, the wedges and their beats along the chain, the core values and value axes, how the product delivers them per persona, the category |
 | 10 | Use cases | the flat list of use cases, and the ones deprioritised |
@@ -117,9 +121,51 @@ Guidance:
 
 <!--
 Guidance:
-- Pointer to the detailed personas source; do not duplicate it here.
+- The persona sheets below are read in full before any message (`pos-campaign`, step 0). They use the
+  same persona codes as the `Persona` property of the CRM and of the feedback base. Pointer to the
+  detailed personas source and to the evidence behind each claim (feedback entries).
+- Corrections of earlier persona documents not to repeat: an angle or a figure that hurt a real
+  reader, a budget assumption the facts contradicted. One line each, with what happened.
+- What makes them reply, what makes them close, from real sends: which message got which reply,
+  which line made a reader close. Facts only.
 - Quick synthesis: one row per persona (an ID such as P1, P2...).
 -->
+
+### Adoption profile: an axis that crosses the personas
+
+<!--
+Every person also sits on the diffusion of innovation curve (Rogers): innovators, early adopters,
+early majority, late majority, laggards. It is neither a persona nor a temperament: any persona can be
+an early adopter or of the majority.
+- Who we look for today, and why (early adopters become the references).
+- How to recognise them: the signals (they built their own tools, they speak of a problem to solve
+  rather than of a tool, they offer to co-build), and which of these signals is a segmentation column
+  of the batches.
+- The majority: what it needs (peer references, a finished product without risk, its institution's
+  validation), and how it will come (through the early adopters' references).
+- Consequence for messages: the cold message is the filter. It is written so an early adopter
+  recognises themselves and replies, and so a member of the majority ignores it without being vexed.
+  The replies tell who is an early adopter.
+-->
+
+### Persona sheets
+
+<!-- One subsection per persona that a message targets. These sheets feed the persona avatars
+(`.claude/agents/avatar-*.md`, built by `pos-gtm`). -->
+
+#### <!-- persona code and name -->
+
+- **Who:** <!-- the role, the kind of organisation, how their time splits, who they report to, their
+  buying power; reference people by name (internal document) -->
+- **Temperaments:** <!-- the temperaments seen among them (for example trust and compliance, decisive
+  and firm, the one who takes initiatives), each with the person it was seen in -->
+- **What they think they know, what vexes them:**
+- **Pains, in their words:** <!-- exact quotes, each with who said it -->
+- **SONCAS:** <!-- Security, Pride, Novelty, Comfort, Money, Sympathy: strong, medium or weak, each
+  with the fact or the quote behind it -->
+- **Replies to / closes on:**
+- **Angle:** <!-- the angle that fits, and the one never to use -->
+- **Unknown:** <!-- what nobody knows yet about them -->
 
 ### Quick synthesis
 
@@ -214,6 +260,27 @@ base.
 - Signature words and phrases to use.
 - Words to avoid.
 -->
+
+### Their words, our words (lexicon)
+
+<!--
+Fed by the feedback base, the replies to mails and the job titles; enriched at each word learnt, and
+opened before writing any text.
+- Their words, used exactly: the trade words of the readers, with the traps (a word that belongs to
+  one sub-domain only).
+- The name of their team or office, by country and kind of organisation: take the word of their job
+  title or their team's page; when the pool was counted, say which word they use and which they never
+  use.
+- Our words, never in copy without translating them into what the reader gains: product concepts,
+  feature names, AI vocabulary, strategy words (wedge, moat, pivot, GTM).
+-->
+
+### Cold-mail rules learnt from real sends
+
+<!-- Each rule with the send that taught it: the subject line (length, case, never accusing), how
+the product is named at first mention, one strong figure per mail, numbers in figures, a list of what
+the product covers never closed, the salutation of the first mail and of the follow-ups, the
+signature. -->
 
 ### The owner's voice
 
@@ -391,7 +458,18 @@ agreement; generic descriptions only. Internal copies may. -->
 | GTM actions base | <!-- data source URL, if the product keeps one --> |
 | Posts base | <!-- data source URL, its title property, its status values, its account and axis properties --> |
 | Competitor watch pages, campaign pages | <!-- the parent pages in the team's shared base --> |
-| The product's own GTM skills | <!-- each skill name in the product's `.claude/skills/`, and the requests it answers; `pos-gtm` routes to it in execute mode --> |
+| Prospecting master plan | <!-- the file under `<memory.dir>/gtm/` and its page under the campaigns page; its annexes (the sending strategy with its exclusion rules, the month plans) are child pages --> |
+| Campaigns base | <!-- data source URL; schema in `pos-campaign` (references/campaigns-base.md) --> |
+| Campaign handoff in progress | <!-- the handoff of the running wave, written with `pos-handoff` --> |
+| Sequence texts | <!-- the file that holds the version in force of each mail, follow-up and 1:1 message, with its date and the sending tool's follow-up procedure --> |
+| Contact pool | <!-- where the contacts to segment come from (an export of a former CRM, a list), and the sheet of the current segmentation; never a temp folder --> |
+| Sending tool | <!-- its name, its API base URL, where its key lives (an environment variable or the assistant's user-level memory, never this repository), its daily cap --> |
+| Address verification tools | <!-- names, where their keys live, the order they are used in --> |
+| LinkedIn scripts and browser profile | <!-- the product's scripts, if any (search profiles, invite, withdraw), and the user-level folder of the browser profile --> |
+| Persona page | <!-- the page in the shared base that holds the long persona descriptions, if any --> |
+| Feature sheet | <!-- what each function of the product does today, in the reader's terms, to set against each pain --> |
+| Claims reference | <!-- the table of what each product figure may say, per scope, with its base; read before any figure in copy --> |
+| Persona avatars | `.claude/agents/avatar-*.md` |
 
 <!-- The CRM and the feedback base are `databases.crm` and `databases.feedback` in the product
 config, not copied here. -->

@@ -2,6 +2,11 @@
 
 Frameworks beat templates — they teach thinking patterns, not copy-paste shortcuts.
 
+Product OS (added on top of the upstream library, see the library README): for a first mail to an
+expert reader, problem, promise, proof, proposition, each once, is the default (grid question 26 in
+`../../copywriting/SKILL.md`); the Agitate step of PAS and PASTOR agitates a sourced market fact,
+never the reader's own situation.
+
 ## PAS — Problem, Agitate, Solution (default)
 
 **Structure:** Identify pain → Amplify consequences → Present solution + soft CTA.

@@ -66,3 +66,16 @@ When `pos-gtm` (mode execute) routes to a library skill :
 ## Updates
 
 To pull updates from upstream : re-clone and `cp -r skills/. <pos-gtm>/skills/marketing/`. Don't fork: keep skills upstream-clean. Product customisation lives in the GTM pivot and in `pos-gtm`.
+
+## Product OS additions on top of the upstream library
+
+One exception to "upstream-clean": the avatar review grid is written INTO the library, because a skill that runs must carry it, and the persona avatars copy it from there. Every OS addition sits under a heading or a paragraph that starts with "Product OS". The upstream text around it is unchanged.
+
+| File | OS addition |
+|---|---|
+| `copywriting/SKILL.md` | section "Product OS: the avatar review grid": the closed questions by moment of the text, facts over the grid, how the avatars decide, the questions each kind of avatar reads first |
+| `cold-email/SKILL.md` | section "Product OS: the review grid and the 'you' that gains" |
+| `cold-email/references/frameworks.md` | the "Product OS" paragraph under the introduction: the default structure for a first mail to an expert, and how Agitate is used |
+| `social-content/SKILL.md` | section "Product OS: review a post with the avatar grid" |
+
+Before re-cloning upstream, save these sections and put them back after the copy.
